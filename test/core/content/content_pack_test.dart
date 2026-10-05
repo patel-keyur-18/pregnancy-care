@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 
-import '../../../tool/weeks_md.dart';
+import '../../../tool/content_md.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -72,7 +72,39 @@ void main() {
     expect(
       File('docs/content/weeks.md').readAsStringSync(),
       renderWeeksMarkdown(source),
-      reason: 'run: dart run tool/weeks_md.dart',
+      reason: 'run: dart run tool/content_md.dart',
     );
+  });
+
+  group('India care template', () {
+    final careSource = File('assets/content/care_template_in.json')
+        .readAsStringSync();
+    final items = parseCareTemplate(careSource);
+
+    test('keys unique, windows inside weeks 4–42, text present', () {
+      expect(items.map((i) => i.key).toSet(), hasLength(items.length));
+      for (final i in items) {
+        expect(i.fromWeek, inInclusiveRange(4, i.toWeek), reason: i.key);
+        expect(i.toWeek, lessThanOrEqualTo(42), reason: i.key);
+        expect(i.title.trim(), isNotEmpty);
+        expect(i.note.trim(), isNotEmpty);
+      }
+    });
+
+    test('hard lines: no forbidden words', () {
+      final forbidden = RegExp(
+        r'\b(mg|mcg|ml|iu|dose|doses|dosage|tablets?|boy|girl|gender|sex|iq|guarantee\w*|emergency|danger\w*|sos)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(careSource).map((m) => m[0]), isEmpty);
+    });
+
+    test('docs/content/care_template.md matches the JSON', () {
+      expect(
+        File('docs/content/care_template.md').readAsStringSync(),
+        renderCareMarkdown(careSource),
+        reason: 'run: dart run tool/content_md.dart',
+      );
+    });
   });
 }

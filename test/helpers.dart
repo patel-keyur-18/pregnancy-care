@@ -1,11 +1,48 @@
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/reminders/planner.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/l10n/gen/app_localizations.dart';
+
+/// Records what the app asks the OS to schedule (no platform plugin).
+class FakeScheduler implements ReminderScheduler {
+  bool permission = false;
+  bool granted = true;
+  List<PlannedReminder> scheduled = const [];
+  final snoozed = <ReminderPayload>[];
+
+  @override
+  Future<void> init({
+    void Function(NotificationResponse)? onAction,
+    void Function(NotificationResponse)? onBackgroundAction,
+  }) async {}
+
+  @override
+  Future<bool> hasPermission() async => permission;
+
+  @override
+  Future<bool> requestPermission() async => permission = granted;
+
+  @override
+  Future<void> sync(
+    List<PlannedReminder> planned,
+    AppLocalizations l10n,
+  ) async => scheduled = planned;
+
+  @override
+  Future<void> snooze(ReminderPayload payload, AppLocalizations l10n) async =>
+      snoozed.add(payload);
+
+  @override
+  Future<void> refreshTimeZone() async {}
+}
 
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
 final testToday = DateTime.utc(2026, 10, 5);
@@ -14,6 +51,7 @@ final testToday = DateTime.utc(2026, 10, 5);
 /// [seed] runs against the database before the first frame.
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
+  FakeScheduler? scheduler,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
   double textScale = 1,
@@ -48,6 +86,9 @@ Future<AppDatabase> pumpApp(
         todayProvider.overrideWithValue(testToday),
         // 9:00 am, so the greeting is always "Good morning".
         nowProvider.overrideWithValue(DateTime(2026, 10, 5, 9)),
+        reminderSchedulerProvider.overrideWithValue(
+          scheduler ?? FakeScheduler(),
+        ),
       ],
       child: const NavmaasApp(),
     ),

@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:navmaas/core/content/content_pack.dart' show CareKind;
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:uuid/uuid.dart';
 
@@ -56,6 +57,158 @@ class ChecklistTicks extends Table with BaseColumns {
   List<Set<Column<Object>>> get uniqueKeys => [
     {pregnancyId, itemKey},
   ];
+}
+
+/// The owner's doctor and clinic (one row). Everything is optional.
+@DataClassName('Profile')
+class Profiles extends Table with BaseColumns {
+  @override
+  String get tableName => 'profile';
+
+  TextColumn get doctorName => text().nullable()();
+  TextColumn get clinicName => text().nullable()();
+  TextColumn get clinicPhone => text().nullable()();
+  TextColumn get clinicAddress => text().nullable()();
+}
+
+/// A supplement as prescribed. [doseText] is copied from the prescription;
+/// the app never suggests doses.
+@DataClassName('Supplement')
+class Supplements extends Table with BaseColumns {
+  @override
+  String get tableName => 'supplement';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get name => text()();
+  TextColumn get doseText => text().withDefault(const Constant(''))();
+  TextColumn get notes => text().nullable()();
+
+  /// Doses left; each "Taken" uses one. Null when not tracked.
+  IntColumn get stock => integer().nullable()();
+
+  /// Remind to refill at or below this many doses.
+  IntColumn get refillAt => integer().nullable()();
+}
+
+/// When a supplement is taken: a time of day on some weekdays.
+@DataClassName('SupplementSchedule')
+class SupplementSchedules extends Table with BaseColumns {
+  @override
+  String get tableName => 'supplement_schedule';
+
+  TextColumn get supplementId => text().references(Supplements, #id)();
+
+  /// Minutes after midnight, local time.
+  IntColumn get minuteOfDay => integer()();
+
+  /// Bit 0 = Monday … bit 6 = Sunday; 127 = every day.
+  IntColumn get weekdayMask => integer().withDefault(const Constant(127))();
+
+  /// "after breakfast".
+  TextColumn get label => text().nullable()();
+}
+
+enum DoseStatus { taken, skipped, missed }
+
+/// A dose marked for one scheduled slot. Unmarking soft-deletes it.
+@DataClassName('DoseLog')
+class DoseLogs extends Table with BaseColumns {
+  @override
+  String get tableName => 'dose_log';
+
+  TextColumn get scheduleId => text().references(SupplementSchedules, #id)();
+
+  /// The slot's local date and time.
+  DateTimeColumn get dueAt => dateTime()();
+  DateTimeColumn get takenAt => dateTime().nullable()();
+  TextColumn get status => textEnum<DoseStatus>()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {scheduleId, dueAt},
+  ];
+}
+
+/// A test, scan or vaccine for this pregnancy, created from the India care
+/// template. Booked = [scheduledAt] set; done = [doneAt] set.
+@DataClassName('CareItem')
+class CareItems extends Table with BaseColumns {
+  @override
+  String get tableName => 'care_item';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get templateKey => text().nullable()();
+  TextColumn get kind => textEnum<CareKind>()();
+  TextColumn get title => text()();
+  IntColumn get fromWeek => integer()();
+  IntColumn get toWeek => integer()();
+  DateTimeColumn get scheduledAt => dateTime().nullable()();
+  DateTimeColumn get doneAt => dateTime().nullable()();
+  TextColumn get notes => text().nullable()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, templateKey},
+  ];
+}
+
+/// A doctor visit.
+@DataClassName('Appointment')
+class Appointments extends Table with BaseColumns {
+  @override
+  String get tableName => 'appointment';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  DateTimeColumn get at => dateTime()();
+  TextColumn get doctor => text().nullable()();
+  TextColumn get place => text().nullable()();
+  TextColumn get notes => text().nullable()();
+
+  /// Things to bring, one per line.
+  TextColumn get bringAlong => text().withDefault(const Constant(''))();
+}
+
+/// A question to ask the doctor; unlinked ones wait for the next visit.
+@DataClassName('VisitQuestion')
+class VisitQuestions extends Table with BaseColumns {
+  @override
+  String get tableName => 'visit_question';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get appointmentId =>
+      text().nullable().references(Appointments, #id)();
+  TextColumn get body => text()();
+  DateTimeColumn get askedAt => dateTime().nullable()();
+}
+
+/// An encrypted file (e.g. a prescription photo) in the private data folder.
+@DataClassName('Attachment')
+class Attachments extends Table with BaseColumns {
+  @override
+  String get tableName => 'attachment';
+
+  TextColumn get appointmentId =>
+      text().nullable().references(Appointments, #id)();
+
+  /// File name inside `db/attachments/`.
+  TextColumn get fileName => text()();
+  TextColumn get mimeType => text()();
+}
+
+enum VitalKind { weight, bloodPressure }
+
+/// A logged reading. Weight: [value1] kg. Blood pressure: [value1] systolic,
+/// [value2] diastolic (mmHg). Recorded only; never interpreted.
+@DataClassName('VitalReading')
+class VitalReadings extends Table with BaseColumns {
+  @override
+  String get tableName => 'vital_reading';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get kind => textEnum<VitalKind>()();
+  RealColumn get value1 => real()();
+  RealColumn get value2 => real().nullable()();
+  DateTimeColumn get at => dateTime()();
 }
 
 /// Key-value app settings (theme, first name, …).

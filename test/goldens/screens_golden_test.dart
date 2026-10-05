@@ -4,8 +4,8 @@
 // and Linux, so each platform has its own exact set: macos/ for local runs,
 // linux/ for CI. After an intended visual change:
 //   macOS:  flutter test test/goldens --update-goldens
-//   Linux:  push; CI fails and uploads `golden-failures`; copy each
-//           *_testImage.png into linux/ without the suffix.
+//   Linux:  push to the PR; the failing CI run uploads `linux-goldens`,
+//           download it into linux/.
 import 'dart:io';
 
 import 'package:flutter/material.dart';

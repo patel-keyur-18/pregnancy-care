@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:navmaas/app/reminders.dart';
 import 'package:navmaas/app/router.dart';
 import 'package:navmaas/app/theme_mode.dart';
 import 'package:navmaas/core/content/content_pack.dart';
+import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -33,11 +36,19 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
   void initState() {
     super.initState();
     // A new day may have started while the app was in the background.
-    _lifecycle = AppLifecycleListener(
-      onResume: () => ref
-        ..invalidate(todayProvider)
-        ..invalidate(nowProvider),
-    );
+    _lifecycle = AppLifecycleListener(onResume: _onResume);
+  }
+
+  Future<void> _onResume() async {
+    // A new day may have started, the time zone may have changed, and a
+    // reminder's "Taken" may have written to the DB from another isolate.
+    ref
+      ..invalidate(todayProvider)
+      ..invalidate(nowProvider);
+    final db = ref.read(appDatabaseProvider);
+    db.markTablesUpdated([db.doseLogs, db.supplements]);
+    await ref.read(reminderSchedulerProvider).refreshTimeZone();
+    ref.read(reminderSyncProvider.notifier).refresh();
   }
 
   @override
@@ -53,6 +64,7 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
         .platformDispatcher
         .accessibilityFeatures
         .disableAnimations;
+    ref.watch(reminderSyncProvider);
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,

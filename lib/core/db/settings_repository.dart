@@ -7,6 +7,13 @@ part 'settings_repository.g.dart';
 abstract final class SettingKeys {
   static const themeMode = 'theme_mode';
   static const firstName = 'first_name';
+  static const remindersOn = 'reminders_on';
+  static const dailyLimit = 'daily_limit';
+  static const quietStart = 'quiet_start';
+  static const quietEnd = 'quiet_end';
+
+  /// Set once the app has offered reminders after the first supplement.
+  static const remindersOffered = 'reminders_offered';
 }
 
 class SettingsRepository {
@@ -19,6 +26,20 @@ class SettingsRepository {
             ..where((t) => t.key.equals(key) & t.deletedAt.isNull()))
           .watchSingleOrNull()
           .map((row) => row?.value);
+
+  /// Every live setting as key → value, read once.
+  Future<Map<String, String>> getAll() async => {
+    for (final r in await (_db.select(
+      _db.settings,
+    )..where((t) => t.deletedAt.isNull())).get())
+      r.key: r.value,
+  };
+
+  /// Every live setting as key → value.
+  Stream<Map<String, String>> watchAll() =>
+      (_db.select(_db.settings)..where((t) => t.deletedAt.isNull()))
+          .watch()
+          .map((rows) => {for (final r in rows) r.key: r.value});
 
   Future<void> put(String key, String value) => _db
       .into(_db.settings)

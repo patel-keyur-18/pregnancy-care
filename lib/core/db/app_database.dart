@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
+import 'package:navmaas/core/content/content_pack.dart' show CareKind;
 import 'package:navmaas/core/db/app_database.steps.dart';
 import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -14,7 +15,22 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'app_database.drift.dart';
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Pregnancies, Settings, ChecklistTicks])
+@DriftDatabase(
+  tables: [
+    Pregnancies,
+    Settings,
+    ChecklistTicks,
+    Profiles,
+    Supplements,
+    SupplementSchedules,
+    DoseLogs,
+    CareItems,
+    Appointments,
+    VisitQuestions,
+    Attachments,
+    VitalReadings,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   new(super.e);
 
@@ -32,13 +48,28 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: stepByStep(
       // v2 (M2): Journey checklist ticks.
       from1To2: (m, schema) => m.createTable(schema.checklistTick),
+      // v3 (M3a): doctor profile, supplements, schedules and dose logs.
+      from2To3: (m, schema) async {
+        await m.createTable(schema.profile);
+        await m.createTable(schema.supplement);
+        await m.createTable(schema.supplementSchedule);
+        await m.createTable(schema.doseLog);
+      },
+      // v4 (M3b): care items, visits, questions, attachments, vitals.
+      from3To4: (m, schema) async {
+        await m.createTable(schema.careItem);
+        await m.createTable(schema.appointment);
+        await m.createTable(schema.visitQuestion);
+        await m.createTable(schema.attachment);
+        await m.createTable(schema.vitalReading);
+      },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -57,6 +88,8 @@ QueryExecutor encryptedExecutor(File file, String keyHex) =>
         }
         db
           ..execute('''PRAGMA key = "x'$keyHex'"''')
+          // Reminder actions write from a second isolate; wait, don't fail.
+          ..execute('PRAGMA busy_timeout = 5000')
           ..select('SELECT count(*) FROM sqlite_master');
       },
     );
@@ -66,8 +99,13 @@ QueryExecutor encryptedExecutor(File file, String keyHex) =>
 /// the one way data moves between phones.
 Future<void> _excludeFromBackup(Directory dir) async {
   if (!Platform.isIOS) return;
-  await const MethodChannel('navmaas/files')
-      .invokeMethod<void>('excludeFromBackup', dir.path);
+  try {
+    await const MethodChannel('navmaas/files')
+        .invokeMethod<void>('excludeFromBackup', dir.path);
+  } on MissingPluginException {
+    // The background isolate behind notification actions has no app
+    // channels; the folder was already marked by the app itself.
+  }
 }
 
 @Riverpod(keepAlive: true)

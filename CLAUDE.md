@@ -24,8 +24,9 @@ flutter analyze                       # must report zero issues
 flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
-dart run tool/weeks_md.dart           # after editing assets/content/weeks.json (review copy)
+dart run tool/content_md.dart         # after editing assets/content/*.json (review copies)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
+flutter test integration_test -d <phone>     # on-device checks (allow notifications first)
 flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
@@ -35,7 +36,8 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/app/`: `NavmaasApp`, router (go_router `StatefulShellRoute`, 5 tabs), theme mode
 - `lib/core/theme/`: `AppTheme` (exact hex values), the `NavmaasColors` extension and `NavmaasIcon` (the prototype's icons as SVG path data). Never hard-code colours in widgets, and never use Material `Icons`.
 - `lib/core/widgets/`: shared widgets (`PillSegmented`, icon motion). New motion is specified in DESIGN_SYSTEM §5 first.
-- `lib/core/content/`: content-pack loader. `assets/content/weeks.json` is the source of the week-by-week text.
+- `lib/core/reminders/`: the pure planner, the OS scheduler adapter (`ReminderScheduler`, faked in tests by `FakeScheduler`) and calm-notification settings. **Every notification goes through `ReminderSync` in `lib/app/reminders.dart`**, never straight to the plugin.
+- `lib/core/content/`: content-pack loaders. `assets/content/weeks.json` (week-by-week text) and `care_template_in.json` (India tests, scans, vaccines) are the sources; `docs/content/*.md` are generated review copies.
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
 - `lib/core/utils/`: date-only maths (UTC-midnight dates), `todayProvider` / `nowProvider` (the clock)
@@ -75,7 +77,12 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Assets in tests:** load with `rootBundle.loadString(path, cache: false)`. A cached asset future from one widget test never completes in the next.
 - **Lazy lists:** don't look up a child's context to scroll to it (it may not be built). Compute the offset, as Journey's week chips do.
 - **Widget-test scrolling:** `scrollUntilVisible` stops at "partly visible", possibly under the tab bar. Follow it with `ensureVisible` before tapping.
-- **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push, let CI fail, download the `golden-failures` artifact and copy each `*_testImage.png` in without the suffix.
+- **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push to the PR; when CI's tests fail it uploads fresh Linux renders as `linux-goldens`: `gh run download <run-id> -n linux-goldens -D test/goldens/linux`.
+- **Semantics in Cards:** `Card` merges its children into one node. A custom tappable inside a card needs `Semantics(container: true, …)` or screen readers lose it.
+- **Dialogs with text fields:** the dialog widget must own (create and dispose) its controllers; disposing them after `showDialog` returns crashes the closing animation.
+- **Encrypted attachments:** `AttachmentStore` only; never write photo bytes to disk unencrypted, and decrypt only in memory.
+- **Drift transactions:** read with `get…()` inside a transaction, never `watch().first` (the stream waits for the transaction).
+- **Reminder actions** run in a background isolate: no app channels there (`navmaas/files` is skipped), and the app refreshes drift streams on resume.
 - **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`.
 - **Schema changes:**
   1. Bump `schemaVersion`.

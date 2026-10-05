@@ -1,6 +1,6 @@
 # Week-by-week content (review copy)
 
-Generated from [`assets/content/weeks.json`](../../assets/content/weeks.json) by `dart run tool/weeks_md.dart`. Edit the JSON, not this file. A test fails if they differ.
+Generated from [`assets/content/weeks.json`](../../assets/content/weeks.json) by `dart run tool/content_md.dart`. Edit the JSON, not this file. A test fails if they differ.
 
 General, original text written to the standard of an experienced obstetrician. No numbers, doses, sex prediction, outcome claims or danger-sign lists; anything clinical says "ask your doctor".
 

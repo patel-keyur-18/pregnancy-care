@@ -3,10 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/theme_mode.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/reminders/reminder_settings.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
+import 'package:navmaas/core/widgets/step_button.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Me, M1 subset: profile + pregnancy dates, appearance, disclaimer.
@@ -132,6 +137,8 @@ class MeScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 18),
+          section(l10n.yourDoctor, const _DoctorRow()),
+          const SizedBox(height: 18),
           section(
             l10n.appearance,
             PillSegmented<ThemeMode>(
@@ -149,6 +156,8 @@ class MeScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 18),
+          section(l10n.calmNotifications, const _CalmNotifications()),
+          const SizedBox(height: 18),
           Text(
             l10n.disclaimer,
             style: text.bodySmall!.copyWith(
@@ -158,6 +167,218 @@ class MeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DoctorRow extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final p = ref.watch(profileProvider).value;
+    final title = p?.doctorName ?? p?.clinicName;
+    final sub = [
+      if (p?.doctorName != null) ?p?.clinicName,
+      p?.clinicPhone,
+    ].nonNulls.join(' · ');
+    return InkWell(
+      onTap: () => context.go('/me/doctor'),
+      borderRadius: BorderRadius.circular(12),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Row(
+          spacing: 12,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title ?? l10n.addDoctor,
+                    style: theme.textTheme.bodyLarge!.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  if (sub.isNotEmpty)
+                    Text(
+                      sub,
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: scheme.outline,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            NmIcon(
+              NavmaasIcon.chevronRight,
+              size: 20,
+              strokeWidth: 2,
+              color: scheme.outline,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Reminders on/off, daily limit and quiet hours (prototype Me).
+class _CalmNotifications extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final s =
+        ref.watch(reminderSettingsProvider).value ?? const ReminderSettings();
+    final settings = ref.read(settingsRepositoryProvider);
+
+    Widget titled(String title, String sub) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.bodyLarge!.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          sub,
+          style: theme.textTheme.bodySmall!.copyWith(color: scheme.outline),
+        ),
+      ],
+    );
+
+    Future<void> setOn({required bool on}) async {
+      if (!on) {
+        await settings.put(SettingKeys.remindersOn, 'false');
+        return;
+      }
+      final scheduler = ref.read(reminderSchedulerProvider);
+      final granted =
+          await scheduler.hasPermission() ||
+          await scheduler.requestPermission();
+      if (granted) {
+        await settings.put(SettingKeys.remindersOn, 'true');
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.remindersDenied)));
+      }
+    }
+
+    Future<void> pickQuiet() async {
+      TimeOfDay time(int m) => TimeOfDay(hour: m ~/ 60, minute: m % 60);
+      final start = await showTimePicker(
+        context: context,
+        helpText: l10n.quietFrom,
+        initialTime: time(s.quietStart),
+      );
+      if (start == null || !context.mounted) return;
+      final end = await showTimePicker(
+        context: context,
+        helpText: l10n.quietUntil,
+        initialTime: time(s.quietEnd),
+      );
+      if (end == null) return;
+      await settings.put(
+        SettingKeys.quietStart,
+        '${start.hour * 60 + start.minute}',
+      );
+      await settings.put(SettingKeys.quietEnd, '${end.hour * 60 + end.minute}');
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 14,
+      children: [
+        MergeSemantics(
+          child: Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: titled(l10n.remindersSwitch, l10n.remindersSwitchSub),
+              ),
+              Switch(
+                value: s.on,
+                onChanged: (v) => setOn(on: v),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          spacing: 12,
+          children: [
+            Expanded(child: titled(l10n.dailyLimit, l10n.dailyLimitSub)),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                StepButton(
+                  symbol: '−',
+                  tooltip: l10n.fewerNotifications,
+                  onPressed: s.dailyLimit > ReminderSettings.minLimit
+                      ? () => settings.put(
+                          SettingKeys.dailyLimit,
+                          '${s.dailyLimit - 1}',
+                        )
+                      : null,
+                ),
+                SizedBox(
+                  width: 28,
+                  child: Text(
+                    '${s.dailyLimit}',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ),
+                StepButton(
+                  symbol: '+',
+                  tooltip: l10n.moreNotifications,
+                  onPressed: s.dailyLimit < ReminderSettings.maxLimit
+                      ? () => settings.put(
+                          SettingKeys.dailyLimit,
+                          '${s.dailyLimit + 1}',
+                        )
+                      : null,
+                ),
+              ],
+            ),
+          ],
+        ),
+        InkWell(
+          onTap: pickQuiet,
+          borderRadius: BorderRadius.circular(12),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Row(
+              spacing: 12,
+              children: [
+                Expanded(child: titled(l10n.quietHours, l10n.quietHoursSub)),
+                Flexible(
+                  child: Text(
+                    l10n.quietRange(
+                      formatMinuteOfDay(s.quietStart),
+                      formatMinuteOfDay(s.quietEnd),
+                    ),
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.labelLarge!.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

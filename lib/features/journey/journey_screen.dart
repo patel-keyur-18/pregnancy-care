@@ -9,8 +9,11 @@ import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
+import 'package:navmaas/features/care/data/supplement_repository.dart';
+import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:navmaas/features/journey/data/checklist_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -121,6 +124,11 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
               final w = int.tryParse(key.substring(1, 3));
               return w != null && trimesterOfWeek(w) == snapshot.trimester;
             }).length,
+            supplementsPercent: _supplementsPercent(
+              ref,
+              start: pregnancy.startDate,
+              trimester: snapshot.trimester,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -131,6 +139,32 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
       ),
     );
   }
+}
+
+/// Percentage of supplement doses taken from the start of the current
+/// trimester to today, or null when none were due.
+int? _supplementsPercent(
+  WidgetRef ref, {
+  required DateTime start,
+  required int trimester,
+}) {
+  final today = localDay(ref.watch(todayProvider));
+  final first = start.add(
+    Duration(days: const {1: 0, 2: 98, 3: 196}[trimester]!),
+  );
+  final from = DateTime(first.year, first.month, first.day);
+  if (from.isAfter(today)) return null;
+  final to = today.add(const Duration(days: 1));
+  final plans = ref.watch(supplementPlansProvider).value ?? const [];
+  final taken = ref.watch(takenDosesProvider(from, to)).value ?? const {};
+  final days = [
+    for (var d = from; d.isBefore(to); d = DateTime(d.year, d.month, d.day + 1))
+      d,
+  ];
+  final counts = adherence(days, plans, taken);
+  final due = counts.fold(0, (n, c) => n + c.due);
+  if (due == 0) return null;
+  return (counts.fold(0, (n, c) => n + c.taken) * 100 / due).round();
 }
 
 /// Adds the screen gutter to every child except the edge-to-edge [except].
@@ -515,11 +549,19 @@ class _CheckRow extends StatelessWidget {
 }
 
 class _TrimesterProgress extends StatelessWidget {
-  const new({required this.trimester, required this.week, required this.done});
+  const new({
+    required this.trimester,
+    required this.week,
+    required this.done,
+    this.supplementsPercent,
+  });
 
   final int trimester;
   final int week;
   final int done;
+
+  /// Share of supplement doses taken so far this trimester; null if none.
+  final int? supplementsPercent;
 
   @override
   Widget build(BuildContext context) {
@@ -577,17 +619,30 @@ class _TrimesterProgress extends StatelessWidget {
                 ),
               ),
             ),
-            // Reading, walk and supplement tiles join these in M3 / M4.
-            Row(
-              children: [
-                Expanded(
-                  child: _StatTile(
-                    value: '$done',
-                    label: l10n.checklistDone(done),
+            // Reading and walk tiles join these in M4.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 8,
+                children: [
+                  Expanded(
+                    child: _StatTile(
+                      value: '$done',
+                      label: l10n.checklistDone(done),
+                    ),
                   ),
-                ),
-                const Spacer(flex: 2),
-              ],
+                  if (supplementsPercent case final pct?)
+                    Expanded(
+                      child: _StatTile(
+                        value: '$pct%',
+                        label: l10n.supplementsTaken,
+                      ),
+                    )
+                  else
+                    const Spacer(),
+                  const Spacer(),
+                ],
+              ),
             ),
           ],
         ),
