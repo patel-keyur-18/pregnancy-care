@@ -4,11 +4,15 @@ import 'dart:ui' show DartPluginRegistrant, Locale;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
+import 'package:navmaas/features/care/data/visit_repository.dart';
+import 'package:navmaas/features/care/domain/care_reminders.dart';
 import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -87,7 +91,10 @@ class ReminderSync extends _$ReminderSync {
     ref
       ..listen(reminderSettingsProvider, (_, _) => refresh())
       ..listen(supplementPlansProvider, (_, _) => refresh())
-      ..listen(_upcomingTakenProvider, (_, _) => refresh());
+      ..listen(_upcomingTakenProvider, (_, _) => refresh())
+      ..listen(appointmentsProvider, (_, _) => refresh())
+      ..listen(careItemsProvider, (_, _) => refresh())
+      ..listen(visitQuestionsProvider, (_, _) => refresh());
     refresh();
   }
 
@@ -103,18 +110,37 @@ class ReminderSync extends _$ReminderSync {
     final settings = ref.read(reminderSettingsProvider).value;
     final plans = ref.read(supplementPlansProvider).value;
     final taken = ref.read(_upcomingTakenProvider).value;
+    final pregnancy = ref.read(activePregnancyProvider).value;
     if (settings == null || plans == null || taken == null) return;
     ref.invalidate(nowProvider);
     final now = ref.read(nowProvider);
+    final questions = ref.read(visitQuestionsProvider).value ?? const [];
     final planned = planReminders(
       now: now,
       settings: settings,
-      candidates: supplementCandidates(
-        now: now,
-        plans: plans,
-        takenKeys: taken,
-        l10n: _l10n,
-      ),
+      candidates: [
+        ...supplementCandidates(
+          now: now,
+          plans: plans,
+          takenKeys: taken,
+          l10n: _l10n,
+        ),
+        ...visitCandidates(
+          now: now,
+          appointments: ref.read(appointmentsProvider).value ?? const [],
+          questionsWaiting: questions
+              .where((q) => q.appointmentId == null && q.askedAt == null)
+              .length,
+          l10n: _l10n,
+        ),
+        if (pregnancy != null)
+          ...careCandidates(
+            now: now,
+            items: ref.read(careItemsProvider).value ?? const [],
+            pregnancyStart: pregnancy.startDate,
+            l10n: _l10n,
+          ),
+      ],
     );
     try {
       await ref.read(reminderSchedulerProvider).sync(planned, _l10n);

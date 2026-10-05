@@ -5,11 +5,14 @@ import 'package:drift/native.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/reminders.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
+import 'package:navmaas/features/care/domain/care_reminders.dart';
 import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -184,5 +187,95 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(scheduler.scheduled, isEmpty);
+  });
+
+  group('visit and care reminders', () {
+    final now = DateTime(2026, 10, 5, 9);
+    Appointment visit(DateTime at) => Appointment(
+      id: 'v1',
+      createdAt: now,
+      updatedAt: now,
+      pregnancyId: 'p',
+      at: at,
+      doctor: 'Dr. Mehta',
+      place: 'City Clinic',
+      bringAlong: '',
+    );
+    CareItem item({DateTime? booked, DateTime? done}) => CareItem(
+      id: 'c1',
+      createdAt: now,
+      updatedAt: now,
+      pregnancyId: 'p',
+      templateKey: 'gtt',
+      kind: CareKind.test,
+      title: 'Glucose test (GTT)',
+      fromWeek: 24,
+      toWeek: 28,
+      scheduledAt: booked,
+      doneAt: done,
+    );
+
+    test('a visit: the evening before and 2 hours before', () {
+      final c = visitCandidates(
+        now: now,
+        appointments: [
+          visit(DateTime(2026, 10, 8, 11)),
+          visit(DateTime(2026, 10, 1, 11)),
+        ],
+        questionsWaiting: 3,
+        l10n: l10n,
+      );
+      expect(c.map((r) => (r.at, r.title, r.body)), [
+        (
+          DateTime(2026, 10, 7, 19),
+          'Tomorrow: doctor visit at 11:00 am',
+          '3 questions ready to ask.',
+        ),
+        (
+          DateTime(2026, 10, 8, 9),
+          'Doctor visit at 11:00 am',
+          'Dr. Mehta · City Clinic',
+        ),
+      ]);
+      expect(c.every((r) => r.kind == ReminderKind.appointment), isTrue);
+    });
+
+    test('care: booked → evening before; unbooked → window; done → none', () {
+      final start = DateTime.utc(2026, 4, 15);
+      final booked = careCandidates(
+        now: now,
+        items: [item(booked: DateTime(2026, 10, 20, 10))],
+        pregnancyStart: start,
+        l10n: l10n,
+      ).single;
+      expect(
+        (booked.at, booked.title),
+        (
+          DateTime(2026, 10, 19, 19),
+          'Tomorrow: Glucose test (GTT) at 10:00 am',
+        ),
+      );
+
+      final window = careCandidates(
+        now: now,
+        items: [item()],
+        pregnancyStart: start,
+        l10n: l10n,
+      ).single;
+      expect(
+        (window.at, window.title),
+        (DateTime(2026, 9, 30, 10), 'Glucose test (GTT): usually weeks 24–28'),
+      );
+
+      expect(
+        careCandidates(
+          now: now,
+          items: [item(done: now)],
+          pregnancyStart: start,
+          l10n: l10n,
+        ),
+        isEmpty,
+      );
+    });
   });
 }
