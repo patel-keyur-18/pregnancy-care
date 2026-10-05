@@ -116,7 +116,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(TodayScreen), findsOneWidget);
-    expect(find.text('23 weeks 5 days'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('23 weeks 5 days')), findsOneWidget);
   });
 
   testWidgets('name can be changed, and cleared', (tester) async {

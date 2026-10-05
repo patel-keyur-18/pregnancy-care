@@ -52,11 +52,12 @@ void main() {
       expect(find.text('24'), findsOneWidget);
       expect(find.text('weeks + 5d'), findsOneWidget);
       expect(find.text('MONTH 6 · TRIMESTER 2'), findsOneWidget);
-      expect(find.text('24 weeks 5 days'), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('24 weeks 5 days')), findsOneWidget);
       expect(
-        find.text('Due Wed, 20 Jan 2027 · 107 days to go'),
+        find.text('Baby is about the size of a bhutta (corn cob)'),
         findsOneWidget,
       );
+      expect(find.text('Due Wed, 20 Jan · 107 days to go'), findsOneWidget);
       expect(
         Theme.of(tester.element(find.byType(TodayScreen))).brightness,
         brightness,

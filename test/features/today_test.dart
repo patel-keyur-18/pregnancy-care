@@ -52,7 +52,7 @@ void main() {
               .saveDating(method: .scan, date: DateTime.utc(2026, 10, 2)),
     );
     expect(find.text('Due date + 3 days'), findsOneWidget);
-    expect(find.text('40 weeks 3 days'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('40 weeks 3 days')), findsOneWidget);
   });
 
   testWidgets('implausible dates: asks to check them', (tester) async {
@@ -62,7 +62,7 @@ void main() {
           PregnancyRepository(db)
               .saveDating(method: .lmp, date: DateTime.utc(2025, 10, 2)),
     );
-    expect(find.text('24 weeks 5 days'), findsNothing);
+    expect(find.bySemanticsLabel(RegExp('24 weeks 5 days')), findsNothing);
     await tester.tap(find.text('Check dates'));
     await tester.pumpAndSettle();
     expect(find.byType(EditDetailsScreen), findsOneWidget);

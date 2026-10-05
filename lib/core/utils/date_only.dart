@@ -16,3 +16,6 @@ int daysBetween(DateTime from, DateTime to) => to.difference(from).inDays;
 
 /// "Wed, 20 Jan 2027".
 String formatDate(DateTime date) => DateFormat('EEE, d MMM yyyy').format(date);
+
+/// "Wed, 20 Jan".
+String formatShortDate(DateTime date) => DateFormat('EEE, d MMM').format(date);
