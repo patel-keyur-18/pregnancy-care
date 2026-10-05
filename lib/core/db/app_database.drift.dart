@@ -7115,10 +7115,11 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
   /// Audio length, once known.
   final int? durationSec;
 
-  /// Where she left off: PDF page or text paragraph (0-based).
+  /// Where she left off: PDF page (0-based), or thousandths of the way
+  /// through a text.
   final int position;
 
-  /// PDF pages or text paragraphs, once opened.
+  /// PDF pages, or 1000 for a text, once opened.
   final int? total;
   final DateTime? lastOpenedAt;
   const LibraryItem({

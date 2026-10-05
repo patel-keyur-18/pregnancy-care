@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.5 — decided 2026-10-04, updated 2026-10-05 (icon motion in §5; M3 components; implementation notes in §8) |
+| **Status** | v1.6 — decided 2026-10-04, updated 2026-10-05 (icon motion in §5; M3 and M4a components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -181,10 +181,12 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     required this.readNightBg,
     required this.readNightText,
     required this.sleep,
+    required this.sleepText,
   });
 
   final Color amber, amberSoft, onAmberSoft, track;
-  final Color readPaperBg, readPaperText, readNightBg, readNightText, sleep;
+  final Color readPaperBg, readPaperText, readNightBg, readNightText;
+  final Color sleep, sleepText; // screen-off overlay
 
   static const light = NavmaasColors(
     amber: Color(0xFF9A6416),
@@ -196,15 +198,16 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     readNightBg: Color(0xFF1E1913),
     readNightText: Color(0xFFE3CDA8),
     sleep: Color(0xFF0E0C10),
+    sleepText: Color(0xFFA99F98),
   );
 
   // `dark`, copyWith and lerp follow the same shape.
 }
 ```
 
-Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader.
+Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M3)
+## 8. Implementation status (M4a)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -221,5 +224,13 @@ Deliberate, permanent differences:
 | Remove-time icon | (not drawn) | A × in the same line style | Needed for the supplement form; also on bring-along chips and photos |
 | Scan icon | (not drawn) | A screen with a gentle wave, same line style | Scans needed their own icon |
 | Past test windows | (not shown) | "Weeks 6–10", not "Due" | No guilt for a window that has passed |
+| Reader subtitle | "Chapter 6 · The little lamp" | PDF: "Page 42 of 120"; text: none (the library row shows "42% read") | PDFs don't reliably mark chapters |
+| Library row | "chapter 6 of 14" | "page 42 of 120" (PDF) or "42% read" (text) | Same reason |
+| Library actions | (not drawn) | Long press a row (or the screen reader's custom action) to rename or remove | No room for a visible menu button in the row |
+| Listen chips | "Sleep timer · 10 min" and "Downloaded" | Sleep timer only (tap: off → 10 → 20 → 30 min); 48 dp tall | Everything is already on the phone |
+| Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
+| Letters to baby | (not drawn) | A list of letters (date, first lines in Literata) and a writing screen, in the Visit screens' card style | Talk to baby needed somewhere to write |
+| Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
+| Journey tiles | Reading sessions · walks logged · supplements taken | Reading sessions · supplements taken (walks join in M4b) | The M2 "checklist done" stand-in is gone |
 
-Still to come: reading and walk items on Today's plan and Journey's reading / walk tiles (M4); the Kick counter and Contraction timer tiles at the top of Care (M5).
+Still to come: Move & breathe on Sessions, the walk item on Today's plan and Journey's walks tile (M4b); the Kick counter and Contraction timer tiles at the top of Care (M5).

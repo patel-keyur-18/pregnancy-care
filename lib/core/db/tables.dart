@@ -213,7 +213,7 @@ class VitalReadings extends Table with BaseColumns {
 
 enum LibraryKind { pdf, text, audio }
 
-/// A book or audio file the owner imported (M4). The file is a copy inside
+/// A book or audio file the owner imported (M4a). The file is a copy inside
 /// the private `db/library/` folder, which OS backups skip. Not tied to a
 /// pregnancy: the library stays with the phone.
 @DataClassName('LibraryItem')
@@ -230,10 +230,11 @@ class LibraryItems extends Table with BaseColumns {
   /// Audio length, once known.
   IntColumn get durationSec => integer().nullable()();
 
-  /// Where she left off: PDF page or text paragraph (0-based).
+  /// Where she left off: PDF page (0-based), or thousandths of the way
+  /// through a text.
   IntColumn get position => integer().withDefault(const Constant(0))();
 
-  /// PDF pages or text paragraphs, once opened.
+  /// PDF pages, or 1000 for a text, once opened.
   IntColumn get total => integer().nullable()();
   DateTimeColumn get lastOpenedAt => dateTime().nullable()();
 }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v6 — updated 2026-10-05 (M3 complete: M3b adds tests and vaccines, visits, vitals, encrypted attachments, schema v4) |
+| **Status** | v7 — updated 2026-10-05 (M4a: library, reader, background audio, letters, schema v5) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -24,7 +24,7 @@
 **Non-functional targets**
 
 - Cold start under 2 s on a 3 GB-RAM Android phone.
-- Release APK at most 100 MB (the owner's limit). In M1 the universal APK is about 71 MB; a per-ABI split (`--split-per-abi`) is about 25 MB.
+- Release APK at most 100 MB (the owner's limit). Since M4a the phone build is Arm only (`--target-platform android-arm,android-arm64`, about 64 MB); the universal APK, which adds x86_64 for emulators, is about 95 MB, and `--split-per-abi` gives about 30 MB per phone. PDFium (the PDF engine) is about 5 MB per ABI.
 - 100 % offline.
 - No network calls.
 - Every screen usable at 200 % text size and with TalkBack / VoiceOver.
@@ -82,9 +82,9 @@ flowchart TB
 | Icons | `path_parsing` (flutter.dev) | Turns the prototype's SVG path data into Flutter paths, so its own line icons are drawn exactly |
 | Notifications | `flutter_local_notifications` + `timezone` + `flutter_timezone` | Local reminders scheduled with the OS (exact alarms on Android), no push. `timezone` lists `http` for its own data-download script; the app never calls it (ADR 020) |
 | Health | `health` | Steps and walking workouts via HealthKit and Health Connect |
-| Audio | `just_audio` + `audio_service` | Background playback, lock-screen controls, sleep timer |
-| Reading | `pdfrx` for PDF; built-in renderer for text/Markdown | EPUB is evaluated in P2 |
-| Import / export | `file_picker` (open + save), `image_picker`, `share_plus` | Books, audio, backup files; `image_picker` (M3b) takes or chooses prescription photos through the system camera and photo picker, so no camera permission is declared |
+| Audio | `just_audio` + `audio_service` | Background playback, lock-screen controls, sleep timer (M4a). `audio_service` brings a download cache (`flutter_cache_manager` → `http`, `sqflite`) that Navmaas never calls (ADR 026) |
+| Reading | `pdfrx` for PDF; built-in renderer for text/Markdown | M4a. PDFium is fetched at build time only. EPUB later (Plan decision 24) |
+| Import / export | `file_picker` (open + save), `image_picker`, `share_plus` | Books and audio (`file_picker`, M4a), backup files; `image_picker` (M3b) takes or chooses prescription photos through the system camera and photo picker, so no camera permission is declared |
 | Backup | `cryptography` (Argon2id, AES-256-GCM), `archive` (ZIP streaming) | See §11. `cryptography` also encrypts attachments (M3b, §13) |
 | Device | `url_launcher` | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps on iPhone and the maps app on Android (ADR 024) |
 | Security | `local_auth` (optional app lock) | |
@@ -102,21 +102,21 @@ Feature-first. Screens and widgets live in `lib/features/<feature>/`. A feature 
 pregnancy-care/
 ├─ lib/
 │  ├─ main.dart
-│  ├─ app/                 # NavmaasApp, router, tab bar, theme mode, reminder sync + actions, placeholder screen
+│  ├─ app/                 # NavmaasApp, router, tab bar, theme mode, reminder sync + actions
 │  ├─ core/
 │  │  ├─ theme/            # AppTheme (tokens → ThemeData light/dark), NavmaasColors, brand mark, prototype icons
 │  │  ├─ db/               # drift database, tables, key handling, attachment store, shared repositories
 │  │  ├─ pregnancy/        # pregnancy engine (pure Dart)
 │  │  ├─ reminders/        # planner (pure), scheduler adapter, calm-notification settings
-│  │  ├─ content/          # content-pack loaders (weeks, India care template)
+│  │  ├─ content/          # content-pack loaders (weeks, India care template, daily activities)
 │  │  ├─ widgets/          # shared widgets: pill segmented control, step button, icon motion
-│  │  ├─ platform/         # health, audio handler, build info, screen-rest channel
+│  │  ├─ platform/         # audio playback (M4a); later health, build info, screen-rest channel
 │  │  └─ utils/            # todayProvider / nowProvider (clock), date-only maths and formatting
 │  ├─ features/
 │  │  ├─ onboarding/
 │  │  ├─ today/            # today screen, today's plan card
 │  │  ├─ journey/          # journey screen; data/ checklist repository
-│  │  ├─ sessions/         # library, reader, listen, letters, walk, exercise
+│  │  ├─ sessions/         # data/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise (M4b)
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
 │  │  ├─ third_trimester/  # kick counter, contraction timer
 │  │  ├─ backup/           # backup format, crypto, create & restore flows
@@ -124,7 +124,7 @@ pregnancy-care/
 │  │  └─ settings/         # me, edit details, your doctor; later build expiry, pause/end tracking
 │  └─ l10n/app_en.arb      # every string; gen/ is generated by `flutter pub get`
 ├─ assets/
-│  ├─ content/             # weeks.json (M2), care_template_in.json (M3b); routines.json later
+│  ├─ content/             # weeks.json (M2), care_template_in.json (M3b), activities.json (M4a); routines.json (M4b)
 │  └─ fonts/               # Nunito, Literata (OFL)
 ├─ test/                   # unit, widget, accessibility; drift/ migrations; goldens/
 ├─ integration_test/      # on-device checks (reminders scheduled by the OS)
@@ -211,7 +211,7 @@ Sources (M3): untaken supplement doses and refills; visits the evening before (7
 
 ## 8. Data model
 
-All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`; the other tables arrive with their milestones.
+All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`; the other tables arrive with their milestones.
 
 ```mermaid
 erDiagram
@@ -225,7 +225,6 @@ erDiagram
   PREGNANCY ||--o{ VITAL_READING : logs
   PREGNANCY ||--o{ SESSION : logs
   LIBRARY_ITEM ||--o{ SESSION : "used in"
-  LIBRARY_ITEM ||--o| READING_PROGRESS : tracks
   PREGNANCY ||--o{ LETTER : writes
   PREGNANCY ||--o{ KICK_SESSION : logs
   PREGNANCY ||--o{ CONTRACTION : logs
@@ -261,7 +260,8 @@ erDiagram
   }
   SESSION {
     string id PK
-    string type "reading | listening | walk | exercise | breathing | activity | letter"
+    string pregnancy_id FK
+    string type "reading | listening | walk | exercise | breathing"
     string library_item_id FK
     string routine_key
     datetime started_at
@@ -292,28 +292,29 @@ Tables not shown in detail:
 | `visit_question` | M3b. Waits unlinked for the next visit; ticking it as asked links it to that visit |
 | `attachment` | M3b. Encrypted file name (in `db/attachments/`), MIME type, the visit it belongs to |
 | `vital_reading` | M3b. `weight` (kg) or `bloodPressure` (systolic / diastolic, mmHg) and time. Logged only, never interpreted |
-| `library_item` | Kind, title, relative file path, duration or pages |
-| `reading_progress` | Position in a library item |
-| `letter` | Letters to baby |
+| `library_item` | M4a. Kind (`pdf` / `text` / `audio`), title, file name inside `db/library/`, audio length, and where she left off: `position` (PDF page, 0-based, or thousandths of the way through a text) out of `total`, plus `last_opened_at`. Not tied to a pregnancy. Reading progress lives here, so there is no separate `reading_progress` table |
+| `session` | M4a. A reading session is logged when she leaves the reader after at least a minute; listening is one session per item played, growing while it actually plays (from one minute). Walks, routines and breathing join in M4b |
+| `letter` | M4a. Letters to baby (body text), in the encrypted database |
 | `kick_session` | Kick-counter sessions |
 | `contraction` | Start and end of each contraction |
 | `screen_rest_rule` | Screen Rest windows and settings |
 | `checklist_tick` | M2. Ticked items from the weekly checklists: `pregnancy_id`, `item_key` (the content pack's stable key, e.g. `w24-gtt`), unique together. Unticking soft-deletes the row |
 | `backup_log` | When each backup or restore happened, size, whether it included the library (never the password) |
-| `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. Later: night reading, text size, backup reminder day |
+| `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). Later: backup reminder day |
 
-Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
+Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
 
 ## 9. Content
 
 | Source | Where | Rules |
 |---|---|---|
-| Week-by-week notes, checklists, India care template, exercise routines | `assets/content/*.json`, versioned with `schemaVersion` | **Only original or public-domain text.** General information, no doses, no outcome claims |
-| Garbhasanskar books (PDF / text) and audio | Imported in-app with `file_picker`, copied into `<app documents>/library/`; the DB stores the relative path | Never leaves the phone except inside a backup the owner makes. Never committed to the repo |
+| Week-by-week notes, checklists, India care template, daily activities, exercise routines | `assets/content/*.json`, versioned with `schemaVersion` | **Only original or public-domain text.** General information, no doses, no outcome claims |
+| Garbhasanskar books (PDF / text) and audio | Imported in-app with `file_picker`, streamed into `<app support>/db/library/` (the folder OS backups skip); the DB stores the file name | Never leaves the phone except inside a backup the owner makes. Never committed to the repo |
 
 - `weeks.json` (`schemaVersion` 1) has one entry per week, 4–42: `week`, `size` (an Indian fruit or vegetable, read after "About the size of"), `baby`, `you`, and `checklist` items as `{key, text}`. The key stays stable when wording changes, so ticks survive edits. The trimester is worked out from the week number, not stored.
 - The text is original, written to the standard of an experienced obstetrician and approved by the owner. `docs/content/weeks.md` is its review copy, generated by `dart run tool/content_md.dart`; a test fails if the two differ.
 - `care_template_in.json` (M3b, `schemaVersion` 1) lists the tests, scans and vaccines commonly offered in India: `key`, `kind` (`test` / `scan` / `vaccine`), `title`, `fromWeek`, `toWeek`, `note`. Each pregnancy gets one `care_item` per entry, created once (new entries are added on update). Every note defers to her doctor; review copy: `docs/content/care_template.md`.
+- `activities.json` (M4a, `schemaVersion` 1): about 30 calm activities (`key`, `title`, `text`), original, no claims about what they do for the baby. The path's Activity tile shows one a day, by day of pregnancy, cycling. Review copy: `docs/content/activities.md`.
 - A test enforces the hard lines on the content: no dose or unit words, no sex prediction, no outcome claims, no emergency or danger-sign wording.
 - Exercise routines carry `trimesters`, `durationSec`, a short "stop if" note and `avoidIfHighRisk` flags. The Exercise screen filters on these and stays locked until "doctor cleared me" is on.
 
@@ -322,7 +323,7 @@ Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `c
 | Capability | MVP behaviour | Platform notes |
 |---|---|---|
 | Steps & walks | Read today's steps; record walk sessions; optionally write a walking workout | iOS: HealthKit capability (available to a free Apple ID) + usage strings. Android: Health Connect permissions + rationale activity; min SDK 26 |
-| Background audio | Plays with the screen off and shows lock-screen controls; sleep timer | iOS Background Modes → audio (available to a free Apple ID); Android media foreground service |
+| Background audio (M4a) | Plays with the screen off and shows lock-screen controls (back / forward 15 s, play / pause); sleep timer of 10, 20 or 30 min. The audio service starts on first play, not at app start | iOS `UIBackgroundModes` → `audio` (available to a free Apple ID); Android `AudioService` media foreground service (`FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `WAKE_LOCK`) and `MainActivity` extends `AudioServiceFragmentActivity` |
 | "Screen off — keep listening" | Switches to a near-black overlay that wakes on tap, and lets the phone lock normally | No wakelock is held |
 | Calls and maps (M3b) | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps (if installed) on iPhone, or the default maps app on Android, with the clinic address | Android declares `tel` and `geo` intent queries; iOS lists `comgooglemaps` to check Google Maps is installed. The maps app does any network use; Navmaas doesn't |
 | Prescription photos (M3b) | Take or choose a photo; it's encrypted before it touches disk | iOS camera and photo-library usage strings; Android uses the system photo picker and camera, so no permission |
@@ -435,9 +436,9 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 ## 13. Security and privacy
 
 - **Network:** the app makes no network calls. Release Android builds omit the `INTERNET` permission (the main manifest removes it with `tools:node="remove"`, which also strips it from plugins), so the app itself cannot send data anywhere; debug and profile builds keep it for hot reload. Fonts are bundled.
-- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin). Never `INTERNET`.
+- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin); `WAKE_LOCK`, `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` for background audio (M4a). Never `INTERNET`; `ACCESS_NETWORK_STATE`, which a plugin asks for, is removed the same way.
 - **Database:** encrypted with SQLCipher. A random 256-bit raw key is generated on first run and kept in Keychain / Android Keystore. The app refuses to open the database on a build without SQLCipher. The database and its key are excluded from OS backups on both platforms (§12).
-- **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key (`navmaas.attachments_key.v1`), as nonce + ciphertext + tag, in `db/attachments/` inside the folder OS backups skip. Photos are only decrypted in memory to show them. Imported books and audio stay as plain files in the app sandbox; they are the owner's own media, not health data.
+- **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key (`navmaas.attachments_key.v1`), as nonce + ciphertext + tag, in `db/attachments/` inside the folder OS backups skip. Photos are only decrypted in memory to show them. Imported books and audio stay as plain files in `db/library/`, skipped by OS backups; they are the owner's own media, not health data, and audio must stream to the player.
 - **Backups:** encrypted with a key derived from the owner's password (§11). The password is never stored.
 - **Optional app lock** with biometrics or PIN (`local_auth`).
 - **Deletion:** "Delete all data" wipes the DB, the files and the stored keys. It does not touch backup files saved elsewhere.
@@ -448,7 +449,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 ## 14. Theming and accessibility
 
 - Tokens from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) become `ThemeData.light/dark`: a `ColorScheme` plus the `NavmaasColors` extension. `ThemeMode` is user-selected (Light / Dark / System).
-- The reader has its own Paper / Night palette, switching to Night automatically after 9 pm if enabled.
+- The reader has its own Paper / Night palette. It opens in Night from 9 pm to 5 am when "Night reading after 9 pm" is on (the default), or whenever the app is dark.
 - **Accessibility:**
   - `MaterialTapTargetSize.padded` and minimum 48 dp targets.
   - `Semantics` labels on icon-only buttons; password fields announce show/hide state.
@@ -462,15 +463,16 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 |---|---|---|
 | **M1 Foundation** ✅ 2026-10-05 (PR #2) | Flutter project, lints, CI, theme + fonts, router with 5 tabs, Drift + SQLCipher, pregnancy engine, onboarding, settings, release install on a free-Apple-ID iPhone | Onboarding stores a pregnancy; Today shows the correct week in light and dark on both phones |
 | **M2 Today & Journey** ✅ 2026-10-05 (PR #4) | Content-pack loader, Journey (trimester tabs, week picker, notes, checklists, trimester progress), size line on Today. `weeks.json` text drafted (original) by Claude and approved by the owner. The prototype's own line icons with calm tap motion. Editable first name in Me. M1 screens matched to the prototype | Golden tests pass for both themes |
-| **M3a Supplements & reminders** ✅ 2026-10-05 | Doctor profile (optional onboarding step 3 of 4, Me), calm-notification settings, supplements (quick-pick names, dose as prescribed), reminder planner + OS scheduler with exact alarms, Taken / Snooze actions, **Today's plan card** (supplements; sessions and walks join in M4), Journey's "supplements taken" tile | Reminders respect the limit and quiet hours in tests and are scheduled by the OS on a device |
+| **M3a Supplements & reminders** ✅ 2026-10-05 | Doctor profile (optional onboarding step 3 of 4, Me), calm-notification settings, supplements (quick-pick names, dose as prescribed), reminder planner + OS scheduler with exact alarms, Taken / Snooze actions, **Today's plan card** (supplements; reading joined in M4a, the walk joins in M4b), Journey's "supplements taken" tile | Reminders respect the limit and quiet hours in tests and are scheduled by the OS on a device |
 | **M3b Care: tests, visits, vitals** ✅ 2026-10-05 | India care template (Claude drafts, owner approves), care items under "Coming up", visits with questions, bring-along, notes, encrypted prescription photo, next visit, Call clinic and Directions (Apple / Google Maps), weight and BP logs, next-visit card on Today | Visit and care-item reminders follow the same calm rules; a prescription photo is encrypted on disk |
-| **M4 Sessions** | Library import (PDF/text/audio), reader with timer + night mode, background audio + screen-off, letters, walk (Health), exercise routines. Reading and walk items on Today's plan; Journey's "reading sessions" and "walks logged" tiles | A 15-min reading and a 20-min walk are logged end to end |
+| **M4a Library & reading** ✅ 2026-10-05 | Schema v5, library import (PDF / text / audio), Sessions tab with the Garbhasanskar path (read, listen, original daily activity, talk to baby), reader with 15-min timer and Paper / Night, background audio with lock-screen controls, sleep timer and screen-off, letters to baby, reading on Today's plan, Journey's "reading sessions" tile, "Night reading after 9 pm" in Me | A 15-min reading is logged end to end (widget test) |
+| **M4b Walk & exercise** | Walk with Health steps, exercise routines (Claude drafts, owner approves) locked behind "doctor cleared me", slow breathing, Me → Exercise switches, Move & breathe on Sessions, walk on Today's plan, Journey's "walks logged" tile | A 20-min walk is logged end to end |
 | **M5 Third trimester & backup** | Kick counter, contraction timer, pause/end tracking, backup & restore (§11), build-expiry reader and reminders (§12) | A backup made on one phone restores on another; a wrong password changes nothing; expiry date shows correctly on the iPhone |
 | **M6 Screen Rest & release** | Rest rules, in-app usage counter, digest polish, accessibility pass, release builds | Signed APK installed; iPhone renewed through one 7-day cycle without data loss |
 
 ## 16. Testing and CI
 
-- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); reminder planner (window, quiet hours, bundling, daily limit and digest, stable ids, cap); supplement reminders and Taken / Snooze against the database; repositories on in-memory Drift; build-expiry parser on sample profiles.
+- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); reminder planner (window, quiet hours, bundling, daily limit and digest, stable ids, cap); supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item); repositories on in-memory Drift; build-expiry parser on sample profiles.
 - **Backup tests:**
   - Round-trip with and without the library.
   - Wrong password.
@@ -478,14 +480,14 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
   - Restoring an older schema (migrates) and rejecting a newer one.
   - Interrupted swap (rollback works).
   - A 500 MB library within the memory budget.
-- **Widget and golden tests:** onboarding, Today, Journey and Me in light and dark at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
-- **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent, review copy in sync.
+- **Widget and golden tests:** onboarding, Today, Journey, Sessions and Me in light and dark at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
+- **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent (weeks, care template, activities), review copies in sync.
 - **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); later: onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
 - **GitHub Actions** (free for public repos), on every pull request, every push to `main` and on demand. Ubuntu, Flutter pinned (3.47.3), Java 17:
   - `dart format --set-exit-if-changed`
   - `flutter analyze`
   - `flutter test`
-  - `flutter build apk --release` (uploaded as an artifact; signed only locally)
+  - `flutter build apk --release --target-platform android-arm,android-arm64` (the phone build; uploaded as an artifact; signed only locally)
   - On a test failure: golden diff images (`golden-failures`) and regenerated Linux goldens (`linux-goldens`) are uploaded
   - iOS builds happen on the owner's Mac, because personal-team signing can't run in CI.
 
@@ -518,3 +520,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | 023 | India care template written as original content, reviewed by the owner | No medical reviewer (Plan decision 5); every item defers to her doctor |
 | 024 | Directions open the phone's maps apps (Apple Maps / Google Maps) instead of an in-app map | No map SDK, no network calls from Navmaas |
 | 025 | Attachments live in the `db/` folder | Already excluded from OS backups on both platforms (ADR 014) |
+| 026 | Accept `audio_service`'s download cache (`flutter_cache_manager` → `http`, `sqflite`) | Needed for background audio with lock-screen controls; only used for network artwork, which Navmaas never sets. Release builds have no `INTERNET`, and the database still opens with SQLCipher (checked on the simulator) |
+| 027 | Arm-only phone APK; universal kept as an option | PDFium pushed the universal APK to about 95 MB, close to the 100 MB limit; phones are Arm. Gradle drops any ABI not asked for, so the phone APK never claims x86_64 |
+| 028 | Library files in `db/library/`, unencrypted; reading progress on `library_item` | Skipped by OS backups like the database (ADR 014); audio has to stream to the player; one table instead of two |
+| 029 | M4 split into M4a (library, reading, listening, letters) and M4b (walk, exercise) | Two reviewable PRs, like M3 |
