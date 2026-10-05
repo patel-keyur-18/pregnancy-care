@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v5 — approved 2026-10-04, updated 2026-10-05 (M1 and M2 built; owner decisions 12–19) |
+| **Status** | v6 — approved 2026-10-04, updated 2026-10-05 (M1, M2, M3a built; owner decisions 12–23) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -38,6 +38,10 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 17 | First name | Optional during onboarding; **editable in Me** (M2) |
 | 18 | Today's plan | **Moved from M2 to M3**, where supplements give it real items; sessions and walks join in M4 |
 | 19 | Icon motion | Small, calm tap animations on icons (DESIGN_SYSTEM §5); instant when the phone asks to reduce motion |
+| 20 | Supplement suggestions | **A quick-pick of common pregnancy supplement names** (folic acid, iron + folic acid, calcium + vitamin D, vitamin D3, B12, DHA, multivitamin). She enters the dose exactly as prescribed; the app never suggests doses or which to take |
+| 21 | Reminder timing | **On time even when the phone is locked**: scheduled with the OS, exact alarms on Android |
+| 22 | Notification permission | Asked in onboarding (optional step), switchable in Me, and offered once after the first supplement |
+| 23 | Doctor details | Optional onboarding step (3 of 4, skippable), editable in Me: doctor, clinic, phone and address; Call clinic and Directions (Apple / Google Maps) on visits in M3b |
 
 ### What these decisions change
 
@@ -69,7 +73,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Journey (trimester-wise)** | Trimester tabs, week picker, baby and body notes per week, weekly checklist, trimester progress from her own logs | MVP |
 | **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books and audio, reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP |
 | **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps (**Android only**) | MVP → P2 |
-| **Supplements** | Schedule as prescribed, reminders, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
+| **Supplements** | Quick-pick of common names, dose as prescribed, schedule, on-time reminders with Taken / Snooze, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
 | **Vaccines & tests** ★ | Editable India template (Td doses, GTT, scans, blood tests) with dates and status | MVP |
 | **Doctor visits** | Appointments, reminders, "questions to ask" collected over weeks ★, what to bring, notes, prescription photo, next visit | MVP |
 | **Walking** | Walk timer, steps from Apple Health / Health Connect, daily goal, history | MVP |
@@ -126,6 +130,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation and M2 Today & Journey ✅ 2026-10-05 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey and M3a Supplements & reminders ✅ 2026-10-05 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |

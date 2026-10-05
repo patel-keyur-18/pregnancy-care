@@ -12,7 +12,7 @@ It combines:
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
 
-> **Status:** M1 Foundation and M2 Today & Journey are built (2026-10-05): onboarding, the pregnancy engine, Today, a trimester-wise Journey with original week-by-week notes and checklists, and Me, on an encrypted on-device database. Next is M3 (Care, including Today's plan).
+> **Status:** M1, M2 and M3a are built (2026-10-05): onboarding, Today with its gentle plan, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), and Me, on an encrypted on-device database. Next is M3b (tests, visits and vitals).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >

@@ -26,6 +26,7 @@ dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dar
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/weeks_md.dart           # after editing assets/content/weeks.json (review copy)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
+flutter test integration_test -d <phone>     # on-device checks (allow notifications first)
 flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
@@ -35,6 +36,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/app/`: `NavmaasApp`, router (go_router `StatefulShellRoute`, 5 tabs), theme mode
 - `lib/core/theme/`: `AppTheme` (exact hex values), the `NavmaasColors` extension and `NavmaasIcon` (the prototype's icons as SVG path data). Never hard-code colours in widgets, and never use Material `Icons`.
 - `lib/core/widgets/`: shared widgets (`PillSegmented`, icon motion). New motion is specified in DESIGN_SYSTEM §5 first.
+- `lib/core/reminders/`: the pure planner, the OS scheduler adapter (`ReminderScheduler`, faked in tests by `FakeScheduler`) and calm-notification settings. **Every notification goes through `ReminderSync` in `lib/app/reminders.dart`**, never straight to the plugin.
 - `lib/core/content/`: content-pack loader. `assets/content/weeks.json` is the source of the week-by-week text.
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
@@ -76,6 +78,9 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Lazy lists:** don't look up a child's context to scroll to it (it may not be built). Compute the offset, as Journey's week chips do.
 - **Widget-test scrolling:** `scrollUntilVisible` stops at "partly visible", possibly under the tab bar. Follow it with `ensureVisible` before tapping.
 - **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push, let CI fail, download the `golden-failures` artifact and copy each `*_testImage.png` in without the suffix.
+- **Semantics in Cards:** `Card` merges its children into one node. A custom tappable inside a card needs `Semantics(container: true, …)` or screen readers lose it.
+- **Drift transactions:** read with `get…()` inside a transaction, never `watch().first` (the stream waits for the transaction).
+- **Reminder actions** run in a background isolate: no app channels there (`navmaas/files` is skipped), and the app refreshes drift streams on resume.
 - **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`.
 - **Schema changes:**
   1. Bump `schemaVersion`.
