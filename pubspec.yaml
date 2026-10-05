@@ -20,6 +20,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   flutter_timezone: ^5.1.1
   go_router: ^18.0.2
+  health: ^13.3.2
   image_picker: ^1.2.3
   intl: any
   just_audio: ^0.10.6
@@ -58,6 +59,7 @@ flutter:
     - assets/content/weeks.json
     - assets/content/care_template_in.json
     - assets/content/activities.json
+    - assets/content/routines.json
   # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
   fonts:
     - family: Nunito
