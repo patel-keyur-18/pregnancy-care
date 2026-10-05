@@ -96,3 +96,44 @@ final class LibraryItemsProvider
 }
 
 String _$libraryItemsHash() => r'84537481bfdc92f60d49785ccc3f8c4d5bf5d1c1';
+
+@ProviderFor(pickFile)
+final pickFileProvider = PickFileProvider._();
+
+final class PickFileProvider
+    extends $FunctionalProvider<PickFile, PickFile, PickFile>
+    with $Provider<PickFile> {
+  PickFileProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pickFileProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pickFileHash();
+
+  @$internal
+  @override
+  $ProviderElement<PickFile> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  PickFile create(Ref ref) {
+    return pickFile(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(PickFile value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<PickFile>(value),
+    );
+  }
+}
+
+String _$pickFileHash() => r'd9fc74fe30d30638f69c8b0fda2c4142c05bbfca';

@@ -132,6 +132,8 @@ void main() {
   testWidgets('Me: reminders need permission; limit and quiet hours persist', (
     tester,
   ) async {
+    // Me has two switches; reminders is the last.
+    final reminders = find.byType(Switch).last;
     final scheduler = FakeScheduler()..granted = false;
     final db = await pumpApp(tester, seed: _seed, scheduler: scheduler);
     await _tab(tester, 'Me');
@@ -140,18 +142,18 @@ void main() {
       200,
       scrollable: _list,
     );
-    await tester.ensureVisible(find.byType(Switch));
+    await tester.ensureVisible(reminders);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(reminders);
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsOneWidget, reason: 'permission denied');
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    expect(tester.widget<Switch>(reminders).value, isFalse);
 
     scheduler.granted = true;
-    await tester.tap(find.byType(Switch));
+    await tester.tap(reminders);
     await tester.pumpAndSettle();
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+    expect(tester.widget<Switch>(reminders).value, isTrue);
 
     await tester.ensureVisible(find.byTooltip('More notifications'));
     await tester.tap(find.byTooltip('More notifications'));

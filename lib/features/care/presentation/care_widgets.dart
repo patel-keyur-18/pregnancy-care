@@ -370,12 +370,19 @@ class _VitalDialogState extends State<_VitalDialog> {
   }
 }
 
-/// A multi-line text dialog that returns the edited text, or null.
+/// A text dialog that returns the edited text, or null. Multi-line unless
+/// [singleLine].
 class TextEntryDialog extends StatefulWidget {
-  const new({required this.title, this.initial, super.key});
+  const new({
+    required this.title,
+    this.initial,
+    this.singleLine = false,
+    super.key,
+  });
 
   final String title;
   final String? initial;
+  final bool singleLine;
 
   @override
   State<TextEntryDialog> createState() => _TextEntryDialogState();
@@ -398,9 +405,11 @@ class _TextEntryDialogState extends State<TextEntryDialog> {
       content: TextField(
         controller: _c,
         autofocus: true,
-        maxLines: 6,
-        minLines: 3,
-        inputFormatters: [LengthLimitingTextInputFormatter(2000)],
+        maxLines: widget.singleLine ? 1 : 6,
+        minLines: widget.singleLine ? 1 : 3,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(widget.singleLine ? 120 : 2000),
+        ],
       ),
       actions: [
         TextButton(

@@ -14,6 +14,9 @@ abstract final class SettingKeys {
 
   /// Set once the app has offered reminders after the first supplement.
   static const remindersOffered = 'reminders_offered';
+
+  /// Reader opens in night colours after 9 pm (default on).
+  static const nightReading = 'night_reading';
 }
 
 class SettingsRepository {
@@ -72,3 +75,10 @@ SettingsRepository settingsRepository(Ref ref) =>
 @riverpod
 Stream<String?> firstName(Ref ref) =>
     ref.watch(settingsRepositoryProvider).watch(SettingKeys.firstName);
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+@riverpod
+Stream<bool> nightReading(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.nightReading)
+    .map((v) => v != 'false');

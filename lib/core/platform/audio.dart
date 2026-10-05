@@ -148,3 +148,42 @@ class DeviceAudioPlayback extends BaseAudioHandler
 
 @Riverpod(keepAlive: true)
 Future<AudioPlayback> audioPlayback(Ref ref) => DeviceAudioPlayback.instance;
+
+/// The current playback, then every change.
+@riverpod
+Stream<Playback> playback(Ref ref) async* {
+  final audio = await ref.watch(audioPlaybackProvider.future);
+  yield audio.current;
+  yield* audio.changes;
+}
+
+/// Pauses playback after 10, 20 or 30 minutes (Listen's sleep timer). Kept
+/// alive so it still runs after she leaves the Listen screen.
+@Riverpod(keepAlive: true)
+class SleepTimer extends _$SleepTimer {
+  Timer? _timer;
+
+  @override
+  int? build() {
+    ref.onDispose(() => _timer?.cancel());
+    return null;
+  }
+
+  /// Off → 10 → 20 → 30 min → off.
+  void cycle() {
+    final next = switch (state) {
+      null => 10,
+      10 => 20,
+      20 => 30,
+      _ => null,
+    };
+    _timer?.cancel();
+    if (next != null) {
+      _timer = Timer(Duration(minutes: next), () async {
+        state = null;
+        await (await ref.read(audioPlaybackProvider.future)).pause();
+      });
+    }
+    state = next;
+  }
+}

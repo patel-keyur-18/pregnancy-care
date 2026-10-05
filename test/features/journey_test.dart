@@ -50,7 +50,7 @@ void main() {
     );
     await _see(tester, 'Second trimester so far');
     expect(find.text('Week 11 of 14'), findsOneWidget);
-    expect(find.text('checklist items done'), findsOneWidget);
+    expect(find.text('reading sessions'), findsOneWidget);
     await _see(
       tester,
       'General information to help you keep track. '
@@ -58,7 +58,7 @@ void main() {
     );
   });
 
-  testWidgets('ticking an item is saved and counted', (tester) async {
+  testWidgets('ticking an item is saved', (tester) async {
     final db = await _openJourney(tester);
     const item = 'Book the glucose test (GTT) if your doctor has advised it';
     await _see(tester, item);
@@ -69,11 +69,10 @@ void main() {
     );
     expect(rows!.single.itemKey, 'w24-gtt');
     expect(tester.getSemantics(find.text(item)), isSemantics(isChecked: true));
-    await _see(tester, 'checklist item done');
 
     await tester.tap(find.text(item));
     await tester.pumpAndSettle();
-    await _see(tester, 'checklist items done');
+    expect(tester.getSemantics(find.text(item)), isSemantics(isChecked: false));
   });
 
   testWidgets('pick another week, and switch trimester', (tester) async {

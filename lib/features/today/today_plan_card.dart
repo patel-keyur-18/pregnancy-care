@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
@@ -8,10 +9,15 @@ import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
+import 'package:navmaas/features/care/presentation/take_button.dart';
+import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/presentation/library_actions.dart';
+import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// "Today's gentle plan" (prototype Today). M3: today's supplement doses;
-/// reading and walk items join in M4.
+/// "Today's gentle plan" (prototype Today): today's supplement doses and,
+/// once there's a book, a reading session. The walk joins in M4b.
 class TodayPlanCard extends ConsumerWidget {
   const new({super.key});
 
@@ -22,16 +28,56 @@ class TodayPlanCard extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
     final day = localDay(ref.watch(todayProvider));
+    final tomorrow = day.add(const Duration(days: 1));
     final slots = slotsOn(
       day,
       ref.watch(supplementPlansProvider).value ?? const [],
     );
     final taken =
-        ref
-            .watch(takenDosesProvider(day, day.add(const Duration(days: 1))))
-            .value ??
-        const {};
-    final done = slots.where((s) => taken.contains(s.key)).length;
+        ref.watch(takenDosesProvider(day, tomorrow)).value ?? const {};
+    final book = (ref.watch(libraryItemsProvider).value ?? const [])
+        .where((i) => i.kind != LibraryKind.audio)
+        .firstOrNull;
+    final readToday =
+        (ref.watch(sessionsBetweenProvider(day, tomorrow)).value ?? const [])
+            .any((s) => s.type == SessionType.reading);
+
+    final rows = <Widget>[
+      for (final slot in slots)
+        _PlanRow(
+          tile: pillTile(scheme),
+          title: slot.supplement.name,
+          subtitle: doseSubtitle(slot),
+          done: taken.contains(slot.key),
+          onOpen: () => context.go('/care/supplements'),
+          onToggle: () => ref
+              .read(supplementRepositoryProvider)
+              .setTaken(
+                slot.schedule.id,
+                slot.dueAt,
+                taken: !taken.contains(slot.key),
+              ),
+        ),
+      if (book != null)
+        _PlanRow(
+          tile: IconTile(
+            background: scheme.tertiaryContainer,
+            child: NmIcon(
+              NavmaasIcon.book,
+              size: 20,
+              color: scheme.onTertiaryContainer,
+            ),
+          ),
+          title: l10n.planReading,
+          subtitle: l10n.minutesTitle(readGoalMinutes, book.title),
+          done: readToday,
+          onOpen: () => openLibraryItem(context, book),
+        ),
+    ];
+    final done = [
+      for (final s in slots) taken.contains(s.key),
+      if (book != null) readToday,
+    ].where((d) => d).length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -46,9 +92,9 @@ class TodayPlanCard extends ConsumerWidget {
               header: true,
               child: Text(l10n.planTitle, style: text.titleMedium),
             ),
-            if (slots.isNotEmpty)
+            if (rows.isNotEmpty)
               Text(
-                l10n.planDone(done, slots.length),
+                l10n.planDone(done, rows.length),
                 style: text.bodySmall!.copyWith(
                   fontWeight: FontWeight.w700,
                   color: scheme.outline,
@@ -58,7 +104,7 @@ class TodayPlanCard extends ConsumerWidget {
         ),
         Card(
           clipBehavior: Clip.antiAlias,
-          child: slots.isEmpty
+          child: rows.isEmpty
               ? InkWell(
                   onTap: () => context.go('/care/supplements/edit'),
                   child: Padding(
@@ -81,19 +127,9 @@ class TodayPlanCard extends ConsumerWidget {
                 )
               : Column(
                   children: [
-                    for (final (i, slot) in slots.indexed) ...[
+                    for (final (i, row) in rows.indexed) ...[
                       if (i > 0) const Divider(height: 1),
-                      _PlanRow(
-                        slot: slot,
-                        done: taken.contains(slot.key),
-                        onToggle: () => ref
-                            .read(supplementRepositoryProvider)
-                            .setTaken(
-                              slot.schedule.id,
-                              slot.dueAt,
-                              taken: !taken.contains(slot.key),
-                            ),
-                      ),
+                      row,
                     ],
                   ],
                 ),
@@ -103,19 +139,31 @@ class TodayPlanCard extends ConsumerWidget {
   }
 }
 
+/// One plan item. [onToggle] ticks it by hand (supplements); without it
+/// the circle only shows whether it's done (reading is ticked by a session).
 class _PlanRow extends StatelessWidget {
-  const new({required this.slot, required this.done, required this.onToggle});
+  const new({
+    required this.tile,
+    required this.title,
+    required this.subtitle,
+    required this.done,
+    required this.onOpen,
+    this.onToggle,
+  });
 
-  final DoseSlot slot;
+  final Widget tile;
+  final String title;
+  final String subtitle;
   final bool done;
-  final VoidCallback onToggle;
+  final VoidCallback onOpen;
+  final VoidCallback? onToggle;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final name = slot.supplement.name;
+    final name = title;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
       child: Row(
@@ -124,13 +172,13 @@ class _PlanRow extends StatelessWidget {
           Expanded(
             child: InkWell(
               borderRadius: BorderRadius.circular(14),
-              onTap: () => context.go('/care/supplements'),
+              onTap: onOpen,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: 48),
                 child: Row(
                   spacing: 12,
                   children: [
-                    pillTile(scheme),
+                    tile,
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +191,7 @@ class _PlanRow extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            doseSubtitle(slot),
+                            subtitle,
                             style: theme.textTheme.bodySmall!.copyWith(
                               color: scheme.outline,
                             ),
@@ -159,9 +207,13 @@ class _PlanRow extends StatelessWidget {
           Semantics(
             // Its own node: Cards merge their children otherwise.
             container: true,
-            button: true,
-            toggled: done,
-            label: done ? l10n.doneName(name) : l10n.markDone(name),
+            button: onToggle != null,
+            toggled: onToggle == null ? null : done,
+            label: done
+                ? l10n.doneName(name)
+                : onToggle == null
+                ? ''
+                : l10n.markDone(name),
             excludeSemantics: true,
             child: PressScale(
               child: InkResponse(

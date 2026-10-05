@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +9,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/platform/audio.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Records what the app asks the OS to schedule (no platform plugin).
@@ -44,6 +49,65 @@ class FakeScheduler implements ReminderScheduler {
   Future<void> refreshTimeZone() async {}
 }
 
+/// Plays nothing; records what the app asks for.
+class FakeAudio implements AudioPlayback {
+  final _changes = StreamController<Playback>.broadcast();
+  Playback _current = idlePlayback;
+  final opened = <String>[];
+
+  @override
+  Playback get current => _current;
+
+  @override
+  Stream<Playback> get changes => _changes.stream;
+
+  void _set(Playback p) => _changes.add(_current = p);
+
+  @override
+  Future<Duration?> open({
+    required String itemId,
+    required String title,
+    required String path,
+  }) async {
+    opened.add(itemId);
+    _set((
+      itemId: itemId,
+      playing: false,
+      completed: false,
+      position: Duration.zero,
+      duration: const Duration(minutes: 10),
+    ));
+    return const Duration(minutes: 10);
+  }
+
+  @override
+  Future<void> play() async => _set((
+    itemId: _current.itemId,
+    playing: true,
+    completed: false,
+    position: _current.position,
+    duration: _current.duration,
+  ));
+
+  @override
+  Future<void> pause() async => _set((
+    itemId: _current.itemId,
+    playing: false,
+    completed: false,
+    position: _current.position,
+    duration: _current.duration,
+  ));
+
+  @override
+  Future<void> seek(Duration position) async => _set((
+    itemId: _current.itemId,
+    playing: _current.playing,
+    completed: false,
+    position: position,
+    duration: _current.duration,
+  ));
+}
+
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
 final testToday = DateTime.utc(2026, 10, 5);
 
@@ -52,6 +116,9 @@ final testToday = DateTime.utc(2026, 10, 5);
 Future<AppDatabase> pumpApp(
   WidgetTester tester, {
   FakeScheduler? scheduler,
+  FakeAudio? audio,
+  Directory? library,
+  PickFile? pickFile,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
   double textScale = 1,
@@ -89,6 +156,15 @@ Future<AppDatabase> pumpApp(
         reminderSchedulerProvider.overrideWithValue(
           scheduler ?? FakeScheduler(),
         ),
+        audioPlaybackProvider.overrideWith((_) async => audio ?? FakeAudio()),
+        libraryRepositoryProvider.overrideWith(
+          (ref) => LibraryRepository(
+            ref.watch(appDatabaseProvider),
+            directory: () async =>
+                library ?? Directory.systemTemp.createTempSync('navmaas_lib'),
+          ),
+        ),
+        pickFileProvider.overrideWithValue(pickFile ?? (_) async => null),
       ],
       child: const NavmaasApp(),
     ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:path/path.dart' as p;
@@ -130,3 +131,17 @@ LibraryRepository libraryRepository(Ref ref) => LibraryRepository(
 @riverpod
 Stream<List<LibraryItem>> libraryItems(Ref ref) =>
     ref.watch(libraryRepositoryProvider).watchItems();
+
+typedef PickedFile = ({String name, Stream<List<int>> bytes});
+
+/// Opens the system file picker for [extensions]; faked in widget tests.
+typedef PickFile = Future<PickedFile?> Function(List<String> extensions);
+
+@riverpod
+PickFile pickFile(Ref ref) => (extensions) async {
+  final f = await FilePicker.pickFile(
+    type: FileType.custom,
+    allowedExtensions: extensions,
+  );
+  return f == null ? null : (name: f.name, bytes: f.xFile.openRead());
+};

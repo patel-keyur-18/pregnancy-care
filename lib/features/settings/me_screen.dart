@@ -141,18 +141,65 @@ class MeScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           section(
             l10n.appearance,
-            PillSegmented<ThemeMode>(
-              segments: [
-                (value: ThemeMode.light, label: l10n.themeLight, caption: null),
-                (value: ThemeMode.dark, label: l10n.themeDark, caption: null),
-                (
-                  value: ThemeMode.system,
-                  label: l10n.themeSystem,
-                  caption: null,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 14,
+              children: [
+                PillSegmented<ThemeMode>(
+                  segments: [
+                    (
+                      value: ThemeMode.light,
+                      label: l10n.themeLight,
+                      caption: null,
+                    ),
+                    (
+                      value: ThemeMode.dark,
+                      label: l10n.themeDark,
+                      caption: null,
+                    ),
+                    (
+                      value: ThemeMode.system,
+                      label: l10n.themeSystem,
+                      caption: null,
+                    ),
+                  ],
+                  selected: mode,
+                  onChanged: (m) => setThemeMode(ref, m),
+                ),
+                MergeSemantics(
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.nightReading,
+                              style: text.bodyLarge!.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              l10n.nightReadingSub,
+                              style: text.bodySmall!.copyWith(
+                                color: scheme.outline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: ref.watch(nightReadingProvider).value ?? true,
+                        onChanged: (v) => ref
+                            .read(settingsRepositoryProvider)
+                            .put(SettingKeys.nightReading, '$v'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-              selected: mode,
-              onChanged: (m) => setThemeMode(ref, m),
             ),
           ),
           const SizedBox(height: 18),

@@ -14,6 +14,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     required this.readNightBg,
     required this.readNightText,
     required this.sleep,
+    required this.sleepText,
   });
 
   final Color amber;
@@ -25,6 +26,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
   final Color readNightBg;
   final Color readNightText;
   final Color sleep;
+  final Color sleepText;
 
   static const light = NavmaasColors(
     amber: Color(0xFF9A6416),
@@ -36,6 +38,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     readNightBg: Color(0xFF1E1913),
     readNightText: Color(0xFFE3CDA8),
     sleep: Color(0xFF0E0C10),
+    sleepText: Color(0xFFA99F98),
   );
 
   static const dark = NavmaasColors(
@@ -48,6 +51,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     readNightBg: Color(0xFF1E1913),
     readNightText: Color(0xFFE3CDA8),
     sleep: Color(0xFF0E0C10),
+    sleepText: Color(0xFFA99F98),
   );
 
   @override
@@ -61,6 +65,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     Color? readNightBg,
     Color? readNightText,
     Color? sleep,
+    Color? sleepText,
   }) => NavmaasColors(
     amber: amber ?? this.amber,
     amberSoft: amberSoft ?? this.amberSoft,
@@ -71,6 +76,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
     readNightBg: readNightBg ?? this.readNightBg,
     readNightText: readNightText ?? this.readNightText,
     sleep: sleep ?? this.sleep,
+    sleepText: sleepText ?? this.sleepText,
   );
 
   @override
@@ -86,6 +92,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
       readNightBg: Color.lerp(readNightBg, other.readNightBg, t)!,
       readNightText: Color.lerp(readNightText, other.readNightText, t)!,
       sleep: Color.lerp(sleep, other.sleep, t)!,
+      sleepText: Color.lerp(sleepText, other.sleepText, t)!,
     );
   }
 }

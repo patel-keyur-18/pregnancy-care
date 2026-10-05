@@ -89,3 +89,41 @@ final class FirstNameProvider
 }
 
 String _$firstNameHash() => r'ddb13adbb9ff01a86abd472055c0e7745f59ad81';
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+
+@ProviderFor(nightReading)
+final nightReadingProvider = NightReadingProvider._();
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+
+final class NightReadingProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+  NightReadingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'nightReadingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$nightReadingHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return nightReading(ref);
+  }
+}
+
+String _$nightReadingHash() => r'e2fb78068998232c10315df9286526204102de4a';
