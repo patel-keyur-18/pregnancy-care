@@ -143,25 +143,6 @@ abstract final class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(textStyle: WidgetStatePropertyAll(text.labelLarge)),
       ),
-      segmentedButtonTheme: SegmentedButtonThemeData(
-        style: ButtonStyle(
-          textStyle: WidgetStatePropertyAll(text.labelLarge),
-          minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
-          backgroundColor: WidgetStateProperty.resolveWith(
-            (s) => s.contains(WidgetState.selected)
-                ? scheme.surface
-                : scheme.surfaceContainerHighest,
-          ),
-          foregroundColor: WidgetStateProperty.resolveWith(
-            (s) => s.contains(WidgetState.selected)
-                ? scheme.onSurface
-                : scheme.onSurfaceVariant,
-          ),
-          side: WidgetStatePropertyAll(
-            BorderSide(color: scheme.outlineVariant),
-          ),
-        ),
-      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest,
@@ -176,31 +157,6 @@ abstract final class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: scheme.primary, width: 1.5),
-        ),
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        height: 84,
-        backgroundColor: scheme.surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        indicatorColor: scheme.primaryContainer,
-        indicatorShape: const StadiumBorder(),
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        labelTextStyle: WidgetStateProperty.resolveWith(
-          (s) => _nunito(13, 18, s.contains(WidgetState.selected) ? 800 : 600)
-              .copyWith(
-                color: s.contains(WidgetState.selected)
-                    ? scheme.onSurface
-                    : scheme.onSurfaceVariant,
-              ),
-        ),
-        iconTheme: WidgetStateProperty.resolveWith(
-          (s) => IconThemeData(
-            size: 24,
-            color: s.contains(WidgetState.selected)
-                ? scheme.onPrimaryContainer
-                : scheme.onSurfaceVariant,
-          ),
         ),
       ),
       dividerTheme: DividerThemeData(color: scheme.outlineVariant, space: 1),

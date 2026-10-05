@@ -6,6 +6,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Me, M1 subset: profile + pregnancy dates, appearance, disclaimer.
@@ -133,24 +134,18 @@ class MeScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           section(
             l10n.appearance,
-            SegmentedButton<ThemeMode>(
-              showSelectedIcon: false,
+            PillSegmented<ThemeMode>(
               segments: [
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  label: Text(l10n.themeLight),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  label: Text(l10n.themeDark),
-                ),
-                ButtonSegment(
+                (value: ThemeMode.light, label: l10n.themeLight, caption: null),
+                (value: ThemeMode.dark, label: l10n.themeDark, caption: null),
+                (
                   value: ThemeMode.system,
-                  label: Text(l10n.themeSystem),
+                  label: l10n.themeSystem,
+                  caption: null,
                 ),
               ],
-              selected: {mode},
-              onSelectionChanged: (s) => setThemeMode(ref, s.single),
+              selected: mode,
+              onChanged: (m) => setThemeMode(ref, m),
             ),
           ),
           const SizedBox(height: 18),

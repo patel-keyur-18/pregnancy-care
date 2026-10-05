@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/theme/brand_mark.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/onboarding/dating_form.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -280,7 +281,12 @@ class _PrivacyLine extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 1),
-          child: Icon(Icons.lock_outline_rounded, size: 16, color: color),
+          child: NmIcon(
+            NavmaasIcon.lock,
+            size: 16,
+            strokeWidth: 2,
+            color: color,
+          ),
         ),
         Flexible(
           child: Text(

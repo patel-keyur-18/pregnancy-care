@@ -8,8 +8,10 @@ import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today, M1 subset: header and the week hero card. The plan, visit and
@@ -93,16 +95,38 @@ class _Header extends ConsumerWidget {
             ],
           ),
         ),
-        IconButton(
-          tooltip: isDark ? l10n.switchToLight : l10n.switchToDark,
-          style: IconButton.styleFrom(
-            backgroundColor: scheme.surfaceContainerHighest,
-            foregroundColor: scheme.onSurfaceVariant,
-          ),
-          onPressed: () =>
-              setThemeMode(ref, isDark ? ThemeMode.light : ThemeMode.dark),
-          icon: Icon(
-            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+        PressScale(
+          child: IconButton(
+            tooltip: isDark ? l10n.switchToLight : l10n.switchToDark,
+            style: IconButton.styleFrom(
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+            onPressed: () =>
+                setThemeMode(ref, isDark ? ThemeMode.light : ThemeMode.dark),
+            // Moon and sun cross-fade with a 30° turn (DESIGN_SYSTEM §5).
+            icon: AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeOut,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: RotationTransition(
+                  turns: Tween<double>(
+                    begin: -1 / 12,
+                    end: 0,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: NmIcon(
+                isDark ? NavmaasIcon.sun : NavmaasIcon.moon,
+                key: ValueKey(isDark),
+                size: 22,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ),
       ],

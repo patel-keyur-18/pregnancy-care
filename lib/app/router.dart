@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/placeholder_screen.dart';
+import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
 import 'package:navmaas/features/settings/edit_dates_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
@@ -86,7 +88,6 @@ StatefulShellBranch _branch(
   ],
 );
 
-/// Bottom tab bar (DESIGN_SYSTEM §6): 84 dp, active tab on a sage pill.
 class _Shell extends StatelessWidget {
   const new(this.shell);
 
@@ -95,44 +96,19 @@ class _Shell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    NavigationDestination tab(IconData icon, IconData selected, String label) =>
-        NavigationDestination(
-          icon: Icon(icon),
-          selectedIcon: Icon(selected),
-          label: label,
-        );
     return Scaffold(
       body: shell,
-      bottomNavigationBar: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: scheme.outlineVariant)),
-        ),
-        // Tab labels stop growing at 1.5× so five tabs still fit; the
-        // screens themselves follow the full text size.
-        child: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: 1.5,
-          child: NavigationBar(
-            selectedIndex: shell.currentIndex,
-            onDestinationSelected: (i) =>
-                shell.goBranch(i, initialLocation: i == shell.currentIndex),
-            destinations: [
-              tab(Icons.home_outlined, Icons.home_rounded, l10n.tabToday),
-              tab(Icons.eco_outlined, Icons.eco_rounded, l10n.tabJourney),
-              tab(Icons.spa_outlined, Icons.spa_rounded, l10n.tabSessions),
-              tab(
-                Icons.favorite_border_rounded,
-                Icons.favorite_rounded,
-                l10n.tabCare,
-              ),
-              tab(
-                Icons.person_outline_rounded,
-                Icons.person_rounded,
-                l10n.tabMe,
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: NavmaasTabBar(
+        currentIndex: shell.currentIndex,
+        onTap: (i) =>
+            shell.goBranch(i, initialLocation: i == shell.currentIndex),
+        tabs: [
+          (icon: NavmaasIcon.home, label: l10n.tabToday),
+          (icon: NavmaasIcon.sprout, label: l10n.tabJourney),
+          (icon: NavmaasIcon.lotus, label: l10n.tabSessions),
+          (icon: NavmaasIcon.heart, label: l10n.tabCare),
+          (icon: NavmaasIcon.person, label: l10n.tabMe),
+        ],
       ),
     );
   }

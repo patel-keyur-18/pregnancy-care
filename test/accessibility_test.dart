@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
@@ -17,7 +18,7 @@ Future<void> _seed(AppDatabase db) async {
 
 Future<void> _tab(WidgetTester tester, String label) async {
   await tester.tap(
-    find.descendant(of: find.byType(NavigationBar), matching: find.text(label)),
+    find.descendant(of: find.byType(NavmaasTabBar), matching: find.text(label)),
   );
   await tester.pumpAndSettle();
 }

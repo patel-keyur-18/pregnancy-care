@@ -54,7 +54,7 @@ Future<AppDatabase> pumpApp(
 
 /// Opens the date field and types [mmddyyyy] in the picker's input mode.
 Future<void> pickDate(WidgetTester tester, String mmddyyyy) async {
-  final field = find.byIcon(Icons.calendar_today_outlined);
+  final field = find.byKey(const ValueKey('date-field'));
   await tester.ensureVisible(field);
   await tester.pumpAndSettle();
   await tester.tap(field);

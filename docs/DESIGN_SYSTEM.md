@@ -110,6 +110,20 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 - 250–350 ms ease-out fades and short slides. No bounce, no flashing, no auto-playing animation.
 - Respects "reduce motion" and the OS animation scale.
 
+### Icon micro-interactions
+
+Small, calm feedback when an icon is tapped (owner request, M2). Only these four exist; anything new is added here first.
+
+| Where | Trigger | What moves | Timing |
+|---|---|---|---|
+| Tab bar | A tab becomes active | The icon's line draws itself (stroke traced 0 → 100 %) while the sage pill fades in | 350 ms, ease-out |
+| Icon buttons: tab bar, theme toggle, cycle stepper | Finger down / up | Shrinks to 92 % while pressed, returns on release | 120 ms down, 200 ms ease-out up |
+| Theme toggle (Today) | Tap | Moon and sun cross-fade with a 30° turn | 300 ms, ease-out |
+| Checklist tick (Journey) | Item ticked | Box fills sage, then the check mark draws itself | 250 ms, ease-out |
+
+- No overshoot, no bounce, no looping, nothing plays on its own.
+- With reduce motion on, every state change is instant and nothing scales.
+
 ## 6. Components (as drawn in the prototype)
 
 | Component | Spec |
