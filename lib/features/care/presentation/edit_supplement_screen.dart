@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/date_only.dart';
@@ -102,7 +104,44 @@ class _EditSupplementScreenState extends ConsumerState<EditSupplementScreen> {
               ),
           ],
         );
+    await _offerReminders();
     if (mounted) context.pop();
+  }
+
+  /// After the first supplement, offers reminders once if they're off
+  /// (Plan decision 22).
+  Future<void> _offerReminders() async {
+    final settings = ref.read(settingsRepositoryProvider);
+    final all = await settings.getAll();
+    if (all[SettingKeys.remindersOn] == 'true' ||
+        all[SettingKeys.remindersOffered] == 'true' ||
+        !mounted) {
+      return;
+    }
+    await settings.put(SettingKeys.remindersOffered, 'true');
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.offerRemindersTitle),
+        content: Text(l10n.offerRemindersBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.turnOnReminders),
+          ),
+        ],
+      ),
+    );
+    if (yes != true) return;
+    if (await ref.read(reminderSchedulerProvider).requestPermission()) {
+      await settings.put(SettingKeys.remindersOn, 'true');
+    }
   }
 
   Future<void> _remove() async {

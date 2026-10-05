@@ -215,5 +215,8 @@
   "quietRange": "{start} – {end}",
   "@quietRange": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
   "quietFrom": "Quiet hours start",
-  "quietUntil": "Quiet hours end"
+  "quietUntil": "Quiet hours end",
+  "offerRemindersTitle": "Remind you on time?",
+  "offerRemindersBody": "Navmaas can remind you when each dose is due, even when your phone is locked. You can change this anytime in Me.",
+  "notNow": "Not now"
 }

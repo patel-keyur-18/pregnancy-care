@@ -51,6 +51,11 @@ Future<void> _addIron(WidgetTester tester) async {
   await tester.enterText(label, 'after breakfast');
   await tester.tap(find.text('Save'));
   await tester.pumpAndSettle();
+  // The first supplement offers reminders once.
+  if (find.text('Not now').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
+  }
 }
 
 void main() {
@@ -157,5 +162,30 @@ void main() {
       (saved![SettingKeys.remindersOn], saved[SettingKeys.dailyLimit]),
       ('true', '5'),
     );
+  });
+
+  testWidgets('first supplement offers reminders once', (tester) async {
+    final scheduler = FakeScheduler();
+    final db = await pumpApp(tester, seed: _seed, scheduler: scheduler);
+    await _tab(tester, 'Care');
+    await _tapText(tester, 'Add');
+    await tester.tap(find.text('Folic acid'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Remind you on time?'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Turn on reminders'));
+    await tester.pumpAndSettle();
+    final on = await tester.runAsync(
+      () => SettingsRepository(db).watch(SettingKeys.remindersOn).first,
+    );
+    expect(on, 'true');
+
+    await _tapText(tester, 'Add');
+    await tester.tap(find.text('Vitamin D3'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Remind you on time?'), findsNothing);
   });
 }
