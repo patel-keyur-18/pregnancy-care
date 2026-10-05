@@ -34,12 +34,12 @@ Future<AppDatabase> pumpApp(
   tester.view
     ..physicalSize = size
     ..devicePixelRatio = 1;
-  addTearDown(() async {
+  addTearDown(() {
     tester.platformDispatcher.clearAllTestValues();
     tester.view.reset();
-    // Real async: after a failed test drift may still be mid-query, and
-    // closing inside the fake-async zone would wait forever.
-    await tester.runAsync(db.close);
+    // The in-memory database is not closed: after a failed test a query from
+    // the abandoned fake-async zone can hold drift's lock, and close() would
+    // wait forever. It is garbage-collected with the test.
   });
   await tester.pumpWidget(
     ProviderScope(
