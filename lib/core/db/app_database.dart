@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
+import 'package:navmaas/core/content/content_pack.dart' show CareKind;
 import 'package:navmaas/core/db/app_database.steps.dart';
 import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -23,6 +24,11 @@ part 'app_database.g.dart';
     Supplements,
     SupplementSchedules,
     DoseLogs,
+    CareItems,
+    Appointments,
+    VisitQuestions,
+    Attachments,
+    VitalReadings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -42,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +61,14 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.supplement);
         await m.createTable(schema.supplementSchedule);
         await m.createTable(schema.doseLog);
+      },
+      // v4 (M3b): care items, visits, questions, attachments, vitals.
+      from3To4: (m, schema) async {
+        await m.createTable(schema.careItem);
+        await m.createTable(schema.appointment);
+        await m.createTable(schema.visitQuestion);
+        await m.createTable(schema.attachment);
+        await m.createTable(schema.vitalReading);
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

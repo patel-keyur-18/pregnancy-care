@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:navmaas/core/content/content_pack.dart' show CareKind;
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:uuid/uuid.dart';
 
@@ -126,6 +127,88 @@ class DoseLogs extends Table with BaseColumns {
   List<Set<Column<Object>>> get uniqueKeys => [
     {scheduleId, dueAt},
   ];
+}
+
+/// A test, scan or vaccine for this pregnancy, created from the India care
+/// template. Booked = [scheduledAt] set; done = [doneAt] set.
+@DataClassName('CareItem')
+class CareItems extends Table with BaseColumns {
+  @override
+  String get tableName => 'care_item';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get templateKey => text().nullable()();
+  TextColumn get kind => textEnum<CareKind>()();
+  TextColumn get title => text()();
+  IntColumn get fromWeek => integer()();
+  IntColumn get toWeek => integer()();
+  DateTimeColumn get scheduledAt => dateTime().nullable()();
+  DateTimeColumn get doneAt => dateTime().nullable()();
+  TextColumn get notes => text().nullable()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, templateKey},
+  ];
+}
+
+/// A doctor visit.
+@DataClassName('Appointment')
+class Appointments extends Table with BaseColumns {
+  @override
+  String get tableName => 'appointment';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  DateTimeColumn get at => dateTime()();
+  TextColumn get doctor => text().nullable()();
+  TextColumn get place => text().nullable()();
+  TextColumn get notes => text().nullable()();
+
+  /// Things to bring, one per line.
+  TextColumn get bringAlong => text().withDefault(const Constant(''))();
+}
+
+/// A question to ask the doctor; unlinked ones wait for the next visit.
+@DataClassName('VisitQuestion')
+class VisitQuestions extends Table with BaseColumns {
+  @override
+  String get tableName => 'visit_question';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get appointmentId =>
+      text().nullable().references(Appointments, #id)();
+  TextColumn get body => text()();
+  DateTimeColumn get askedAt => dateTime().nullable()();
+}
+
+/// An encrypted file (e.g. a prescription photo) in the private data folder.
+@DataClassName('Attachment')
+class Attachments extends Table with BaseColumns {
+  @override
+  String get tableName => 'attachment';
+
+  TextColumn get appointmentId =>
+      text().nullable().references(Appointments, #id)();
+
+  /// File name inside `db/attachments/`.
+  TextColumn get fileName => text()();
+  TextColumn get mimeType => text()();
+}
+
+enum VitalKind { weight, bloodPressure }
+
+/// A logged reading. Weight: [value1] kg. Blood pressure: [value1] systolic,
+/// [value2] diastolic (mmHg). Recorded only; never interpreted.
+@DataClassName('VitalReading')
+class VitalReadings extends Table with BaseColumns {
+  @override
+  String get tableName => 'vital_reading';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get kind => textEnum<VitalKind>()();
+  RealColumn get value1 => real()();
+  RealColumn get value2 => real().nullable()();
+  DateTimeColumn get at => dateTime()();
 }
 
 /// Key-value app settings (theme, first name, …).
