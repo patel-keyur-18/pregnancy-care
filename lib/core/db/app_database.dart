@@ -66,8 +66,13 @@ QueryExecutor encryptedExecutor(File file, String keyHex) =>
 /// the one way data moves between phones.
 Future<void> _excludeFromBackup(Directory dir) async {
   if (!Platform.isIOS) return;
-  await const MethodChannel('navmaas/files')
-      .invokeMethod<void>('excludeFromBackup', dir.path);
+  try {
+    await const MethodChannel('navmaas/files')
+        .invokeMethod<void>('excludeFromBackup', dir.path);
+  } on MissingPluginException {
+    // The background isolate behind notification actions has no app
+    // channels; the folder was already marked by the app itself.
+  }
 }
 
 @Riverpod(keepAlive: true)
