@@ -24,6 +24,8 @@ flutter analyze                       # must report zero issues
 flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
+dart run tool/weeks_md.dart           # after editing assets/content/weeks.json (review copy)
+flutter test test/goldens --update-goldens  # after an intended visual change
 flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
@@ -31,13 +33,15 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 ## Folder conventions (ARCHITECTURE §4)
 
 - `lib/app/`: `NavmaasApp`, router (go_router `StatefulShellRoute`, 5 tabs), theme mode
-- `lib/core/theme/`: `AppTheme` (exact hex values) and the `NavmaasColors` extension. Never hard-code colours in widgets.
+- `lib/core/theme/`: `AppTheme` (exact hex values), the `NavmaasColors` extension and `NavmaasIcon` (the prototype's icons as SVG path data). Never hard-code colours in widgets, and never use Material `Icons`.
+- `lib/core/widgets/`: shared widgets (`PillSegmented`, icon motion). New motion is specified in DESIGN_SYSTEM §5 first.
+- `lib/core/content/`: content-pack loader. `assets/content/weeks.json` is the source of the week-by-week text.
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
-- `lib/core/utils/`: date-only maths (UTC-midnight dates), `todayProvider` (the clock)
+- `lib/core/utils/`: date-only maths (UTC-midnight dates), `todayProvider` / `nowProvider` (the clock)
 - `lib/features/<feature>/`: screens and widgets per feature
 - `lib/l10n/app_en.arb`: every user-facing string. No literals in widgets.
-- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05)
+- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 at 9:00); `test/goldens/` holds the golden screenshots
 
 ## Hard lines
 
@@ -62,9 +66,16 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Riverpod 3 pauses unlistened providers:** use `container.listen(...)`, not `read`, when awaiting a stream provider outside widgets (see `loadFirstValues`).
 - **Widget tests with drift:**
   - Seed data inside `tester.runAsync`.
-  - Use `DatabaseConnection(..., closeStreamsSynchronously: true)`; `pumpApp` already does both.
+  - Use `DatabaseConnection(..., closeStreamsSynchronously: true)`.
+  - Close the DB in `tester.runAsync`; otherwise a failed test hangs the run.
+
+  `pumpApp` already does all three.
   - Call `ensureVisible` before tapping below the fold.
 - **OS backups:** they stay on, but the DB and its key are excluded on both platforms. On iOS that's the `navmaas/files` channel plus a `first_unlock_this_device` key; on Android it's the `res/xml` rules. The `.navmaas` backup file (M5) is the only way to move data between phones.
+- **Assets in tests:** load with `rootBundle.loadString(path, cache: false)`. A cached asset future from one widget test never completes in the next.
+- **Lazy lists:** don't look up a child's context to scroll to it (it may not be built). Compute the offset, as Journey's week chips do.
+- **Widget-test scrolling:** `scrollUntilVisible` stops at "partly visible", possibly under the tab bar. Follow it with `ensureVisible` before tapping.
+- **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`.
 - **Schema changes:**
   1. Bump `schemaVersion`.
   2. Write the migration.

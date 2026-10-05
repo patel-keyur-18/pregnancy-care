@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v4 — approved 2026-10-04, updated 2026-10-05 (M1 built; owner decisions 12–17) |
+| **Status** | v5 — approved 2026-10-04, updated 2026-10-05 (M1 and M2 built; owner decisions 12–19) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -36,6 +36,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 15 | Prototype fidelity | Screens follow the prototype **exactly**, including its own line icons (drawn in M2) |
 | 16 | Week-by-week text | Claude drafts **original** text; the owner reviews it and decides what ships |
 | 17 | First name | Optional during onboarding; **editable in Me** (M2) |
+| 18 | Today's plan | **Moved from M2 to M3**, where supplements give it real items; sessions and walks join in M4 |
+| 19 | Icon motion | Small, calm tap animations on icons (DESIGN_SYSTEM §5); instant when the phone asks to reduce motion |
 
 ### What these decisions change
 
@@ -124,6 +126,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation ✅ 2026-10-05 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation and M2 Today & Journey ✅ 2026-10-05 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |
