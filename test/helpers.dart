@@ -46,6 +46,8 @@ Future<AppDatabase> pumpApp(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
         todayProvider.overrideWithValue(testToday),
+        // 9:00 am, so the greeting is always "Good morning".
+        nowProvider.overrideWithValue(DateTime(2026, 10, 5, 9)),
       ],
       child: const NavmaasApp(),
     ),

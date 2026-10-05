@@ -66,7 +66,7 @@ class _Header extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final hour = DateTime.now().hour;
+    final hour = ref.watch(nowProvider).hour;
     final period = hour < 12
         ? 'morning'
         : hour < 17

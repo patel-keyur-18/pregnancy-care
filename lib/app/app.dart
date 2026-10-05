@@ -34,7 +34,9 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
     super.initState();
     // A new day may have started while the app was in the background.
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref.invalidate(todayProvider),
+      onResume: () => ref
+        ..invalidate(todayProvider)
+        ..invalidate(nowProvider),
     );
   }
 
