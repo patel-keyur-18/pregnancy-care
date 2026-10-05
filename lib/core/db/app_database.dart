@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
+import 'package:navmaas/core/db/app_database.steps.dart';
 import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
@@ -13,7 +14,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'app_database.drift.dart';
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Pregnancies, Settings])
+@DriftDatabase(tables: [Pregnancies, Settings, ChecklistTicks])
 class AppDatabase extends _$AppDatabase {
   new(super.e);
 
@@ -31,10 +32,14 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: stepByStep(
+      // v2 (M2): Journey checklist ticks.
+      from1To2: (m, schema) => m.createTable(schema.checklistTick),
+    ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );
 }

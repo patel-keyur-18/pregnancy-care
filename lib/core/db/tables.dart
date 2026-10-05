@@ -41,6 +41,23 @@ class Pregnancies extends Table with BaseColumns {
       boolean().withDefault(const Constant(false))();
 }
 
+/// A ticked item from a week's checklist (Journey). Unticking soft-deletes.
+@DataClassName('ChecklistTick')
+class ChecklistTicks extends Table with BaseColumns {
+  @override
+  String get tableName => 'checklist_tick';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+
+  /// `ChecklistItem.key` from the content pack, e.g. `w24-gtt`.
+  TextColumn get itemKey => text()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, itemKey},
+  ];
+}
+
 /// Key-value app settings (theme, first name, …).
 @DataClassName('Setting')
 class Settings extends Table with BaseColumns {

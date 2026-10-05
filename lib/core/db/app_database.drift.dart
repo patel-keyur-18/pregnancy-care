@@ -1280,16 +1280,440 @@ class SettingsCompanion extends UpdateCompanion<Setting> {
   }
 }
 
+class $ChecklistTicksTable extends ChecklistTicks
+    with TableInfo<$ChecklistTicksTable, ChecklistTick> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistTicksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: DateTime.now,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _itemKeyMeta = const VerificationMeta(
+    'itemKey',
+  );
+  @override
+  late final GeneratedColumn<String> itemKey = GeneratedColumn<String>(
+    'item_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    itemKey,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_tick';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChecklistTick> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('item_key')) {
+      context.handle(
+        _itemKeyMeta,
+        itemKey.isAcceptableOrUnknown(data['item_key']!, _itemKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_itemKeyMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {pregnancyId, itemKey},
+  ];
+  @override
+  ChecklistTick map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistTick(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      itemKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}item_key'],
+      )!,
+    );
+  }
+
+  @override
+  $ChecklistTicksTable createAlias(String alias) {
+    return $ChecklistTicksTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistTick extends DataClass implements Insertable<ChecklistTick> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+
+  /// `ChecklistItem.key` from the content pack, e.g. `w24-gtt`.
+  final String itemKey;
+  const ChecklistTick({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    required this.itemKey,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    map['item_key'] = Variable<String>(itemKey);
+    return map;
+  }
+
+  ChecklistTicksCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistTicksCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      itemKey: Value(itemKey),
+    );
+  }
+
+  factory ChecklistTick.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistTick(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      itemKey: serializer.fromJson<String>(json['itemKey']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'itemKey': serializer.toJson<String>(itemKey),
+    };
+  }
+
+  ChecklistTick copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    String? itemKey,
+  }) => ChecklistTick(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    itemKey: itemKey ?? this.itemKey,
+  );
+  ChecklistTick copyWithCompanion(ChecklistTicksCompanion data) {
+    return ChecklistTick(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      itemKey: data.itemKey.present ? data.itemKey.value : this.itemKey,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTick(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('itemKey: $itemKey')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, createdAt, updatedAt, deletedAt, pregnancyId, itemKey);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistTick &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.itemKey == this.itemKey);
+}
+
+class ChecklistTicksCompanion extends UpdateCompanion<ChecklistTick> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<String> itemKey;
+  final Value<int> rowid;
+  const ChecklistTicksCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.itemKey = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChecklistTicksCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    required String itemKey,
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       itemKey = Value(itemKey);
+  static Insertable<ChecklistTick> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<String>? itemKey,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (itemKey != null) 'item_key': itemKey,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChecklistTicksCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<String>? itemKey,
+    Value<int>? rowid,
+  }) {
+    return ChecklistTicksCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      itemKey: itemKey ?? this.itemKey,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (itemKey.present) {
+      map['item_key'] = Variable<String>(itemKey.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTicksCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('itemKey: $itemKey, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $PregnanciesTable pregnancies = $PregnanciesTable(this);
   late final $SettingsTable settings = $SettingsTable(this);
+  late final $ChecklistTicksTable checklistTicks = $ChecklistTicksTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [pregnancies, settings];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    pregnancies,
+    settings,
+    checklistTicks,
+  ];
   @override
   DriftDatabaseOptions get options =>
       const DriftDatabaseOptions(storeDateTimeAsText: true);
@@ -1333,6 +1757,29 @@ typedef $$PregnanciesTableUpdateCompanionBuilder =
       Value<bool> exerciseCleared,
       Value<int> rowid,
     });
+
+final class $$PregnanciesTableReferences
+    extends BaseReferences<_$AppDatabase, $PregnanciesTable, Pregnancy> {
+  $$PregnanciesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ChecklistTicksTable, List<ChecklistTick>>
+  _checklistTicksRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.checklistTicks,
+    aliasName: 'pregnancy__id__checklist_tick__pregnancy_id',
+  );
+
+  $$ChecklistTicksTableProcessedTableManager get checklistTicksRefs {
+    final manager = $$ChecklistTicksTableTableManager(
+      $_db,
+      $_db.checklistTicks,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_checklistTicksRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$PregnanciesTableFilterComposer
     extends Composer<_$AppDatabase, $PregnanciesTable> {
@@ -1423,6 +1870,31 @@ class $$PregnanciesTableFilterComposer
     column: $table.exerciseCleared,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> checklistTicksRefs(
+    Expression<bool> Function($$ChecklistTicksTableFilterComposer f) f,
+  ) {
+    final $$ChecklistTicksTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.checklistTicks,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChecklistTicksTableFilterComposer(
+            $db: $db,
+            $table: $db.checklistTicks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PregnanciesTableOrderingComposer
@@ -1573,6 +2045,31 @@ class $$PregnanciesTableAnnotationComposer
     column: $table.exerciseCleared,
     builder: (column) => column,
   );
+
+  Expression<T> checklistTicksRefs<T extends Object>(
+    Expression<T> Function($$ChecklistTicksTableAnnotationComposer a) f,
+  ) {
+    final $$ChecklistTicksTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.checklistTicks,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ChecklistTicksTableAnnotationComposer(
+            $db: $db,
+            $table: $db.checklistTicks,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PregnanciesTableTableManager
@@ -1586,12 +2083,9 @@ class $$PregnanciesTableTableManager
           $$PregnanciesTableAnnotationComposer,
           $$PregnanciesTableCreateCompanionBuilder,
           $$PregnanciesTableUpdateCompanionBuilder,
-          (
-            Pregnancy,
-            BaseReferences<_$AppDatabase, $PregnanciesTable, Pregnancy>,
-          ),
+          (Pregnancy, $$PregnanciesTableReferences),
           Pregnancy,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool checklistTicksRefs})
         > {
   $$PregnanciesTableTableManager(_$AppDatabase db, $PregnanciesTable table)
     : super(
@@ -1680,15 +2174,44 @@ class $$PregnanciesTableTableManager
               .map(
                 (e) => (
                   e.readTable<$PregnanciesTable, Pregnancy>(table),
-                  BaseReferences<_$AppDatabase, $PregnanciesTable, Pregnancy>(
-                    db,
-                    table,
-                    e,
-                  ),
+                  $$PregnanciesTableReferences(db, table, e),
                 ),
               )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({checklistTicksRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (checklistTicksRefs) db.checklistTicks,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (checklistTicksRefs)
+                    await $_getPrefetchedData<
+                      Pregnancy,
+                      $PregnanciesTable,
+                      ChecklistTick
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PregnanciesTableReferences
+                          ._checklistTicksRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$PregnanciesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).checklistTicksRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.pregnancyId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -1703,9 +2226,9 @@ typedef $$PregnanciesTableProcessedTableManager =
       $$PregnanciesTableAnnotationComposer,
       $$PregnanciesTableCreateCompanionBuilder,
       $$PregnanciesTableUpdateCompanionBuilder,
-      (Pregnancy, BaseReferences<_$AppDatabase, $PregnanciesTable, Pregnancy>),
+      (Pregnancy, $$PregnanciesTableReferences),
       Pregnancy,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool checklistTicksRefs})
     >;
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
   Value<String> id,
@@ -1927,6 +2450,346 @@ typedef $$SettingsTableProcessedTableManager =
       Setting,
       PrefetchHooks Function()
     >;
+typedef $$ChecklistTicksTableCreateCompanionBuilder =
+    ChecklistTicksCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String pregnancyId,
+      required String itemKey,
+      Value<int> rowid,
+    });
+typedef $$ChecklistTicksTableUpdateCompanionBuilder =
+    ChecklistTicksCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> pregnancyId,
+      Value<String> itemKey,
+      Value<int> rowid,
+    });
+
+final class $$ChecklistTicksTableReferences
+    extends BaseReferences<_$AppDatabase, $ChecklistTicksTable, ChecklistTick> {
+  $$ChecklistTicksTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('checklist_tick__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ChecklistTicksTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistTicksTable> {
+  $$ChecklistTicksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get itemKey => $composableBuilder(
+    column: $table.itemKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChecklistTicksTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistTicksTable> {
+  $$ChecklistTicksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get itemKey => $composableBuilder(
+    column: $table.itemKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChecklistTicksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistTicksTable> {
+  $$ChecklistTicksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get itemKey =>
+      $composableBuilder(column: $table.itemKey, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ChecklistTicksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChecklistTicksTable,
+          ChecklistTick,
+          $$ChecklistTicksTableFilterComposer,
+          $$ChecklistTicksTableOrderingComposer,
+          $$ChecklistTicksTableAnnotationComposer,
+          $$ChecklistTicksTableCreateCompanionBuilder,
+          $$ChecklistTicksTableUpdateCompanionBuilder,
+          (ChecklistTick, $$ChecklistTicksTableReferences),
+          ChecklistTick,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$ChecklistTicksTableTableManager(
+    _$AppDatabase db,
+    $ChecklistTicksTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistTicksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistTicksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistTicksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<String> itemKey = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistTicksCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                itemKey: itemKey,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                required String itemKey,
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistTicksCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                itemKey: itemKey,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ChecklistTicksTable, ChecklistTick>(table),
+                  $$ChecklistTicksTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$ChecklistTicksTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$ChecklistTicksTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ChecklistTicksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChecklistTicksTable,
+      ChecklistTick,
+      $$ChecklistTicksTableFilterComposer,
+      $$ChecklistTicksTableOrderingComposer,
+      $$ChecklistTicksTableAnnotationComposer,
+      $$ChecklistTicksTableCreateCompanionBuilder,
+      $$ChecklistTicksTableUpdateCompanionBuilder,
+      (ChecklistTick, $$ChecklistTicksTableReferences),
+      ChecklistTick,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1935,4 +2798,6 @@ class $AppDatabaseManager {
       $$PregnanciesTableTableManager(_db, _db.pregnancies);
   $$SettingsTableTableManager get settings =>
       $$SettingsTableTableManager(_db, _db.settings);
+  $$ChecklistTicksTableTableManager get checklistTicks =>
+      $$ChecklistTicksTableTableManager(_db, _db.checklistTicks);
 }

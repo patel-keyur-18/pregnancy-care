@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/journey/data/checklist_repository.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
@@ -112,6 +113,22 @@ void main() {
       await repo.put(SettingKeys.themeMode, 'light');
       expect(await repo.watch(SettingKeys.themeMode).first, 'light');
       expect(await db.select(db.settings).get(), hasLength(1));
+    });
+
+    test('checklist: tick, untick, tick again keeps one row', () async {
+      await PregnancyRepository(db)
+          .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
+      final id = (await db.select(db.pregnancies).getSingle()).id;
+      final repo = ChecklistRepository(db);
+
+      await repo.setTicked(id, 'w24-gtt', ticked: true);
+      expect(await repo.watchTicked(id).first, {'w24-gtt'});
+      await repo.setTicked(id, 'w24-gtt', ticked: false);
+      expect(await repo.watchTicked(id).first, isEmpty);
+      await repo.setTicked(id, 'w24-gtt', ticked: true);
+      expect(await repo.watchTicked(id).first, {'w24-gtt'});
+      expect(await db.select(db.checklistTicks).get(), hasLength(1));
+      expect(await repo.watchTicked('other').first, isEmpty);
     });
 
     test('settings remove soft-deletes; put brings the key back', () async {
