@@ -1,0 +1,22 @@
+targets:
+  $default:
+    builders:
+      # Drift writes its own `.drift.dart` part (not the shared `.g.dart`), so
+      # riverpod_generator can see drift's row classes.
+      drift_dev:
+        enabled: false
+      drift_dev:not_shared:
+        enabled: true
+        options: &drift_options
+          store_date_time_values_as_text: true
+          databases:
+            navmaas: lib/core/db/app_database.dart
+          schema_dir: drift_schemas/
+          test_dir: test/drift/
+      drift_dev:preparing_builder:
+        options: *drift_options
+
+global_options:
+  drift_dev:not_shared:
+    runs_before:
+      - riverpod_generator

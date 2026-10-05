@@ -1,0 +1,41 @@
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
+import 'package:drift_dev/api/migrations_native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:navmaas/core/db/app_database.dart';
+
+import 'generated/schema.dart';
+
+// After changing tables: bump `schemaVersion`, write the migration, then run
+// `dart run drift_dev make-migrations` to dump the new schema and helpers.
+void main() {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  late SchemaVerifier verifier;
+
+  setUpAll(() => verifier = SchemaVerifier(GeneratedHelper()));
+
+  test('tables match the latest schema snapshot', () async {
+    final latest = GeneratedHelper.versions.last;
+    final db = AppDatabase(NativeDatabase.memory());
+    expect(db.schemaVersion, latest, reason: 'run make-migrations');
+    await db.close();
+
+    final schema = await verifier.schemaAt(latest);
+    final fresh = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(fresh, latest);
+    await fresh.close();
+  });
+
+  // Every older schema must migrate to every newer one. Runs from v2 on.
+  const versions = GeneratedHelper.versions;
+  for (final (i, from) in versions.indexed) {
+    for (final to in versions.skip(i + 1)) {
+      test('migrates v$from → v$to', () async {
+        final schema = await verifier.schemaAt(from);
+        final db = AppDatabase(schema.newConnection());
+        await verifier.migrateAndValidate(db, to);
+        await db.close();
+      });
+    }
+  }
+}

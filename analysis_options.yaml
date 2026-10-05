@@ -1,0 +1,13 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - lib/l10n/gen/**
+    - test/drift/**/generated/**
+    - android/**
+    - ios/**
+
+linter:
+  rules:
+    public_member_api_docs: false
