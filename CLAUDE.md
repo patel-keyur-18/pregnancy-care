@@ -25,7 +25,7 @@ flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/weeks_md.dart           # after editing assets/content/weeks.json (review copy)
-flutter test test/goldens --update-goldens  # after an intended visual change
+flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
 flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
@@ -75,6 +75,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Assets in tests:** load with `rootBundle.loadString(path, cache: false)`. A cached asset future from one widget test never completes in the next.
 - **Lazy lists:** don't look up a child's context to scroll to it (it may not be built). Compute the offset, as Journey's week chips do.
 - **Widget-test scrolling:** `scrollUntilVisible` stops at "partly visible", possibly under the tab bar. Follow it with `ensureVisible` before tapping.
+- **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push, let CI fail, download the `golden-failures` artifact and copy each `*_testImage.png` in without the suffix.
 - **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`.
 - **Schema changes:**
   1. Bump `schemaVersion`.

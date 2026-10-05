@@ -465,7 +465,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
   - Restoring an older schema (migrates) and rejecting a newer one.
   - Interrupted swap (rollback works).
   - A 500 MB library within the memory budget.
-- **Widget and golden tests:** onboarding, Today, Journey and Me in light and dark at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they match on macOS and CI Linux; they check layout, colour and icons, not letter shapes. Update with `flutter test test/goldens --update-goldens`.
+- **Widget and golden tests:** onboarding, Today, Journey and Me in light and dark at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI; when they change, CI uploads the new renders as the `golden-failures` artifact to copy in).
 - **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent, review copy in sync.
 - **Integration tests:** onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
 - **GitHub Actions** (free for public repos), on every pull request, every push to `main` and on demand. Ubuntu, Flutter pinned (3.47.3), Java 17:
@@ -473,6 +473,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
   - `flutter analyze`
   - `flutter test`
   - `flutter build apk --release` (uploaded as an artifact; signed only locally)
+  - On a test failure, golden diff images are uploaded as `golden-failures`
   - iOS builds happen on the owner's Mac, because personal-team signing can't run in CI.
 
 ## 17. Decision log
@@ -496,4 +497,4 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | 015 | First name stored as the `first_name` setting | M1 needs no `profile` table; doctor and clinic details arrive with visits in M3 |
 | 016 | Prototype icons drawn from its SVG path data with `path_parsing` | Exact match to the prototype; `flutter_svg` would bring the `http` package into a no-network app |
 | 017 | No `freezed` / `json_serializable` | One small model parsed by hand; fewer packages and no extra codegen; a test reads the real file |
-| 018 | Goldens use the built-in test font | Same pixels on macOS and CI Linux; real-font screenshots are reviewed by eye |
+| 018 | Goldens use the built-in test font, one exact set per platform (`macos/`, `linux/`) | Pixel-exact checks everywhere without a fuzzy tolerance; real-font screenshots are reviewed by eye |

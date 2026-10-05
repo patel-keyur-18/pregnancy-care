@@ -1,8 +1,13 @@
 // Golden screenshots of the main screens (ARCHITECTURE §16), light and dark
-// at 1.0× and 2.0× text. They use Flutter's built-in test font, so they
-// render the same on macOS and on CI's Linux: they check layout, colour and
-// icons, not letter shapes. Update with:
-//   flutter test test/goldens --update-goldens
+// at 1.0× and 2.0× text, with Flutter's built-in test font (layout, colour
+// and icons, not letter shapes). Text rounds slightly differently on macOS
+// and Linux, so each platform has its own exact set: macos/ for local runs,
+// linux/ for CI. After an intended visual change:
+//   macOS:  flutter test test/goldens --update-goldens
+//   Linux:  push; CI fails and uploads `golden-failures`; copy each
+//           *_testImage.png into linux/ without the suffix.
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/tab_bar.dart';
@@ -25,12 +30,19 @@ Future<void> _tab(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
+/// Golden folder for this platform; other platforms skip the goldens.
+final String? _dir = Platform.isMacOS
+    ? 'macos'
+    : Platform.isLinux
+    ? 'linux'
+    : null;
+
 void main() {
   for (final brightness in Brightness.values) {
     for (final scale in [1.0, 2.0]) {
       final name = '${brightness.name}_${scale}x';
 
-      testWidgets('onboarding $name', (tester) async {
+      testWidgets('onboarding $name', skip: _dir == null, (tester) async {
         await pumpApp(tester, platformBrightness: brightness, textScale: scale);
         await tester.tap(find.text('Continue'));
         await tester.pumpAndSettle();
@@ -39,11 +51,11 @@ void main() {
         await tester.pumpAndSettle();
         await expectLater(
           find.byType(MaterialApp),
-          matchesGoldenFile('onboarding_$name.png'),
+          matchesGoldenFile('$_dir/onboarding_$name.png'),
         );
       });
 
-      testWidgets('tabs $name', (tester) async {
+      testWidgets('tabs $name', skip: _dir == null, (tester) async {
         await pumpApp(
           tester,
           seed: _seed,
@@ -52,13 +64,13 @@ void main() {
         );
         await expectLater(
           find.byType(MaterialApp),
-          matchesGoldenFile('today_$name.png'),
+          matchesGoldenFile('$_dir/today_$name.png'),
         );
         for (final tab in ['Journey', 'Me']) {
           await _tab(tester, tab);
           await expectLater(
             find.byType(MaterialApp),
-            matchesGoldenFile('${tab.toLowerCase()}_$name.png'),
+            matchesGoldenFile('$_dir/${tab.toLowerCase()}_$name.png'),
           );
         }
       });
