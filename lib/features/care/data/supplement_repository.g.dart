@@ -102,3 +102,87 @@ final class SupplementPlansProvider
 }
 
 String _$supplementPlansHash() => r'7c7b5ecf90b0959582241911caedd2b5a16f42b2';
+
+/// Keys of doses taken with due times in [from, to) (local dates).
+
+@ProviderFor(takenDoses)
+final takenDosesProvider = TakenDosesFamily._();
+
+/// Keys of doses taken with due times in [from, to) (local dates).
+
+final class TakenDosesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Set<String>>,
+          Set<String>,
+          Stream<Set<String>>
+        >
+    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
+  /// Keys of doses taken with due times in [from, to) (local dates).
+  TakenDosesProvider._({
+    required TakenDosesFamily super.from,
+    required (DateTime, DateTime) super.argument,
+  }) : super(
+         retry: null,
+         name: r'takenDosesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$takenDosesHash();
+
+  @override
+  String toString() {
+    return r'takenDosesProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Set<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Set<String>> create(Ref ref) {
+    final argument = this.argument as (DateTime, DateTime);
+    return takenDoses(ref, argument.$1, argument.$2);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TakenDosesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$takenDosesHash() => r'82c55b9992b9ecb0a6d4fb8ca6d3cca989c9eb41';
+
+/// Keys of doses taken with due times in [from, to) (local dates).
+
+final class TakenDosesFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<Set<String>>, (DateTime, DateTime)> {
+  TakenDosesFamily._()
+    : super(
+        retry: null,
+        name: r'takenDosesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Keys of doses taken with due times in [from, to) (local dates).
+
+  TakenDosesProvider call(DateTime from, DateTime to) =>
+      TakenDosesProvider._(argument: (from, to), from: this);
+
+  @override
+  String toString() => r'takenDosesProvider';
+}

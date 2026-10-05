@@ -202,3 +202,8 @@ Stream<List<SupplementPlan>> supplementPlans(Ref ref) {
   if (id == null) return Stream.value(const []);
   return ref.watch(supplementRepositoryProvider).watchPlans(id);
 }
+
+/// Keys of doses taken with due times in [from, to) (local dates).
+@riverpod
+Stream<Set<String>> takenDoses(Ref ref, DateTime from, DateTime to) =>
+    ref.watch(supplementRepositoryProvider).watchTaken(from, to);

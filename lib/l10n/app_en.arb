@@ -113,5 +113,18 @@
   "heroSize": "Baby is about the size of {size}",
   "@heroSize": {"placeholders": {"size": {"type": "String"}}},
   "sessionsBody": "Reading, listening and walks arrive in a coming update.",
-  "careBody": "Supplements, visits and tests arrive in a coming update."
+  "careBody": "Supplements, visits and tests arrive in a coming update.",
+
+  "reminderChannel": "Reminders",
+  "reminderChannelDescription": "Supplement and care reminders",
+  "reminderSupplements": "Supplements",
+  "reminderGeneric": "Reminders",
+  "reminderDigest": "Today's reminders",
+  "reminderTimeFor": "Time for your supplement",
+  "reminderRefillTitle": "{name}: refill soon",
+  "@reminderRefillTitle": {"placeholders": {"name": {"type": "String"}}},
+  "reminderRefillBody": "{count, plural, =0{None left} =1{1 dose left} other{{count} doses left}}",
+  "@reminderRefillBody": {"placeholders": {"count": {"type": "int"}}},
+  "actionTaken": "Taken",
+  "actionSnooze": "Snooze 30 min"
 }
