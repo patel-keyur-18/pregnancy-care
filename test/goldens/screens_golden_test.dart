@@ -6,6 +6,7 @@
 //   macOS:  flutter test test/goldens --update-goldens
 //   Linux:  push to the PR; the failing CI run uploads `linux-goldens`,
 //           download it into linux/.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -14,13 +15,24 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/features/sessions/data/library_repository.dart';
 
 import '../helpers.dart';
+
+final Directory _library = Directory.systemTemp.createTempSync('navmaas_gold');
 
 Future<void> _seed(AppDatabase db) async {
   await SettingsRepository(db).put(SettingKeys.firstName, 'Meera');
   await PregnancyRepository(db)
       .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
+  final library = LibraryRepository(db, directory: () async => _library);
+  final book = await library.import(
+    'evening_stories.txt',
+    Stream.value(utf8.encode('Once upon a time.')),
+  );
+  await library.setProgress(book!.id, position: 420, total: 1000);
+  final audio = await library.import('om_chanting.mp3', Stream.value([0]));
+  await library.setDuration(audio!.id, 600);
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -59,6 +71,7 @@ void main() {
         await pumpApp(
           tester,
           seed: _seed,
+          library: _library,
           platformBrightness: brightness,
           textScale: scale,
         );
@@ -66,7 +79,7 @@ void main() {
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/today_$name.png'),
         );
-        for (final tab in ['Journey', 'Me']) {
+        for (final tab in ['Journey', 'Sessions', 'Me']) {
           await _tab(tester, tab);
           await expectLater(
             find.byType(MaterialApp),
