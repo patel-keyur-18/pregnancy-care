@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.4 — decided 2026-10-04, updated 2026-10-05 (icon motion in §5; M3a components; implementation notes in §8) |
+| **Status** | v1.5 — decided 2026-10-04, updated 2026-10-05 (icon motion in §5; M3 components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -140,6 +140,9 @@ Small, calm feedback when an icon is tapped (owner request, M2). Only these four
 | Take / Taken pill (Care, Supplements) | Pill, 1.5 border; taken = `primary` fill, `on-primary` label 14/800 |
 | Week dose dots (Supplements) | 36 circles with "taken/due"; all taken = `primary`, some = `primary-soft`, today = `primary` ring |
 | Notice row | Radius 12, 8/10 padding, 13/700: note = `surface-2`; low stock = `amber-soft` with a bell |
+| Care row (Coming up, Tests) | 40 icon tile by kind (test = `amber-soft` flask, vaccine = `lavender-soft` shield, scan and visit = `primary-soft`), title 16/800, caption 13/600 `text-3`; optional "Book" chip (`amber-soft`, 12/800) |
+| Visit header | `amber-soft` card, radius 24: overline ("IN 3 DAYS"), date and time 22/800, doctor · clinic; two `surface` pill buttons (Call clinic, Directions) |
+| Vital tile | Card: label 13/700 `text-3`, value 24/800, detail 13/600, "Log …" pill on `surface-2` |
 | Switch | 52 × 32 track (`primary` / `track`), 26 thumb `surface` |
 | Segmented control | `surface-2` pill container; selected = `surface` + shadow |
 | Progress | 6–8 h bar on `track`, or ring (stroke 8–10) |
@@ -201,7 +204,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader.
 
-## 8. Implementation status (M3a)
+## 8. Implementation status (M3)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -215,6 +218,8 @@ Deliberate, permanent differences:
 | Journey week chips | 52 × 60 | Grow with text size up to 1.6× | The week number never clips |
 | Take / Taken pill | 40 px tall | 48 dp | Accessibility (§4) |
 | Onboarding | 3 steps | 4 steps: an optional "Your doctor and reminders" step | Owner decision (Plan 22, 23) |
-| Remove-time icon | (not drawn) | A × in the same line style | Needed for the supplement form |
+| Remove-time icon | (not drawn) | A × in the same line style | Needed for the supplement form; also on bring-along chips and photos |
+| Scan icon | (not drawn) | A screen with a gentle wave, same line style | Scans needed their own icon |
+| Past test windows | (not shown) | "Weeks 6–10", not "Due" | No guilt for a window that has passed |
 
-Still to come: reading and walk items on Today's plan and Journey's reading / walk tiles (M4); Care's "Coming up" and "Vitals you logged" sections (M3b); the Kick counter and Contraction timer tiles on Care (M5).
+Still to come: reading and walk items on Today's plan and Journey's reading / walk tiles (M4); the Kick counter and Contraction timer tiles at the top of Care (M5).

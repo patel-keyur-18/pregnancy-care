@@ -19,8 +19,9 @@ import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Care tab (prototype "Care"). M3a: supplements today. Tests, visits and
-/// vitals join in M3b; kick counter and contraction timer in M5.
+/// Care tab (prototype "Care"): supplements today, coming up (visits,
+/// tests, scans, vaccines) and vitals. Kick counter and contraction timer
+/// tiles join in M5.
 class CareScreen extends ConsumerWidget {
   const new({super.key});
 

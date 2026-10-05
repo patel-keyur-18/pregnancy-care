@@ -12,7 +12,7 @@ It combines:
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
 
-> **Status:** M1, M2 and M3a are built (2026-10-05): onboarding, Today with its gentle plan, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), and Me, on an encrypted on-device database. Next is M3b (tests, visits and vitals).
+> **Status:** M1, M2 and M3 are built (2026-10-05): onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, and Me — all on an encrypted on-device database. Next is M4 (Sessions).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
