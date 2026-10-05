@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.1 — decided 2026-10-04, updated 2026-10-05 (SOS removed; red now marks destructive actions) |
+| **Status** | v1.2 — decided 2026-10-04, updated 2026-10-05 (SOS removed; red marks destructive actions; M1 implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -94,13 +94,14 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 | Reading | Literata | 19 / 32 | 400 |
 
 - Nunito is rounded and friendly, and stays clear at small sizes. Literata is designed for long reading on screens.
-- Minimum text size is 12 px. All sizes follow the phone's text-size setting and are tested at 200 %.
+- Minimum text size is 12 px. All sizes follow the phone's text-size setting and are tested at 100 %, 130 % and 200 %.
+- Both ship as Google Fonts' variable files (`Nunito[wght]`, `Literata[opsz,wght]`) in `assets/fonts/`, next to their `OFL-*.txt` licences. Flutter maps `fontWeight` onto the `wght` axis.
 
 ## 4. Shape, space, touch
 
 - **Spacing:** 4-point grid (4 · 8 · 12 · 16 · 20 · 24 · 32). Screen gutter is 20.
 - **Radius:** 8 (chips) · 14 (icon tiles, inputs) · 20 (cards) · 28 (hero cards) · pill (buttons, segmented controls).
-- **Touch targets:** at least 48 dp. Main actions sit in the lower half of the screen for one-handed use.
+- **Touch targets:** at least 48 dp (the prototype draws some at 44 px; the app rounds them up to 48). Main actions sit in the lower half of the screen for one-handed use.
 - **Icons:** 24-grid line icons, 1.8 stroke, round caps and joins. No emoji in the interface.
 - **Elevation:** a very soft shadow in light mode only. Dark mode separates layers by tone (`bg` → `surface` → `surface-2`).
 
@@ -180,3 +181,15 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 ```
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader.
+
+## 8. Implementation status (M1)
+
+The prototype is the exact visual spec (Plan decision 15). Where the M1 app still differs, it is listed here and fixed in M2:
+
+| Area | Prototype | M1 app |
+|---|---|---|
+| Icons (tab bar, calendar, theme toggle, stepper, lock) | Own 24-grid line icons, 1.8 stroke | Material outline icons as stand-ins |
+| Segmented control | Selected segment = `surface` + soft shadow, inside a `surface-2` pill | Material `SegmentedButton`: selected = `surface`, no shadow, bordered segments |
+| Cycle-length stepper | Label and stepper on one row | Stepper wraps under its label when the row is too narrow (keeps 2.0× text working) |
+
+Deliberate, permanent differences: touch targets are 48 dp, not 44 px, and tab-bar labels stop growing at 1.5× text so five tabs fit.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v3 — approved 2026-10-04, updated 2026-10-05 |
+| **Status** | v4 — approved 2026-10-04, updated 2026-10-05 (M1 built; owner decisions 12–17) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -30,6 +30,12 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 9 | SOS / emergency features | **Not included.** Emergencies are handled manually, as the doctor advises |
 | 10 | iPhone install | **Free Apple ID.** The owner re-runs the app from Xcode every 7 days to renew it |
 | 11 | Backup & restore | **In the MVP.** Password-protected backup file plus restore |
+| 12 | Bundle ID | **`com.patelkeyur.navmaas`** on iOS and Android. It never changes: a new ID installs a new, empty app |
+| 13 | OS backups | **Stay on for both platforms**, but Navmaas's encrypted database and its key are left out of them on both, so behaviour is the same. The `.navmaas` backup file is how data moves between phones |
+| 14 | App size | **Up to 100 MB** is fine |
+| 15 | Prototype fidelity | Screens follow the prototype **exactly**, including its own line icons (drawn in M2) |
+| 16 | Week-by-week text | Claude drafts **original** text; the owner reviews it and decides what ships |
+| 17 | First name | Optional during onboarding; **editable in Me** (M2) |
 
 ### What these decisions change
 
@@ -56,7 +62,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 
 | Module | What it does | Phase |
 |---|---|---|
-| **Onboarding & pregnancy engine** | Due date from last period (with cycle length), conception date, IVF transfer or scan. Shows weeks + days, the month ("Month 6") and the trimester. Twins flag, high-risk flag ★, "doctor cleared me for exercise" ★ | MVP |
+| **Onboarding & pregnancy engine** | Due date from last period (with cycle length), conception date, IVF transfer or scan. Shows weeks + days, the month ("Month 6") and the trimester. Optional first name, editable in Me. Twins flag, high-risk flag ★, "doctor cleared me for exercise" ★ | MVP |
 | **Today (home)** | Week ring, baby size (Indian fruit and vegetable comparisons), today's plan (supplements, session, walk), next visit, Screen Rest status | MVP |
 | **Journey (trimester-wise)** | Trimester tabs, week picker, baby and body notes per week, weekly checklist, trimester progress from her own logs | MVP |
 | **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books and audio, reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP |
@@ -118,6 +124,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones) |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation ✅ 2026-10-05 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |

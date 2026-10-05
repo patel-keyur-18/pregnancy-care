@@ -10,6 +10,10 @@ Navmaas (नवमास) is a calm, private pregnancy tracker for iOS and Andro
 
 **Ask before** adding a package beyond ARCHITECTURE §3, or deviating from the docs. Owner decisions (bundle ID, package swaps, scope) are not yours to make.
 
+**Keep the docs in sync.** Any change that alters something documented (a decision, package, table, setting, folder, test promise, milestone status) updates `docs/`, `README.md` and this file in the same PR. Nothing in the docs may be stale. Prototype differences go in DESIGN_SYSTEM §8.
+
+**The prototype is the exact visual spec** (Plan decision 15), including its icons.
+
 ## Commands
 
 ```sh
@@ -20,7 +24,7 @@ flutter analyze                       # must report zero issues
 flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
-flutter build apk --release           # universal APK; --split-per-abi for ~25 MB per phone
+flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
 
@@ -44,7 +48,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Accessibility:**
   - ≥ 48 dp touch targets
   - `Semantics`/tooltip on icon-only buttons
-  - no overflow at 2.0× text
+  - no overflow at 1.0×, 1.3× and 2.0× text
   - respect reduce motion
 
   `test/accessibility_test.dart` enforces this for every screen; add new screens to it.

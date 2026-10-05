@@ -12,7 +12,7 @@ It combines:
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
 
-> **Status:** Phase 0 complete — plan, theme, prototype and architecture are done. App code starts with milestone M1.
+> **Status:** M1 Foundation is built (2026-10-05): onboarding, the pregnancy engine, Today and Me on an encrypted on-device database. Next is M2 (Today & Journey).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
@@ -22,11 +22,12 @@ It combines:
 
 | Document | What's inside |
 |---|---|
-| [Plan](docs/PLAN.md) | Approved decisions, feature map by phase, open pushbacks, roadmap |
+| [Plan](docs/PLAN.md) | Approved decisions, feature map by phase, notes and constraints, roadmap |
 | [Design system](docs/DESIGN_SYSTEM.md) | "Moonlit Sage" light/dark theme, contrast-checked tokens, type, components, Flutter mapping |
 | [Architecture](docs/ARCHITECTURE.md) | Flutter stack, structure, pregnancy engine, reminder scheduler, data model, backup & restore, free-Apple-ID install, security, milestones, ADRs |
 | [Interactive prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) | 16 clickable screens in light and dark, plus the theme sheet (private link; share from its Share menu) |
 | [`design/navmaas-tokens.css`](design/navmaas-tokens.css) | The colour tokens used by the prototype |
+| [`CLAUDE.md`](CLAUDE.md) | Commands (run, test, build, codegen), folder conventions and hard lines |
 
 ## Principles
 

@@ -60,7 +60,7 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
 
 void main() {
   for (final MapEntry(key: name, value: (seeded, open)) in _screens.entries) {
-    for (final scale in [1.0, 2.0]) {
+    for (final scale in [1.0, 1.3, 2.0]) {
       testWidgets('$name at ${scale}x: no overflow, 48 dp labelled targets', (
         tester,
       ) async {
