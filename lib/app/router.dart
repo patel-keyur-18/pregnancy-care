@@ -4,6 +4,7 @@ import 'package:navmaas/app/placeholder_screen.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
 import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
@@ -37,13 +38,7 @@ GoRouter router(Ref ref) {
         builder: (_, _, shell) => _Shell(shell),
         branches: [
           _branch('/today', (_) => const TodayScreen()),
-          _branch(
-            '/journey',
-            (l10n) => PlaceholderScreen(
-              title: l10n.tabJourney,
-              body: l10n.journeyBody,
-            ),
-          ),
+          _branch('/journey', (_) => const JourneyScreen()),
           _branch(
             '/sessions',
             (l10n) => PlaceholderScreen(

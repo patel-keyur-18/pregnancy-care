@@ -8,9 +8,12 @@ part of 'content_pack.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Read once (the provider is kept alive), so the bundle cache isn't needed.
 
 @ProviderFor(contentPack)
 final contentPackProvider = ContentPackProvider._();
+
+/// Read once (the provider is kept alive), so the bundle cache isn't needed.
 
 final class ContentPackProvider
     extends
@@ -20,6 +23,7 @@ final class ContentPackProvider
           FutureOr<ContentPack>
         >
     with $FutureModifier<ContentPack>, $FutureProvider<ContentPack> {
+  /// Read once (the provider is kept alive), so the bundle cache isn't needed.
   ContentPackProvider._()
     : super(
         from: null,
@@ -46,4 +50,4 @@ final class ContentPackProvider
   }
 }
 
-String _$contentPackHash() => r'ed5327d66b41d27d30f3530fcbe0a6ef8b487c07';
+String _$contentPackHash() => r'e92813536859a553f09f9e8ae5598eeb58b24e56';

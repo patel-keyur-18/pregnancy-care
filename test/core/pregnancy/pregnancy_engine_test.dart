@@ -256,4 +256,22 @@ void main() {
       expect(addDays(d('2024-03-01'), -1), d('2024-02-29'));
     });
   });
+
+  test('trimesterOfWeek matches the snapshot boundaries', () {
+    for (final (week, tri) in [
+      (4, 1),
+      (13, 1),
+      (14, 2),
+      (27, 2),
+      (28, 3),
+      (42, 3),
+    ]) {
+      expect(trimesterOfWeek(week), tri, reason: 'week $week');
+      final s = PregnancySnapshot.of(
+        start: d('2026-01-01'),
+        today: addDays(d('2026-01-01'), week * 7),
+      );
+      expect(s.trimester, tri, reason: 'snapshot week $week');
+    }
+  });
 }

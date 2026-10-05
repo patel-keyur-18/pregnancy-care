@@ -70,3 +70,9 @@ class PregnancySnapshot {
   /// Below 0 or above 44 weeks: ask the user to check the dates.
   bool get needsReview => gaDays < 0 || gaDays > 44 * 7;
 }
+
+/// Trimester of completed week [week] (same boundaries as the snapshot).
+int trimesterOfWeek(int week) => week < 14 ? 1 : (week < 28 ? 2 : 3);
+
+/// Weeks per trimester as shown on Journey: 1–13, 14–27, 28–40.
+const trimesterWeeks = {1: (1, 13), 2: (14, 27), 3: (28, 40)};

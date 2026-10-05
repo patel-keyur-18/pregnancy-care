@@ -67,7 +67,8 @@ class ContentPack {
   WeekContent? operator [](int week) => _weeks[week];
 }
 
+/// Read once (the provider is kept alive), so the bundle cache isn't needed.
 @Riverpod(keepAlive: true)
 Future<ContentPack> contentPack(Ref ref) async => ContentPack.fromJson(
-  await rootBundle.loadString('assets/content/weeks.json'),
+  await rootBundle.loadString('assets/content/weeks.json', cache: false),
 );

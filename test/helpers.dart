@@ -37,7 +37,9 @@ Future<AppDatabase> pumpApp(
   addTearDown(() async {
     tester.platformDispatcher.clearAllTestValues();
     tester.view.reset();
-    await db.close();
+    // Real async: after a failed test drift may still be mid-query, and
+    // closing inside the fake-async zone would wait forever.
+    await tester.runAsync(db.close);
   });
   await tester.pumpWidget(
     ProviderScope(
