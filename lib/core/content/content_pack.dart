@@ -72,3 +72,54 @@ class ContentPack {
 Future<ContentPack> contentPack(Ref ref) async => ContentPack.fromJson(
   await rootBundle.loadString('assets/content/weeks.json', cache: false),
 );
+
+enum CareKind { test, scan, vaccine }
+
+/// One test, scan or vaccine from the India care template (original text).
+@immutable
+class CareTemplateItem {
+  const new({
+    required this.key,
+    required this.kind,
+    required this.title,
+    required this.fromWeek,
+    required this.toWeek,
+    required this.note,
+  });
+
+  factory fromJson(Map<String, dynamic> json) => CareTemplateItem(
+    key: json['key'] as String,
+    kind: CareKind.values.byName(json['kind'] as String),
+    title: json['title'] as String,
+    fromWeek: json['fromWeek'] as int,
+    toWeek: json['toWeek'] as int,
+    note: json['note'] as String,
+  );
+
+  final String key;
+  final CareKind kind;
+  final String title;
+  final int fromWeek;
+  final int toWeek;
+  final String note;
+}
+
+/// Parses `care_template_in.json` (schemaVersion 1), in file order.
+List<CareTemplateItem> parseCareTemplate(String source) {
+  final json = jsonDecode(source) as Map<String, dynamic>;
+  if (json['schemaVersion'] != 1) {
+    throw FormatException('Unsupported care template schemaVersion', json);
+  }
+  return [
+    for (final i in (json['items'] as List).cast<Map<String, dynamic>>())
+      CareTemplateItem.fromJson(i),
+  ];
+}
+
+@Riverpod(keepAlive: true)
+Future<List<CareTemplateItem>> careTemplate(Ref ref) async => parseCareTemplate(
+  await rootBundle.loadString(
+    'assets/content/care_template_in.json',
+    cache: false,
+  ),
+);

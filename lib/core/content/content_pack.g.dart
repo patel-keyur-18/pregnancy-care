@@ -51,3 +51,44 @@ final class ContentPackProvider
 }
 
 String _$contentPackHash() => r'e92813536859a553f09f9e8ae5598eeb58b24e56';
+
+@ProviderFor(careTemplate)
+final careTemplateProvider = CareTemplateProvider._();
+
+final class CareTemplateProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<CareTemplateItem>>,
+          List<CareTemplateItem>,
+          FutureOr<List<CareTemplateItem>>
+        >
+    with
+        $FutureModifier<List<CareTemplateItem>>,
+        $FutureProvider<List<CareTemplateItem>> {
+  CareTemplateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'careTemplateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$careTemplateHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<CareTemplateItem>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<CareTemplateItem>> create(Ref ref) {
+    return careTemplate(ref);
+  }
+}
+
+String _$careTemplateHash() => r'683d498e975d8a54505c17ad7ead2c83176aff55';
