@@ -45,7 +45,22 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
+      // Today shows the right week, in the same theme.
       expect(find.byType(TodayScreen), findsOneWidget);
+      expect(find.text('Monday, 5 October'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^Good \w+, Meera$')), findsOneWidget);
+      expect(find.text('24'), findsOneWidget);
+      expect(find.text('weeks + 5d'), findsOneWidget);
+      expect(find.text('MONTH 6 · TRIMESTER 2'), findsOneWidget);
+      expect(find.text('24 weeks 5 days'), findsOneWidget);
+      expect(
+        find.text('Due Wed, 20 Jan 2027 · 107 days to go'),
+        findsOneWidget,
+      );
+      expect(
+        Theme.of(tester.element(find.byType(TodayScreen))).brightness,
+        brightness,
+      );
       final saved = await tester.runAsync(
         () => db.select(db.pregnancies).getSingle(),
       );
