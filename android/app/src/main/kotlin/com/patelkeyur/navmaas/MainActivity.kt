@@ -1,5 +1,7 @@
 package com.patelkeyur.navmaas
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceFragmentActivity
 
-class MainActivity : FlutterActivity()
+// Background audio (audio_service) needs its activity; the fragment variant
+// is what Health Connect (M4b) needs too.
+class MainActivity : AudioServiceFragmentActivity()
