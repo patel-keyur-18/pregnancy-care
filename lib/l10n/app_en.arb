@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "appTitle": "Navmaas",
+  "@appTitle": {"description": "App name shown by the OS."}
+}
