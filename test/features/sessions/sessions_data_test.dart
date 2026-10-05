@@ -35,13 +35,13 @@ void main() {
     final source = File(p.join(tmp.path, 'evening_stories-vol-2.PDF'))
       ..writeAsStringSync('%PDF-1.4');
 
-    final item = (await repo.import(source))!;
+    final item = (await repo.import(source.path, source.openRead()))!;
     expect((item.kind, item.title), (LibraryKind.pdf, 'evening stories vol 2'));
     final copy = await repo.file(item);
     expect(copy.readAsStringSync(), '%PDF-1.4');
     expect(p.isWithin(library.path, copy.path), isTrue);
 
-    expect(await repo.import(File(p.join(tmp.path, 'x.epub'))), isNull);
+    expect(await repo.import('x.epub', const Stream.empty()), isNull);
 
     await repo.setProgress(item.id, position: 41, total: 120);
     await repo.rename(item.id, ' Evening stories ');
@@ -61,10 +61,8 @@ void main() {
       db,
       directory: () async => Directory(p.join(tmp.path, 'library')),
     );
-    File(p.join(tmp.path, 'a.txt')).writeAsStringSync('a');
-    File(p.join(tmp.path, 'b.mp3')).writeAsStringSync('b');
-    final a = (await repo.import(File(p.join(tmp.path, 'a.txt'))))!;
-    await repo.import(File(p.join(tmp.path, 'b.mp3')));
+    final a = (await repo.import('a.txt', Stream.value([97])))!;
+    await repo.import('b.mp3', Stream.value([98]));
     await repo.markOpened(a.id);
     expect((await repo.watchItems().first).map((i) => i.title), ['a', 'b']);
   });

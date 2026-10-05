@@ -44,24 +44,30 @@ class LibraryRepository {
     _db.libraryItems,
   )..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  /// Copies [source] into the library. Returns null for a file type the
-  /// library doesn't read.
-  Future<LibraryItem?> import(File source) async {
-    final ext = p.extension(source.path).replaceFirst('.', '').toLowerCase();
+  /// Copies the file called [name] into the library, streaming [bytes] (the
+  /// picker may hand over a content URI, not a path). Returns null for a
+  /// file type the library doesn't read.
+  Future<LibraryItem?> import(String name, Stream<List<int>> bytes) async {
+    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
     final kind = libraryExtensions[ext];
     if (kind == null) return null;
     final dir = await directory();
     await dir.create(recursive: true);
     final id = newId();
     final fileName = '$id.$ext';
-    await source.copy(p.join(dir.path, fileName));
+    final sink = File(p.join(dir.path, fileName)).openWrite();
+    try {
+      await sink.addStream(bytes);
+    } finally {
+      await sink.close();
+    }
     return await _db
         .into(_db.libraryItems)
         .insertReturning(
           LibraryItemsCompanion.insert(
             id: Value(id),
             kind: kind,
-            title: titleFromFileName(source.path),
+            title: titleFromFileName(name),
             fileName: fileName,
           ),
         );
