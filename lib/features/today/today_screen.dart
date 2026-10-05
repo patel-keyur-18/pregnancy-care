@@ -13,6 +13,7 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
+import 'package:navmaas/features/today/next_visit_card.dart';
 import 'package:navmaas/features/today/today_plan_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -51,6 +52,7 @@ class TodayScreen extends ConsumerWidget {
             ),
           const SizedBox(height: 16),
           const TodayPlanCard(),
+          const NextVisitCard(),
         ],
       ),
     );

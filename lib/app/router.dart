@@ -6,7 +6,10 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
+import 'package:navmaas/features/care/presentation/edit_visit_screen.dart';
 import 'package:navmaas/features/care/presentation/supplements_screen.dart';
+import 'package:navmaas/features/care/presentation/tests_screen.dart';
+import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
 import 'package:navmaas/features/settings/doctor_screen.dart';
@@ -54,6 +57,19 @@ GoRouter router(Ref ref) {
             '/care',
             (_) => const CareScreen(),
             routes: [
+              GoRoute(path: 'tests', builder: (_, _) => const TestsScreen()),
+              GoRoute(
+                path: 'visit',
+                builder: (_, state) =>
+                    VisitScreen(visitId: state.extra as String? ?? ''),
+              ),
+              // A sibling, not a child: adding a visit has no visit to show
+              // underneath.
+              GoRoute(
+                path: 'visit-edit',
+                builder: (_, state) =>
+                    EditVisitScreen(visitId: state.extra as String?),
+              ),
               GoRoute(
                 path: 'supplements',
                 builder: (_, _) => const SupplementsScreen(),

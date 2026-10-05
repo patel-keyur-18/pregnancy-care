@@ -78,7 +78,8 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
     true,
     (t) async {
       await _tab(t, 'Care');
-      await _tapText(t, 'See all');
+      await t.tap(find.text('See all').first); // Supplements today
+      await t.pumpAndSettle();
     },
   ),
   'add supplement': (
@@ -86,6 +87,36 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
     (t) async {
       await _tab(t, 'Care');
       await _tapText(t, 'Add');
+    },
+  ),
+  'tests and vaccines': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await t.scrollUntilVisible(
+        find.text('Coming up'),
+        150,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.text('See all').last);
+      await t.pumpAndSettle();
+    },
+  ),
+  'add visit': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Add a visit');
+    },
+  ),
+  'visit': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Add a visit');
+      await t.tap(find.text('Save'));
+      await t.pumpAndSettle();
     },
   ),
   'doctor': (

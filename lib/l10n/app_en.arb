@@ -231,6 +231,8 @@
   "@reminderCareWindow": {"placeholders": {"title": {"type": "String"}, "from": {"type": "int"}, "to": {"type": "int"}}},
   "reminderCareWindowBody": "Ask your doctor whether and when to book it.",
 
+  "trimesterName": "{trimester, plural, =1{First trimester} =2{Second trimester} other{Third trimester}}",
+  "@trimesterName": {"placeholders": {"trimester": {"type": "int"}}},
   "comingUp": "Coming up",
   "testsAndVaccines": "Tests and vaccines",
   "careDueWeeks": "Due weeks {from}–{to} · not booked yet",

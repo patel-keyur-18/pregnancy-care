@@ -70,6 +70,9 @@ void main() {
     expect(find.text('9:00 am · 1 tablet · after breakfast'), findsOneWidget);
     await tester.pageBack();
     await tester.pumpAndSettle();
+    // Care keeps its scroll position; back to the top.
+    await tester.drag(find.byType(ListView).first, const Offset(0, 3000));
+    await tester.pumpAndSettle();
     expect(find.text('1 tablet · after breakfast'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Mark taken: Iron + folic acid'));
     await tester.pumpAndSettle();
