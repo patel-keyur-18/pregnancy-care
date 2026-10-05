@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1 — decided 2026-10-04 |
+| **Status** | v1.1 — decided 2026-10-04, updated 2026-10-05 (SOS removed; red now marks destructive actions) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -14,7 +14,7 @@ Pregnancy often brings tired eyes, headaches, nausea and sometimes changes in vi
 - **No pure black.** Dark mode is a warm plum-charcoal (`#1B1820`). This avoids the harsh contrast and OLED smearing that pure black causes.
 - **Calm ≠ faint.** Every text and background pair meets WCAG AA (≥ 4.5 : 1). Most body text sits at 6–14 : 1.
 - **Muted, natural hues.** Sage (calm, growth), dusty rose (warmth), lavender (sleep, rest), amber (gentle notices).
-- **Red only for emergencies.** SOS, danger signs and "call now" are the only red elements, so red always means urgent.
+- **Red only for destructive actions.** Restore (which replaces data), delete and error messages are the only red elements, so red always means "this changes or loses data".
 - **Night reading.** A warm amber page with low blue light for bedtime Garbhasanskar sessions.
 
 The name comes from *maas* (month), which follows the moon. The logo is a sage crescent moon cradling a small rose seed.
@@ -36,7 +36,7 @@ The name comes from *maas* (month), which follows the moon. The logo is a sage c
 | `rose` | `#A85A61` | Supplements, baby moments | 4.8 : 1 on surface |
 | `lavender` | `#6E63A0` | Sessions, sleep, Screen Rest | 5.2 : 1 |
 | `amber` | `#9A6416` | Visits, tests, notices | 4.9 : 1 |
-| `danger` | `#B3261E` | Emergencies only | 6.5 : 1 with white |
+| `danger` | `#B3261E` | Restore, delete, errors only | 6.5 : 1 with white |
 | `track` | `#E9E1D6` | Empty part of progress bars and switches | — |
 
 ### Dark · "Moonlit"
@@ -54,7 +54,7 @@ The name comes from *maas* (month), which follows the moon. The logo is a sage c
 | `rose` | `#E2A6A6` | Accents | 7.8 : 1 |
 | `lavender` | `#B9AFE3` | Accents | 7.8 : 1 |
 | `amber` | `#E2B464` | Accents | 8.3 : 1 |
-| `danger` | `#F2B8B5` | Emergencies only | 9.9 : 1 with `on-danger` `#3B0B08` |
+| `danger` | `#F2B8B5` | Restore, delete, errors only | 9.9 : 1 with `on-danger` `#3B0B08` |
 | `track` | `#39323F` | Empty progress | — |
 
 ### Soft containers
@@ -81,7 +81,7 @@ Each soft container is always paired with its own "on" text colour.
 
 ## 3. Typography
 
-Both fonts are SIL Open Font License and are **bundled with the app**; there is no runtime font download (see [Architecture ADR-008](ARCHITECTURE.md#15-decision-log)).
+Both fonts are SIL Open Font License and are **bundled with the app**; there is no runtime font download (see [Architecture ADR-008](ARCHITECTURE.md#17-decision-log)).
 
 | Style | Font | Size / line | Weight |
 |---|---|---|---|
@@ -115,7 +115,8 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 |---|---|
 | Primary button | Pill, 52–56 h, `primary` fill, `on-primary` label 16/800 |
 | Secondary button | Pill, 52 h, `surface` fill, 1.5 `border` |
-| SOS button | Pill, 44 h, `danger-soft` fill, 1.5 `danger` border, `on-danger-soft` label, letter-spacing 0.04em |
+| Destructive button | Pill, 52–54 h, `danger` fill, `on-danger` label 16/800; always next to a `danger-soft` note saying what will be replaced or lost |
+| Password field | 48 h, radius 12, `surface-2` fill, 1 `border`; "Show / Hide" button beside it; live hint below (`text-3` → `primary` when valid, `danger` on mismatch) |
 | Card | `surface`, 1 `border`, radius 20, soft shadow (light) |
 | List row | 56+ h, 40 icon tile (soft pair), title 16/700, caption 13/600 `text-3`, divider `border` |
 | Check (done) | 30 circle; done = `primary` fill + check; pending = 2 `border` ring |

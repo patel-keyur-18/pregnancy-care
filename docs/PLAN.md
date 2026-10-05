@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | v2 — approved 2026-10-04 |
+| **Status** | v3 — approved 2026-10-04, updated 2026-10-05 |
 | **App name** | Navmaas (नवमास, "nine months") |
-| **Platforms** | iOS + Android (Flutter) |
+| **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
-| **Cost** | Free — no subscription, no ads |
-| **Last updated** | 2026-10-04 |
+| **Cost** | Free — no subscription, no ads, no paid developer account |
+| **Last updated** | 2026-10-05 |
 
 Related: [Design system](DESIGN_SYSTEM.md) · [Architecture](ARCHITECTURE.md) · [Interactive prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) (private link — share it from its Share menu)
 
@@ -27,19 +27,27 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 6 | Monetization | **Personal use, free.** No subscription tier |
 | 7 | App name | **Navmaas** — *nav* (nine, also "new") + *maas* (month). Lunar months tie into the moon logo. A web search found no pregnancy app, brand or product using the name; a formal trademark search is still advised before any public store release |
 | 8 | Repository | **Public**, MIT-licensed |
+| 9 | SOS / emergency features | **Not included.** Emergencies are handled manually, as the doctor advises |
+| 10 | iPhone install | **Free Apple ID.** The owner re-runs the app from Xcode every 7 days to renew it |
+| 11 | Backup & restore | **In the MVP.** Password-protected backup file plus restore |
 
 ### What these decisions change
 
 - **No backend in v1.** No accounts, CMS, Supabase or partner sync. The app makes no network calls at all, which keeps it simple and private.
 - **Content is the owner's own.** Week-by-week notes ship as a small bundled content pack (general, well-known information). Books (PDF/EPUB/text) and audio are imported on the phone and never leave it.
 - **Public repo means no copyrighted content in git.** Only original or public-domain text goes into the bundled content pack. Personal books and audio stay on the device.
-- **Tracking aid positioning.** Without a medical reviewer, the app records and reminds; it does not interpret readings or recommend doses. One safety exception is kept on purpose (see 5.1).
+- **Tracking aid only.** The app records and reminds. It does not interpret readings, recommend doses or provide emergency features: no SOS, no emergency card, no danger-sign list.
+- **Built for a free Apple ID.** Everything the iPhone app needs is available to a free Apple ID: HealthKit, background audio, App Groups, Keychain and Data Protection. Three things are not: Family Controls, push notifications and iCloud. So:
+  - Limits on other apps are Android-only.
+  - There is no iCloud sync.
+  - The app warns before its 7-day build expires.
+- **Backup is the safety net.** No cloud means a lost or wiped phone loses data. The password-protected backup file is how data survives that, and how it moves to a new phone.
 - **No multilingual work** for now. Strings still go through Flutter's localisation system so a language can be added later without a rewrite.
 
 ## 2. Product principles
 
 1. **Calm by default.** An app that asks her to use the phone less must itself be low-screen: audio-first sessions, few notifications, get in and get out.
-2. **Track, don't diagnose.** The app records and reminds. Warning symptoms always route to "call your doctor" or emergency help.
+2. **Track, don't diagnose.** The app records and reminds; medical decisions stay with her doctor.
 3. **Private by design.** No account, data stays encrypted on the phone, no ads, no analytics.
 4. **No guilt.** Gentle progress, no punishing streaks; every pregnancy day is different.
 5. **Inclusive.** Garbhasanskar is optional; runs well on low-end Android phones.
@@ -49,23 +57,24 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | Module | What it does | Phase |
 |---|---|---|
 | **Onboarding & pregnancy engine** | Due date from last period (with cycle length), conception date, IVF transfer or scan. Shows weeks + days, the month ("Month 6") and the trimester. Twins flag, high-risk flag ★, "doctor cleared me for exercise" ★ | MVP |
-| **Today (home)** | Week ring, baby size (Indian fruit and vegetable comparisons), today's plan (supplements, session, walk), next visit, Screen Rest status, SOS | MVP |
+| **Today (home)** | Week ring, baby size (Indian fruit and vegetable comparisons), today's plan (supplements, session, walk), next visit, Screen Rest status | MVP |
 | **Journey (trimester-wise)** | Trimester tabs, week picker, baby and body notes per week, weekly checklist, trimester progress from her own logs | MVP |
 | **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books and audio, reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP |
-| **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps | MVP → P2 |
+| **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps (**Android only**) | MVP → P2 |
 | **Supplements** | Schedule as prescribed, reminders, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
 | **Vaccines & tests** ★ | Editable India template (Td doses, GTT, scans, blood tests) with dates and status | MVP |
 | **Doctor visits** | Appointments, reminders, "questions to ask" collected over weeks ★, what to bring, notes, prescription photo, next visit | MVP |
 | **Walking** | Walk timer, steps from Apple Health / Health Connect, daily goal, history | MVP |
 | **Exercise** | Trimester-filtered guided routines with timers, locked until "doctor cleared me" is on | MVP |
 | **Vitals** ★ | Weight and blood pressure logs (blood sugar in P2). Logged values only — no interpretation | MVP / P2 |
-| **Third-trimester tools** ★ | Kick counter (pattern-based), contraction timer; hospital bag checklist and birth plan in P2 | MVP / P2 |
-| **Safety** ★ | SOS (108, doctor, family), share live location, emergency card, WHO danger-sign list | MVP |
+| **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor); hospital bag checklist and birth plan in P2 | MVP / P2 |
+| **Backup & restore** ★ | Password-protected `.navmaas` backup file, optional books and audio, weekly reminder, restore with password | MVP |
+| **iPhone build-expiry reminder** ★ | Reads the 7-day signing expiry; shows it in Me; reminds the day before to back up and re-run from Xcode | MVP |
 | **Pregnancy loss handling** ★ | Pause or end tracking; immediately stops baby content and reminders | MVP |
 | **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 |
 | **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 |
 | **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 |
-| **Widgets** ★ | Home-screen widget (week + next reminder) | P2 |
+| **Widgets** ★ | Home-screen widget (week + next reminder); App Groups work with a free Apple ID | P2 |
 | **Postpartum & baby mode** ★ | Recovery, feeding, sleep, baby vaccine schedule | P3 |
 | **Family sharing** ★ | Needs a backend; only if wanted later | P3 (optional) |
 
@@ -73,31 +82,32 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 
 The prototype covers 16 screens, each in light and dark mode, with a clickable flow and the theme sheet: [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
 
-Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · SOS & emergency card · Me & settings.
+Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Backup & restore · Me & settings.
 
-## 5. Pushbacks still open
+## 5. Notes and constraints
 
-### 5.1 Keep one piece of safety content
-Even as a tracking aid, the app keeps a **fixed list of pregnancy danger signs** (WHO) on the SOS screen, a "baby moving less → call now" line on the kick counter, and stop-signs on exercise sessions. These are short, static, sourced and never personalised. Removing them would make the app less safe without making it any simpler.
+### 5.1 Free Apple ID limits
+These come from Apple's [supported capabilities table](https://developer.apple.com/help/account/reference/supported-capabilities-ios) and free-account signing rules.
 
-### 5.2 Screen Rest across other apps needs native work
-- **iOS:** needs the Family Controls capability. For personal installs, the development entitlement works without Apple's approval; distribution through TestFlight or the App Store would need it approved.
-- **Android:** needs "Usage access", which the user grants in Settings.
-- **Plan:** MVP Screen Rest works inside Navmaas only; limits on other apps come in P2 through platform channels (Swift extension and Kotlin).
+| Limit | Effect on Navmaas |
+|---|---|
+| Build stops opening 7 days after signing | In-app expiry banner plus a reminder the day before. Re-running from Xcode keeps all data |
+| Up to 3 sideloaded apps per device, 10 App IDs | Navmaas plus a P2 widget extension uses 2 App IDs |
+| No Family Controls | Limits on other apps are Android-only |
+| No push notifications, no iCloud | Not needed: reminders are local; backup is a file |
+| Deleting the app erases its data | Restore from the latest backup |
 
-### 5.3 Installing on iPhone for personal use
-A free Apple ID signs builds for only 7 days at a time. For a build that keeps working, enrol in the Apple Developer Program (paid, yearly). Android can install a signed APK directly.
+### 5.2 Screen Rest across other apps (P2)
+- **Android:** uses "Usage access", which the user grants in Settings.
+- **iOS:** not possible with a free Apple ID (Family Controls). In-app Screen Rest still works on both platforms.
 
-### 5.4 Data loss risk
-With no cloud account, a lost phone means lost data. The app offers an **encrypted backup file** that the user saves wherever they choose, such as Google Drive, iCloud Drive or WhatsApp to self, plus a weekly backup reminder.
+### 5.3 Kick counter and contraction timer
+These are logs to show the doctor. They show her usual pattern and averages; they never judge whether something is fine or urgent. The kick counter carries one plain line: "Fewer movements than usual? Follow your doctor's advice and contact them."
 
-### 5.5 Kick counting
-The counter shows her usual pattern and always says "reduced movement → call now, don't wait". It never says everything is fine.
-
-### 5.6 Notifications
+### 5.4 Notifications
 There's a daily notification limit (default 4), digest bundling and quiet hours. iOS allows only 64 pending local notifications, so the scheduler uses a rolling window (see [Architecture](ARCHITECTURE.md#7-reminder-scheduler)).
 
-### 5.7 Hard lines
+### 5.5 Hard lines
 - No sex prediction or sex-selection content (PCPNDT Act).
 - No outcome claims ("raises IQ").
 - No dose suggestions.
@@ -108,6 +118,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §13](ARCHITECTURE.md#13-delivery-milestones) |
-| **2** | Other-app Screen Rest, wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones) |
+| **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |
