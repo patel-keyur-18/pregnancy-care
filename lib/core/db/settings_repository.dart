@@ -14,6 +14,12 @@ abstract final class SettingKeys {
 
   /// Set once the app has offered reminders after the first supplement.
   static const remindersOffered = 'reminders_offered';
+
+  /// Reader opens in night colours after 9 pm (default on).
+  static const nightReading = 'night_reading';
+
+  /// Walk: daily step goal (default 6,000).
+  static const stepGoal = 'step_goal';
 }
 
 class SettingsRepository {
@@ -72,3 +78,19 @@ SettingsRepository settingsRepository(Ref ref) =>
 @riverpod
 Stream<String?> firstName(Ref ref) =>
     ref.watch(settingsRepositoryProvider).watch(SettingKeys.firstName);
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+@riverpod
+Stream<bool> nightReading(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.nightReading)
+    .map((v) => v != 'false');
+
+/// The daily step goal she set on the Walk screen.
+@riverpod
+Stream<int> stepGoal(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.stepGoal)
+    .map((v) => int.tryParse(v ?? '') ?? defaultStepGoal);
+
+const defaultStepGoal = 6000;

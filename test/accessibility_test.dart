@@ -1,19 +1,46 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/features/sessions/data/library_repository.dart';
 
 import 'helpers.dart';
 
 /// Small phone, so 2.0× text has the least room.
 const _small = Size(360, 640);
 
+/// Library files for the seeded screens (a book and an audio file).
+final Directory _library = Directory.systemTemp.createTempSync('navmaas_a11y');
+
 Future<void> _seed(AppDatabase db) async {
   await SettingsRepository(db).put(SettingKeys.firstName, 'Meera');
   await PregnancyRepository(db)
       .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
+  final library = LibraryRepository(db, directory: () async => _library);
+  await library.import(
+    'evening_stories.txt',
+    Stream.value(utf8.encode('# The little lamp\n\nIn a quiet village.')),
+  );
+  await library.import('om_chanting.mp3', Stream.value([0]));
+  // Routines unlocked, so the exercise screen is reachable.
+  final pregnancy = await db.select(db.pregnancies).getSingle();
+  await PregnancyRepository(db).setFlags(pregnancy.id, exerciseCleared: true);
+}
+
+/// Lets real file reads finish (they run outside fake time).
+Future<void> _settleIo(WidgetTester tester) async {
+  for (var i = 0; i < 5; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -24,15 +51,21 @@ Future<void> _tab(WidgetTester tester, String label) async {
 }
 
 /// Scrolls [text] into view (screens are long at 2.0×), then taps it.
-Future<void> _tapText(WidgetTester tester, String text) async {
+/// [last]: the text appears more than once; take the last.
+Future<void> _tapText(
+  WidgetTester tester,
+  String text, {
+  bool last = false,
+}) async {
+  final finder = last ? find.text(text).last : find.text(text);
   await tester.scrollUntilVisible(
-    find.text(text),
+    finder,
     200,
     scrollable: find.byType(Scrollable).last,
   );
-  await tester.ensureVisible(find.text(text));
+  await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
-  await tester.tap(find.text(text));
+  await tester.tap(finder);
   await tester.pumpAndSettle();
 }
 
@@ -119,6 +152,82 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pumpAndSettle();
     },
   ),
+  'reader': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'evening stories');
+      await _settleIo(t);
+    },
+  ),
+  'listen': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'om chanting', last: true); // library row
+      await _settleIo(t);
+    },
+  ),
+  'listen, screen off': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'om chanting', last: true); // library row
+      await _settleIo(t);
+      await _tapText(t, 'Screen off — keep listening');
+    },
+  ),
+  'walk': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Walk');
+    },
+  ),
+  'exercise': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Gentle flow');
+    },
+  ),
+  'slow breathing': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Slow breathing');
+    },
+  ),
+  'letters': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Talk to baby');
+    },
+  ),
+  'write a letter': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Talk to baby');
+      await t.tap(find.text('Write a letter'));
+      await t.pumpAndSettle();
+    },
+  ),
+  'add to library': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Add');
+    },
+  ),
+  'activity': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Activity');
+    },
+  ),
   'doctor': (
     true,
     (t) async {
@@ -145,6 +254,7 @@ void main() {
         await pumpApp(
           tester,
           seed: seeded ? _seed : null,
+          library: _library,
           textScale: scale,
           size: _small,
         );
@@ -165,6 +275,7 @@ void main() {
         await pumpApp(
           tester,
           seed: seeded ? _seed : null,
+          library: _library,
           platformBrightness: brightness,
         );
         await open(tester);

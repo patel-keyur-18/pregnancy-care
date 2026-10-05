@@ -141,22 +141,71 @@ class MeScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           section(
             l10n.appearance,
-            PillSegmented<ThemeMode>(
-              segments: [
-                (value: ThemeMode.light, label: l10n.themeLight, caption: null),
-                (value: ThemeMode.dark, label: l10n.themeDark, caption: null),
-                (
-                  value: ThemeMode.system,
-                  label: l10n.themeSystem,
-                  caption: null,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 14,
+              children: [
+                PillSegmented<ThemeMode>(
+                  segments: [
+                    (
+                      value: ThemeMode.light,
+                      label: l10n.themeLight,
+                      caption: null,
+                    ),
+                    (
+                      value: ThemeMode.dark,
+                      label: l10n.themeDark,
+                      caption: null,
+                    ),
+                    (
+                      value: ThemeMode.system,
+                      label: l10n.themeSystem,
+                      caption: null,
+                    ),
+                  ],
+                  selected: mode,
+                  onChanged: (m) => setThemeMode(ref, m),
+                ),
+                MergeSemantics(
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.nightReading,
+                              style: text.bodyLarge!.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              l10n.nightReadingSub,
+                              style: text.bodySmall!.copyWith(
+                                color: scheme.outline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value: ref.watch(nightReadingProvider).value ?? true,
+                        onChanged: (v) => ref
+                            .read(settingsRepositoryProvider)
+                            .put(SettingKeys.nightReading, '$v'),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-              selected: mode,
-              onChanged: (m) => setThemeMode(ref, m),
             ),
           ),
           const SizedBox(height: 18),
           section(l10n.calmNotifications, const _CalmNotifications()),
+          const SizedBox(height: 18),
+          section(l10n.exerciseSection, const _ExerciseSwitches()),
           const SizedBox(height: 18),
           Text(
             l10n.disclaimer,
@@ -377,6 +426,74 @@ class _CalmNotifications extends ConsumerWidget {
               ],
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// "Doctor cleared me for exercise" and "High-risk pregnancy" (prototype Me
+/// → Exercise). Walking is always open (Plan decision 27).
+class _ExerciseSwitches extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final pregnancy = ref.watch(activePregnancyProvider).value;
+    if (pregnancy == null) return const SizedBox.shrink();
+    final repo = ref.read(pregnancyRepositoryProvider);
+
+    Widget row(
+      String title,
+      String sub, {
+      required bool value,
+      required ValueChanged<bool> set,
+    }) => MergeSemantics(
+      child: Row(
+        spacing: 12,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                Text(
+                  sub,
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    color: theme.colorScheme.outline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(value: value, onChanged: set),
+        ],
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 14,
+      children: [
+        row(
+          l10n.clearedSwitch,
+          l10n.clearedSub,
+          value: pregnancy.exerciseCleared,
+          set: (v) => repo.setFlags(pregnancy.id, exerciseCleared: v),
+        ),
+        row(
+          l10n.highRiskSwitch,
+          l10n.highRiskSub,
+          value: pregnancy.highRisk,
+          set: (v) => repo.setFlags(pregnancy.id, highRisk: v),
         ),
       ],
     );

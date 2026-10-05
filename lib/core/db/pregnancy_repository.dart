@@ -61,6 +61,18 @@ class PregnancyRepository {
       }
     });
   }
+
+  /// Me → Exercise: "Doctor cleared me for exercise" and "High-risk
+  /// pregnancy". Exercise routines stay locked until cleared; high risk
+  /// hides the routines marked for extra caution. Walking is always open.
+  Future<void> setFlags(String id, {bool? exerciseCleared, bool? highRisk}) =>
+      (_db.update(_db.pregnancies)..where((t) => t.id.equals(id))).write(
+        PregnanciesCompanion(
+          exerciseCleared: Value.absentIfNull(exerciseCleared),
+          highRisk: Value.absentIfNull(highRisk),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 }
 
 @riverpod

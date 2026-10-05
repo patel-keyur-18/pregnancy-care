@@ -83,14 +83,11 @@ void main() {
 
   testWidgets("Today's plan lists and ticks today's doses", (tester) async {
     await pumpApp(tester, seed: _seed);
-    expect(
-      find.text('Add the supplements your doctor prescribed to see them here.'),
-      findsOneWidget,
-    );
+    expect(find.text('0 of 1 done'), findsOneWidget, reason: 'the walk');
     await _addIron(tester);
     await _tab(tester, 'Today');
     expect(find.text("Today's gentle plan"), findsOneWidget);
-    expect(find.text('0 of 1 done'), findsOneWidget);
+    expect(find.text('0 of 2 done'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.bySemanticsLabel('Mark done: Iron + folic acid'),
       200,
@@ -98,7 +95,7 @@ void main() {
     );
     await tester.tap(find.bySemanticsLabel('Mark done: Iron + folic acid'));
     await tester.pumpAndSettle();
-    expect(find.text('1 of 1 done'), findsOneWidget);
+    expect(find.text('1 of 2 done'), findsOneWidget);
   });
 
   testWidgets('See all: this week, edit and remove', (tester) async {
@@ -132,6 +129,10 @@ void main() {
   testWidgets('Me: reminders need permission; limit and quiet hours persist', (
     tester,
   ) async {
+    final reminders = find.descendant(
+      of: find.ancestor(of: find.text('Reminders'), matching: find.byType(Row)),
+      matching: find.byType(Switch),
+    );
     final scheduler = FakeScheduler()..granted = false;
     final db = await pumpApp(tester, seed: _seed, scheduler: scheduler);
     await _tab(tester, 'Me');
@@ -140,18 +141,18 @@ void main() {
       200,
       scrollable: _list,
     );
-    await tester.ensureVisible(find.byType(Switch));
+    await tester.ensureVisible(reminders);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(reminders);
     await tester.pumpAndSettle();
     expect(find.byType(SnackBar), findsOneWidget, reason: 'permission denied');
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isFalse);
+    expect(tester.widget<Switch>(reminders).value, isFalse);
 
     scheduler.granted = true;
-    await tester.tap(find.byType(Switch));
+    await tester.tap(reminders);
     await tester.pumpAndSettle();
-    expect(tester.widget<Switch>(find.byType(Switch)).value, isTrue);
+    expect(tester.widget<Switch>(reminders).value, isTrue);
 
     await tester.ensureVisible(find.byTooltip('More notifications'));
     await tester.tap(find.byTooltip('More notifications'));

@@ -29,6 +29,9 @@ part 'app_database.g.dart';
     VisitQuestions,
     Attachments,
     VitalReadings,
+    LibraryItems,
+    Sessions,
+    Letters,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -48,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -69,6 +72,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.visitQuestion);
         await m.createTable(schema.attachment);
         await m.createTable(schema.vitalReading);
+      },
+      // v5 (M4a): library, sessions and letters.
+      from4To5: (m, schema) async {
+        await m.createTable(schema.libraryItem);
+        await m.createTable(schema.session);
+        await m.createTable(schema.letter);
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

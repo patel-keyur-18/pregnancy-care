@@ -68,13 +68,61 @@ enum NavmaasIcon {
     'M4 8h3l1.8-2.5h6.4L17 8h3v11.5H4z',
     'M15.5 13.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 1 1 7 0z',
   ]),
+  book([
+    'M3 5.5h5.5A3.5 3.5 0 0 1 12 9v11.5a2.5 2.5 0 0 0-2.5-2.5H3z',
+    'M21 5.5h-5.5A3.5 3.5 0 0 0 12 9v11.5a2.5 2.5 0 0 1 2.5-2.5H21z',
+  ]),
+  headphones([
+    'M4 15v-3a8 8 0 0 1 16 0v3',
+    'M4.5 14H6a1.5 1.5 0 0 1 1.5 1.5v4A1.5 1.5 0 0 1 6 21H4.5A1.5 1.5 0 0 1 3 19.5v-4A1.5 1.5 0 0 1 4.5 14z',
+    'M18 14h1.5a1.5 1.5 0 0 1 1.5 1.5v4a1.5 1.5 0 0 1-1.5 1.5H18a1.5 1.5 0 0 1-1.5-1.5v-4A1.5 1.5 0 0 1 18 14z',
+  ]),
+  palette([
+    'M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-1.2-.9-1.5-.9-2.6 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z',
+    'M8.5 11a1 1 0 1 1-2 0 1 1 0 1 1 2 0z',
+    'M11.5 7a1 1 0 1 1-2 0 1 1 0 1 1 2 0z',
+    'M16 7.5a1 1 0 1 1-2 0 1 1 0 1 1 2 0z',
+  ]),
+  music([
+    'M9 18V5.5l11-2V16',
+    'M9 18a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z',
+    'M20 16a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z',
+  ]),
+  eyeOff([
+    'M3 3l18 18',
+    'M10.6 5.1A9.6 9.6 0 0 1 12 5c6 0 9.5 7 9.5 7a16 16 0 0 1-2.9 3.7M6.3 6.9C3.9 8.6 2.5 12 2.5 12s3.5 7 9.5 7c1.6 0 3-.4 4.3-1',
+    'M9.9 9.9a3 3 0 0 0 4.2 4.2',
+  ]),
+  play(['M8 5.5v13l11-6.5z'], fill: true),
+  pause(['M8.5 5v14M15.5 5v14']),
+  rewind(['M4 12a8 8 0 1 0 2.4-5.7', 'M4 4v4h4']),
+  forward(['M20 12a8 8 0 1 1-2.4-5.7', 'M20 4v4h-4']),
+  walk([
+    'M8.5 3.5c1.7 0 2.7 2 2.7 4.5S10 12 8.5 12 5.8 10.5 5.8 8s1-4.5 2.7-4.5z',
+    'M6.2 15h4.6',
+    'M15.5 8.5c1.7 0 2.7 2 2.7 4.5s-1.2 4-2.7 4-2.7-1.5-2.7-4 1-4.5 2.7-4.5z',
+    'M13.2 20h4.6',
+  ]),
+  pelvic([
+    'M14.5 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 1 1 5 0z',
+    'M7 7a7 7 0 0 0 0 10M17 7a7 7 0 0 1 0 10',
+  ]),
+  breath([
+    'M3 8.5h10.5a2.5 2.5 0 1 0-2.5-2.5',
+    'M3 12.5h15a3 3 0 1 1-3 3',
+    'M3 16.5h6',
+  ]),
+  notice(['M12 3.5 2.5 20h19z', 'M12 10v4.5M12 17.5v.01']),
   // Same line style as the prototype's icons (not drawn there).
   close(['M6 6l12 12M18 6 6 18']),
   scan(['M4 5h16v12H4z', 'M12 17v3M8 20h8', 'M7 12c1.5-3 3.5-3 5 0s3.5 3 5 0']);
 
-  new(this.svg);
+  new(this.svg, {this.fill = false});
 
   final List<String> svg;
+
+  /// Filled shape instead of a line (the prototype's play triangle).
+  final bool fill;
 
   static final _cache = <NavmaasIcon, ui.Path>{};
 
@@ -159,7 +207,7 @@ class _IconPainter extends CustomPainter {
     canvas.scale(size.width / 24);
     final paint = Paint()
       ..color = color
-      ..style = PaintingStyle.stroke
+      ..style = icon.fill ? PaintingStyle.fill : PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;

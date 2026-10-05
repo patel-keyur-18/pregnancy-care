@@ -28,9 +28,8 @@ android {
 
     defaultConfig {
         applicationId = "com.patelkeyur.navmaas"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Android 8: Health Connect (walk steps) needs it.
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
@@ -47,6 +46,30 @@ android {
                 keyPassword = keystoreProperties.getProperty("keyPassword")
                 storeFile = file(keystoreProperties.getProperty("storeFile"))
                 storePassword = keystoreProperties.getProperty("storePassword")
+            }
+        }
+    }
+
+    // `flutter build apk --target-platform android-arm,android-arm64` (the
+    // phone build, ~64 MB) still gets one plugin's x86_64 library; drop
+    // every ABI that wasn't asked for, so the APK never claims an ABI it
+    // can't run. The universal build (no --target-platform) keeps them all.
+    val requestedAbis = (project.findProperty("target-platform") as String?)
+        ?.split(",")
+        ?.map {
+            mapOf(
+                "android-arm" to "armeabi-v7a",
+                "android-arm64" to "arm64-v8a",
+                "android-x64" to "x86_64",
+                "android-x86" to "x86",
+            )[it.trim()]
+        }
+    if (requestedAbis != null) {
+        packaging {
+            jniLibs {
+                for (abi in listOf("armeabi-v7a", "arm64-v8a", "x86_64", "x86")) {
+                    if (abi !in requestedAbis) excludes += "lib/$abi/**"
+                }
             }
         }
     }

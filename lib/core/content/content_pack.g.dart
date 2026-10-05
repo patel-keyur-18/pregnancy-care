@@ -92,3 +92,81 @@ final class CareTemplateProvider
 }
 
 String _$careTemplateHash() => r'683d498e975d8a54505c17ad7ead2c83176aff55';
+
+@ProviderFor(activities)
+final activitiesProvider = ActivitiesProvider._();
+
+final class ActivitiesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  ActivitiesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'activitiesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$activitiesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    return activities(ref);
+  }
+}
+
+String _$activitiesHash() => r'a37f517645efff8158ae1cb492a68bff6da302e4';
+
+@ProviderFor(routines)
+final routinesProvider = RoutinesProvider._();
+
+final class RoutinesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Routine>>,
+          List<Routine>,
+          FutureOr<List<Routine>>
+        >
+    with $FutureModifier<List<Routine>>, $FutureProvider<List<Routine>> {
+  RoutinesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'routinesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$routinesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Routine>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Routine>> create(Ref ref) {
+    return routines(ref);
+  }
+}
+
+String _$routinesHash() => r'3a8af206f9a7eeb0f66b0c2d778b4b2e9e55a3e4';

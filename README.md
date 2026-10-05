@@ -12,7 +12,7 @@ It combines:
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
 
-> **Status:** M1, M2 and M3 are built (2026-10-05): onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, and Me — all on an encrypted on-device database. Next is M4 (Sessions).
+> **Status:** M1–M4 are built (2026-10-05): onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, Sessions with the Garbhasanskar path, your own books (PDF, text) and audio with a calm reader and screen-off listening, letters to baby, walks with steps from Apple Health / Health Connect, gentle exercise routines once the doctor has cleared you, slow breathing, and Me — all on an encrypted on-device database. Next is M5 (third trimester and backup).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >

@@ -89,3 +89,79 @@ final class FirstNameProvider
 }
 
 String _$firstNameHash() => r'ddb13adbb9ff01a86abd472055c0e7745f59ad81';
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+
+@ProviderFor(nightReading)
+final nightReadingProvider = NightReadingProvider._();
+
+/// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+
+final class NightReadingProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// "Night reading after 9 pm" (Me → Appearance); on unless switched off.
+  NightReadingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'nightReadingProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$nightReadingHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return nightReading(ref);
+  }
+}
+
+String _$nightReadingHash() => r'e2fb78068998232c10315df9286526204102de4a';
+
+/// The daily step goal she set on the Walk screen.
+
+@ProviderFor(stepGoal)
+final stepGoalProvider = StepGoalProvider._();
+
+/// The daily step goal she set on the Walk screen.
+
+final class StepGoalProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  /// The daily step goal she set on the Walk screen.
+  StepGoalProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'stepGoalProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$stepGoalHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    return stepGoal(ref);
+  }
+}
+
+String _$stepGoalHash() => r'301ea04d8b2ba445c22737247c10053feccbd2b6';

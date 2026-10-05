@@ -24,10 +24,11 @@ flutter analyze                       # must report zero issues
 flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
-dart run tool/content_md.dart         # after editing assets/content/*.json (review copies)
+dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
 flutter test integration_test -d <phone>     # on-device checks (allow notifications first)
-flutter build apk --release           # universal APK (~71 MB; limit 100 MB); --split-per-abi ~25 MB per phone
+flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~65 MB, Arm only; what CI builds; limit 100 MB)
+flutter build apk --release           # universal APK (~101 MB, adds x86_64; emulators only); --split-per-abi ~30 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
 
@@ -37,18 +38,19 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/core/theme/`: `AppTheme` (exact hex values), the `NavmaasColors` extension and `NavmaasIcon` (the prototype's icons as SVG path data). Never hard-code colours in widgets, and never use Material `Icons`.
 - `lib/core/widgets/`: shared widgets (`PillSegmented`, icon motion). New motion is specified in DESIGN_SYSTEM §5 first.
 - `lib/core/reminders/`: the pure planner, the OS scheduler adapter (`ReminderScheduler`, faked in tests by `FakeScheduler`) and calm-notification settings. **Every notification goes through `ReminderSync` in `lib/app/reminders.dart`**, never straight to the plugin.
-- `lib/core/content/`: content-pack loaders. `assets/content/weeks.json` (week-by-week text) and `care_template_in.json` (India tests, scans, vaccines) are the sources; `docs/content/*.md` are generated review copies.
+- `lib/core/content/`: content-pack loaders. `assets/content/weeks.json` (week-by-week text), `care_template_in.json` (India tests, scans, vaccines) `activities.json` (daily calm activities) and `routines.json` (exercise routines) are the sources; `docs/content/*.md` are generated review copies.
+- `lib/core/platform/`: platform adapters. `audio.dart`: `AudioPlayback` (just_audio behind audio_service; faked in tests by `FakeAudio`), the playback stream and the sleep timer. `health.dart`: `StepSource` (read-only steps from HealthKit / Health Connect; faked by `FakeSteps`).
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
 - `lib/core/utils/`: date-only maths (UTC-midnight dates), `todayProvider` / `nowProvider` (the clock)
-- `lib/features/<feature>/`: screens and widgets per feature
+- `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing; the listening log turns playback into sessions; `SessionClock` is the shared once-a-second timer
 - `lib/l10n/app_en.arb`: every user-facing string. No literals in widgets.
-- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 at 9:00); `test/goldens/` holds the golden screenshots
+- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 at 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
 
 ## Hard lines
 
 - **No network calls** of any kind: no analytics, crash reporting, ads or remote fonts. Release Android builds have no `INTERNET` permission.
-- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction.
+- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction. No symptom or danger-sign lists: Walk and Exercise show one general line (Plan decision 26).
 - **No copyrighted text or audio** in the repo. Only original or public-domain content.
 - **Red (`error`) only for destructive actions and errors.** Notices use amber.
 - **Accessibility:**
@@ -60,7 +62,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
   `test/accessibility_test.dart` enforces this for every screen; add new screens to it.
 - Never commit keystores, `key.properties`, provisioning profiles, `.navmaas` backups or personal content.
 
-## Gotchas learned in M1
+## Gotchas learned so far
 
 - **Dart 3.13 style:** constructors are declared as `const new(...)` / `factory name(...)` (lint `unnecessary_type_name_in_constructor`). Dot shorthands (`.lmp`) are fine.
 - **Encryption:** `sqlite3` with `hooks: user_defines: sqlite3: source: sqlcipher` in `pubspec.yaml`. This replaces the end-of-life `sqlcipher_flutter_libs`. `encryptedExecutor` refuses to open without SQLCipher.
@@ -83,9 +85,15 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Encrypted attachments:** `AttachmentStore` only; never write photo bytes to disk unencrypted, and decrypt only in memory.
 - **Drift transactions:** read with `get…()` inside a transaction, never `watch().first` (the stream waits for the transaction).
 - **Reminder actions** run in a background isolate: no app channels there (`navmaas/files` is skipped), and the app refreshes drift streams on resume.
-- **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`.
+- **Content hard lines:** `test/core/content/content_pack_test.dart` rejects dose, sex-prediction, outcome-claim and emergency words in `weeks.json`, the care template, `activities.json` and `routines.json` (which also may not say "on your back").
 - **Schema changes:**
   1. Bump `schemaVersion`.
   2. Write the migration.
   3. Run `make-migrations`.
   4. `test/drift/navmaas/migration_test.dart` then checks every version pair.
+- **Real file I/O in widget tests** (the reader, library import) runs outside fake time: loop `tester.runAsync(short delay)` + `pump()` a few times (`_settleIo` in the Sessions and accessibility tests).
+- **`ref` in `dispose()`** throws. Read repositories and ids in `initState()` when `dispose()` must save something (the reader logs its session there).
+- **Scroll position in `dispose()`:** child scroll views are already detached. Keep the position in a field from a scroll listener.
+- **APK ABIs:** `build.gradle.kts` drops every ABI not passed in `--target-platform`, so the Arm-only APK carries no stray x86_64 library.
+- **Repeating animations** never let `pumpAndSettle` finish. Slow breathing animates only after Start, so tests and the accessibility pass see it still; drive a running session with `pump(duration)`.
+- **Health access** is asked on the first walk only; Sessions and Today read steps without asking (null until allowed).

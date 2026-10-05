@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "routines": [
+    {
+      "key": "gentle-flow-1",
+      "title": "Gentle flow",
+      "trimesters": [
+        1
+      ],
+      "avoidIfHighRisk": true,
+      "moves": [
+        {
+          "name": "Seated breathing",
+          "how": "Sit tall on a cushion or chair. Breathe in through your nose, then out slowly through your mouth.",
+          "sec": 60
+        },
+        {
+          "name": "Neck and shoulder rolls",
+          "how": "Drop one ear towards your shoulder, then the other. Roll your shoulders slowly back a few times.",
+          "sec": 60
+        },
+        {
+          "name": "Cat–cow stretch",
+          "how": "On hands and knees. Breathe in and let your back dip gently; breathe out and round it up.",
+          "sec": 90
+        },
+        {
+          "name": "Seated side stretch",
+          "how": "Sit cross-legged. Raise one arm and lean gently to the other side. Switch sides halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Hip circles",
+          "how": "Stand with your feet apart and hands on your hips. Circle your hips slowly one way, then the other.",
+          "sec": 60
+        },
+        {
+          "name": "Wall push-ups",
+          "how": "Stand an arm's length from a wall with your hands on it. Bend your elbows to lean in, then push back.",
+          "sec": 90
+        },
+        {
+          "name": "Ankle circles",
+          "how": "Sitting, lift one foot a little and circle the ankle slowly. Switch feet halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Resting breath",
+          "how": "Sit, or lie on your side with a pillow. Let your breath slow down and your shoulders soften.",
+          "sec": 60
+        }
+      ]
+    },
+    {
+      "key": "gentle-flow-2",
+      "title": "Gentle flow",
+      "trimesters": [
+        2
+      ],
+      "avoidIfHighRisk": true,
+      "moves": [
+        {
+          "name": "Seated breathing",
+          "how": "Sit tall on a cushion or chair. Breathe in through your nose, then out slowly through your mouth.",
+          "sec": 60
+        },
+        {
+          "name": "Cat–cow stretch",
+          "how": "On hands and knees. Breathe in and let your back dip gently; breathe out and round it up.",
+          "sec": 90
+        },
+        {
+          "name": "Side-lying leg lifts",
+          "how": "Lie on your side with your head supported. Lift the top leg slowly, then lower it. Switch sides halfway.",
+          "sec": 90
+        },
+        {
+          "name": "Butterfly stretch",
+          "how": "Sit with the soles of your feet together. Let your knees fall softly, without pushing.",
+          "sec": 60
+        },
+        {
+          "name": "Wall push-ups",
+          "how": "Stand an arm's length from a wall with your hands on it. Bend your elbows to lean in, then push back.",
+          "sec": 90
+        },
+        {
+          "name": "Supported squat",
+          "how": "Hold the back of a chair or a counter. Bend your knees a little, as if to sit, then stand tall.",
+          "sec": 60
+        },
+        {
+          "name": "Resting breath",
+          "how": "Sit, or lie on your side with a pillow. Let your breath slow down and your shoulders soften.",
+          "sec": 60
+        }
+      ]
+    },
+    {
+      "key": "gentle-flow-3",
+      "title": "Gentle flow",
+      "trimesters": [
+        3
+      ],
+      "avoidIfHighRisk": true,
+      "moves": [
+        {
+          "name": "Seated breathing",
+          "how": "Sit tall on a cushion or chair. Breathe in through your nose, then out slowly through your mouth.",
+          "sec": 60
+        },
+        {
+          "name": "Shoulder rolls",
+          "how": "Sitting, roll your shoulders slowly back, then forward. Let your arms hang loose.",
+          "sec": 60
+        },
+        {
+          "name": "Cat–cow stretch",
+          "how": "On hands and knees. Breathe in and let your back dip gently; breathe out and round it up.",
+          "sec": 90
+        },
+        {
+          "name": "Butterfly stretch",
+          "how": "Sit with the soles of your feet together. Let your knees fall softly, without pushing.",
+          "sec": 60
+        },
+        {
+          "name": "Side-lying leg lifts",
+          "how": "Lie on your side with your head and bump supported. Lift the top leg a little, then lower it. Switch sides halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Ankle circles",
+          "how": "Sitting, lift one foot a little and circle the ankle slowly. Switch feet halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Resting on your side",
+          "how": "Lie on your side with pillows where you need them. Let your breath slow down.",
+          "sec": 90
+        }
+      ]
+    },
+    {
+      "key": "pelvic-floor",
+      "title": "Pelvic floor",
+      "trimesters": [
+        1,
+        2,
+        3
+      ],
+      "avoidIfHighRisk": false,
+      "moves": [
+        {
+          "name": "Find the muscles",
+          "how": "Sit comfortably. Gently squeeze the muscles you'd use to hold in wind, then let go. Keep breathing.",
+          "sec": 60
+        },
+        {
+          "name": "Ten slow holds",
+          "how": "Squeeze and hold for a slow count of five, then relax for five. Ten times.",
+          "sec": 200
+        },
+        {
+          "name": "Quick squeezes",
+          "how": "Squeeze and let go quickly, ten times, then rest.",
+          "sec": 40
+        }
+      ]
+    },
+    {
+      "key": "seated-stretches",
+      "title": "Seated stretches",
+      "trimesters": [
+        1,
+        2,
+        3
+      ],
+      "avoidIfHighRisk": false,
+      "moves": [
+        {
+          "name": "Seated breathing",
+          "how": "Sit tall on a cushion or chair. Breathe in through your nose, then out slowly through your mouth.",
+          "sec": 60
+        },
+        {
+          "name": "Neck stretch",
+          "how": "Drop one ear towards your shoulder and hold for a few breaths. Switch sides halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Seated side stretch",
+          "how": "Sit tall. Raise one arm and lean gently to the other side. Switch sides halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Seated twist",
+          "how": "Sit tall and turn gently from your upper back, not your tummy, to one side, then the other.",
+          "sec": 60
+        },
+        {
+          "name": "Ankle circles",
+          "how": "Sitting, lift one foot a little and circle the ankle slowly. Switch feet halfway.",
+          "sec": 60
+        },
+        {
+          "name": "Resting breath",
+          "how": "Sit, or lie on your side with a pillow. Let your breath slow down and your shoulders soften.",
+          "sec": 60
+        }
+      ]
+    }
+  ]
+}

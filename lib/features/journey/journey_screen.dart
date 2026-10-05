@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
@@ -15,6 +16,7 @@ import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:navmaas/features/journey/data/checklist_repository.dart';
+import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Journey (prototype "Journey"): trimester tabs, week picker, the week's
@@ -120,10 +122,11 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
           _TrimesterProgress(
             trimester: snapshot.trimester,
             week: snapshot.weeks,
-            done: ticked.where((key) {
-              final w = int.tryParse(key.substring(1, 3));
-              return w != null && trimesterOfWeek(w) == snapshot.trimester;
-            }).length,
+            sessions: _sessionCounts(
+              ref,
+              start: pregnancy.startDate,
+              trimester: snapshot.trimester,
+            ),
             supplementsPercent: _supplementsPercent(
               ref,
               start: pregnancy.startDate,
@@ -141,6 +144,30 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
   }
 }
 
+/// The local day the current trimester began.
+DateTime _trimesterStart(DateTime start, int trimester) {
+  final first = start.add(
+    Duration(days: const {1: 0, 2: 98, 3: 196}[trimester]!),
+  );
+  return DateTime(first.year, first.month, first.day);
+}
+
+/// Reading sessions and walks logged since the current trimester began.
+({int reading, int walks}) _sessionCounts(
+  WidgetRef ref, {
+  required DateTime start,
+  required int trimester,
+}) {
+  final to = localDay(ref.watch(todayProvider)).add(const Duration(days: 1));
+  final sessions =
+      ref
+          .watch(sessionsBetweenProvider(_trimesterStart(start, trimester), to))
+          .value ??
+      const [];
+  int count(SessionType type) => sessions.where((s) => s.type == type).length;
+  return (reading: count(SessionType.reading), walks: count(SessionType.walk));
+}
+
 /// Percentage of supplement doses taken from the start of the current
 /// trimester to today, or null when none were due.
 int? _supplementsPercent(
@@ -149,10 +176,7 @@ int? _supplementsPercent(
   required int trimester,
 }) {
   final today = localDay(ref.watch(todayProvider));
-  final first = start.add(
-    Duration(days: const {1: 0, 2: 98, 3: 196}[trimester]!),
-  );
-  final from = DateTime(first.year, first.month, first.day);
+  final from = _trimesterStart(start, trimester);
   if (from.isAfter(today)) return null;
   final to = today.add(const Duration(days: 1));
   final plans = ref.watch(supplementPlansProvider).value ?? const [];
@@ -552,13 +576,13 @@ class _TrimesterProgress extends StatelessWidget {
   const new({
     required this.trimester,
     required this.week,
-    required this.done,
+    required this.sessions,
     this.supplementsPercent,
   });
 
   final int trimester;
   final int week;
-  final int done;
+  final ({int reading, int walks}) sessions;
 
   /// Share of supplement doses taken so far this trimester; null if none.
   final int? supplementsPercent;
@@ -619,7 +643,6 @@ class _TrimesterProgress extends StatelessWidget {
                 ),
               ),
             ),
-            // Reading and walk tiles join these in M4.
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -627,8 +650,14 @@ class _TrimesterProgress extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _StatTile(
-                      value: '$done',
-                      label: l10n.checklistDone(done),
+                      value: '${sessions.reading}',
+                      label: l10n.readingSessions(sessions.reading),
+                    ),
+                  ),
+                  Expanded(
+                    child: _StatTile(
+                      value: '${sessions.walks}',
+                      label: l10n.walksLogged(sessions.walks),
                     ),
                   ),
                   if (supplementsPercent case final pct?)
@@ -640,7 +669,6 @@ class _TrimesterProgress extends StatelessWidget {
                     )
                   else
                     const Spacer(),
-                  const Spacer(),
                 ],
               ),
             ),
