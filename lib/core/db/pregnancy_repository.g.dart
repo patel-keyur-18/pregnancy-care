@@ -57,8 +57,12 @@ final class PregnancyRepositoryProvider
 String _$pregnancyRepositoryHash() =>
     r'053072432f4ed820fce0c4dc994813cbb5bfd2ce';
 
+/// Kept alive: the router's onboarding redirect depends on it.
+
 @ProviderFor(activePregnancy)
 final activePregnancyProvider = ActivePregnancyProvider._();
+
+/// Kept alive: the router's onboarding redirect depends on it.
 
 final class ActivePregnancyProvider
     extends
@@ -68,13 +72,14 @@ final class ActivePregnancyProvider
           Stream<Pregnancy?>
         >
     with $FutureModifier<Pregnancy?>, $StreamProvider<Pregnancy?> {
+  /// Kept alive: the router's onboarding redirect depends on it.
   ActivePregnancyProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'activePregnancyProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -93,4 +98,4 @@ final class ActivePregnancyProvider
   }
 }
 
-String _$activePregnancyHash() => r'eac283cfb489d7edfc0f8cf9ff897110b26aeb13';
+String _$activePregnancyHash() => r'8c3eefc20aee8b3c43e34d30da1bb89d3e86f23f';

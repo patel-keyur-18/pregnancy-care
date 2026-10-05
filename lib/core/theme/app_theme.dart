@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 
@@ -94,6 +95,14 @@ abstract final class AppTheme {
       fontFamily: 'Nunito',
       textTheme: text,
       materialTapTargetSize: MaterialTapTargetSize.padded,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: _ReduceMotion(
+            FadeForwardsPageTransitionsBuilder(),
+          ),
+          TargetPlatform.iOS: _ReduceMotion(CupertinoPageTransitionsBuilder()),
+        },
+      ),
       extensions: [brand],
       appBarTheme: AppBarTheme(
         backgroundColor: background,
@@ -140,12 +149,12 @@ abstract final class AppTheme {
           minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
           backgroundColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected)
-                ? scheme.primaryContainer
+                ? scheme.surface
                 : scheme.surfaceContainerHighest,
           ),
           foregroundColor: WidgetStateProperty.resolveWith(
             (s) => s.contains(WidgetState.selected)
-                ? scheme.onPrimaryContainer
+                ? scheme.onSurface
                 : scheme.onSurfaceVariant,
           ),
           side: WidgetStatePropertyAll(
@@ -234,4 +243,28 @@ abstract final class AppTheme {
     height: line / size,
     fontWeight: FontWeight.values[weight ~/ 100 - 1],
   );
+}
+
+/// Platform page transitions, or none when the OS asks to reduce motion.
+class _ReduceMotion extends PageTransitionsBuilder {
+  const new(this._inner);
+
+  final PageTransitionsBuilder _inner;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) => MediaQuery.disableAnimationsOf(context)
+      ? child
+      : _inner.buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+        );
 }

@@ -38,3 +38,7 @@ class SettingsRepository {
 @riverpod
 SettingsRepository settingsRepository(Ref ref) =>
     SettingsRepository(ref.watch(appDatabaseProvider));
+
+@riverpod
+Stream<String?> firstName(Ref ref) =>
+    ref.watch(settingsRepositoryProvider).watch(SettingKeys.firstName);

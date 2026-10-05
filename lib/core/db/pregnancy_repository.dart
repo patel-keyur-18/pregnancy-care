@@ -67,6 +67,7 @@ class PregnancyRepository {
 PregnancyRepository pregnancyRepository(Ref ref) =>
     PregnancyRepository(ref.watch(appDatabaseProvider));
 
-@riverpod
+/// Kept alive: the router's onboarding redirect depends on it.
+@Riverpod(keepAlive: true)
 Stream<Pregnancy?> activePregnancy(Ref ref) =>
     ref.watch(pregnancyRepositoryProvider).watchActive();

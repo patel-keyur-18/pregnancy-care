@@ -56,3 +56,36 @@ final class SettingsRepositoryProvider
 
 String _$settingsRepositoryHash() =>
     r'3f50af93b926c10969b8df7db297dfaa78f9ebf0';
+
+@ProviderFor(firstName)
+final firstNameProvider = FirstNameProvider._();
+
+final class FirstNameProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
+    with $FutureModifier<String?>, $StreamProvider<String?> {
+  FirstNameProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'firstNameProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$firstNameHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<String?> create(Ref ref) {
+    return firstName(ref);
+  }
+}
+
+String _$firstNameHash() => r'ddb13adbb9ff01a86abd472055c0e7745f59ad81';
