@@ -1,0 +1,97 @@
+/* Navmaas design tokens - theme "Moonlit Sage".
+   Light = "Dawn" (warm cream + sage), Dark = "Moonlit" (warm plum-charcoal).
+   No pure white or pure black anywhere; every text pair meets WCAG AA (4.5:1). */
+
+.nm-light {
+  --nm-bg: #FAF6F0;
+  --nm-surface: #FFFDF9;
+  --nm-surface-2: #F3EDE4;
+  --nm-border: #E6DDD1;
+  --nm-text: #2F2A28;
+  --nm-text-2: #5E5650;
+  --nm-text-3: #6E655E;
+  --nm-primary: #4A6F5D;
+  --nm-on-primary: #FFFDF9;
+  --nm-primary-soft: #E2ECE5;
+  --nm-on-primary-soft: #2C4638;
+  --nm-rose: #A85A61;
+  --nm-rose-soft: #F6E5E2;
+  --nm-on-rose-soft: #743840;
+  --nm-lavender: #6E63A0;
+  --nm-lavender-soft: #ECE8F6;
+  --nm-on-lavender-soft: #433B6B;
+  --nm-amber: #9A6416;
+  --nm-amber-soft: #FAEEDB;
+  --nm-on-amber-soft: #65420E;
+  --nm-danger: #B3261E;
+  --nm-on-danger: #FFFFFF;
+  --nm-danger-soft: #FBE4E1;
+  --nm-on-danger-soft: #7F1D17;
+  --nm-read-bg: #F6EEDF;
+  --nm-read-text: #3B2F25;
+  --nm-track: #E9E1D6;
+  --nm-shadow: 0 1px 2px rgba(60, 40, 30, 0.05), 0 6px 20px rgba(60, 40, 30, 0.05);
+  --nm-sleep: #0E0C10;
+  color-scheme: light;
+}
+
+.nm-dark {
+  --nm-bg: #1B1820;
+  --nm-surface: #24202A;
+  --nm-surface-2: #2D2833;
+  --nm-border: #3B3542;
+  --nm-text: #E8E0D8;
+  --nm-text-2: #C2B8B0;
+  --nm-text-3: #A99F98;
+  --nm-primary: #9CC2AE;
+  --nm-on-primary: #15201A;
+  --nm-primary-soft: #2B3A33;
+  --nm-on-primary-soft: #CFE4D7;
+  --nm-rose: #E2A6A6;
+  --nm-rose-soft: #3E2A2E;
+  --nm-on-rose-soft: #F4D4D2;
+  --nm-lavender: #B9AFE3;
+  --nm-lavender-soft: #302A42;
+  --nm-on-lavender-soft: #DDD6F5;
+  --nm-amber: #E2B464;
+  --nm-amber-soft: #3A2F1F;
+  --nm-on-amber-soft: #F2DAAA;
+  --nm-danger: #F2B8B5;
+  --nm-on-danger: #3B0B08;
+  --nm-danger-soft: #4E201D;
+  --nm-on-danger-soft: #FFDAD6;
+  --nm-read-bg: #1E1913;
+  --nm-read-text: #E3CDA8;
+  --nm-track: #39323F;
+  --nm-shadow: none;
+  --nm-sleep: #0E0C10;
+  color-scheme: dark;
+}
+
+/* Night reading (bedtime Garbhasanskar sessions): warm amber, low blue light. */
+.nm-night {
+  --nm-read-bg: #1E1913;
+  --nm-read-text: #E3CDA8;
+}
+.nm-paper {
+  --nm-read-bg: #F6EEDF;
+  --nm-read-text: #3B2F25;
+}
+
+.nm-light button, .nm-dark button,
+.nm-light input, .nm-dark input {
+  font: inherit;
+  color: inherit;
+}
+.nm-light button, .nm-dark button { cursor: pointer; }
+.nm-light button:focus-visible, .nm-dark button:focus-visible,
+.nm-light a:focus-visible, .nm-dark a:focus-visible {
+  outline: 2px solid var(--nm-primary);
+  outline-offset: 2px;
+}
+.nm-scroll { scrollbar-width: none; }
+.nm-scroll::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .nm-light *, .nm-dark * { transition: none !important; animation: none !important; }
+}

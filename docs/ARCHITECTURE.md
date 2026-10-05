@@ -1,0 +1,477 @@
+# Navmaas — Architecture Design
+
+| | |
+|---|---|
+| **Status** | v2 — updated 2026-10-05 (SOS removed, backup & restore added, free Apple ID constraints) |
+| **Stack** | Flutter (stable) · Dart 3 |
+| **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
+
+## 1. Context and constraints
+
+| Constraint | Consequence for the design |
+|---|---|
+| Personal use, free | No accounts, payments, analytics or backend |
+| Tracking aid, no medical reviewer | Domain logic records and reminds; it never interprets readings |
+| No SOS / emergency features | Emergencies are handled manually, as the doctor advises. The app has no emergency calls, location sharing or danger-sign content |
+| Owner supplies Garbhasanskar content | In-app import of PDF, text and audio, stored on the device |
+| Public MIT repository | Only original or public-domain content in `assets/`; no secrets in the repo |
+| India, English only | `en` strings through `gen-l10n` (ready for more later); India care template |
+| iPhone signed with a **free Apple ID** | Only capabilities available to a personal team; the build expires every 7 days, so the app warns before expiry (§12) |
+| No cloud | Password-protected backup file is the only way data survives a lost or wiped phone (§11) |
+| Calm, low-screen product | Audio-first sessions, a notification budget, quiet hours, Screen Rest |
+| Low-end Android phones | Small app size, no background polling in the MVP, offline-first |
+
+**Non-functional targets**
+
+- Cold start under 2 s on a 3 GB-RAM Android phone.
+- Release APK under 30 MB.
+- 100 % offline.
+- No network calls.
+- Every screen usable at 200 % text size and with TalkBack / VoiceOver.
+- Backup of a 500 MB library streams in under 50 MB of RAM.
+
+## 2. Architecture at a glance
+
+```mermaid
+flowchart TB
+  subgraph UI["Presentation"]
+    Screens["Feature screens & widgets"] --> Ctrl["Riverpod controllers / notifiers"]
+  end
+  subgraph Domain["Domain (pure Dart)"]
+    Engine["Pregnancy engine"]
+    Planner["Reminder planner"]
+    Rules["Session rules"]
+  end
+  subgraph Data["Data"]
+    Repos["Repositories"] --> DB[("Drift + SQLCipher")]
+    Repos --> Files[("App sandbox files<br/>library · attachments")]
+    Pack["Content-pack loader"] --> Assets[("Bundled JSON assets")]
+    Backup["Backup & restore service"] --> DB
+    Backup --> Files
+  end
+  subgraph Platform["Platform adapters"]
+    Notif["Local notifications"]
+    Health["HealthKit / Health Connect"]
+    Audio["Background audio"]
+    Share["Files · share sheet"]
+    Build["Build-expiry reader (iOS)"]
+    SR["Screen Rest channel (P2, Android)"]
+  end
+  Keys["Secure storage<br/>(Keychain / Keystore)"] --> DB
+  Ctrl --> Engine & Planner & Rules & Repos & Pack & Backup
+  Planner --> Notif
+  Backup --> Share
+  Ctrl --> Health & Audio & Build & SR
+```
+
+- **One Flutter app, no server.** All state lives in an encrypted SQLite database plus files in the app sandbox.
+- **Domain is pure Dart.** The pregnancy engine and the reminder planner have no Flutter imports, so they are fast to unit-test.
+- **Platform adapters sit behind interfaces**, so tests can use fakes.
+
+## 3. Tech stack
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Framework | Flutter stable, Dart 3 | Material 3 with custom tokens |
+| State & DI | `flutter_riverpod` (+ `riverpod_generator`) | Compile-safe providers, easy overrides in tests |
+| Navigation | `go_router` | `StatefulShellRoute` for the 5 tabs, keeping each tab's stack |
+| Database | `drift` + `sqlcipher_flutter_libs` | Typed SQL, migrations, reactive streams, encrypted at rest |
+| Secrets | `flutter_secure_storage` | Holds the random 256-bit DB and attachment keys |
+| Models | `freezed` + `json_serializable` | Immutable domain models and content-pack parsing |
+| Notifications | `flutter_local_notifications` + `timezone` + `flutter_timezone` | Scheduled local reminders only, no push |
+| Health | `health` | Steps and walking workouts via HealthKit and Health Connect |
+| Audio | `just_audio` + `audio_service` | Background playback, lock-screen controls, sleep timer |
+| Reading | `pdfrx` for PDF; built-in renderer for text/Markdown | EPUB is evaluated in P2 |
+| Import / export | `file_picker` (open + save), `image_picker`, `share_plus` | Books, audio, prescription photos, backup files |
+| Backup | `cryptography` (Argon2id, AES-256-GCM), `archive` (ZIP streaming) | See §11 |
+| Device | `url_launcher` | "Call clinic" and "Directions" on a visit |
+| Security | `local_auth` (optional app lock) | |
+| Utilities | `intl`, `uuid` (v7), `collection` | |
+| Lints & tests | `very_good_analysis`, `flutter_test`, `mocktail`, `integration_test` | Golden tests for light/dark |
+| Native | Swift platform channel `navmaas/build_info` (MVP); `home_widget` + Kotlin Screen Rest channel (P2) | |
+
+Package versions are pinned to the latest stable at project start and upgraded deliberately.
+
+## 4. Project structure
+
+Feature-first. Each feature has `data/` (repositories, table access), `domain/` (models, pure logic) and `presentation/` (screens, widgets, controllers).
+
+```
+pregnancy-care/
+├─ lib/
+│  ├─ main.dart
+│  ├─ app/                 # NavmaasApp, router, theme-mode controller
+│  ├─ core/
+│  │  ├─ theme/            # tokens, ThemeData light/dark, NavmaasColors
+│  │  ├─ db/               # drift database, tables, migrations, key handling
+│  │  ├─ pregnancy/        # pregnancy engine (pure Dart)
+│  │  ├─ reminders/        # planner (pure) + scheduler adapter
+│  │  ├─ content/          # content-pack loader and models
+│  │  ├─ platform/         # health, audio handler, build info, screen-rest channel
+│  │  └─ utils/            # clock, date-only maths, ids
+│  ├─ features/
+│  │  ├─ onboarding/
+│  │  ├─ today/
+│  │  ├─ journey/
+│  │  ├─ sessions/         # library, reader, listen, letters, walk, exercise
+│  │  ├─ care/             # supplements, vaccines & tests, visits, vitals
+│  │  ├─ third_trimester/  # kick counter, contraction timer
+│  │  ├─ backup/           # backup format, crypto, create & restore flows
+│  │  ├─ screen_rest/
+│  │  └─ settings/         # me, build expiry, pause/end tracking
+│  └─ l10n/app_en.arb
+├─ assets/
+│  ├─ content/             # weeks.json, care_template_in.json, routines.json
+│  └─ fonts/               # Nunito, Literata (OFL)
+├─ test/                   # unit + widget + golden
+├─ integration_test/
+├─ android/  ios/
+├─ design/                 # navmaas-tokens.css (prototype tokens)
+└─ docs/
+```
+
+## 5. Layers and state
+
+- **Repositories** expose `Stream`s from Drift queries (`watch…`) and `Future` commands. Screens never touch the database directly.
+- **Controllers** (`Notifier` / `AsyncNotifier`) combine repositories with domain logic for each screen. For example, `todayPlanProvider` merges supplement schedules, the session plan and the next appointment.
+- **A `Clock` provider** wraps "now", so date-dependent logic (gestational age, reminders, build expiry) can be tested with a fixed date.
+- **Side effects** (scheduling notifications, Health reads, audio, file export) go through adapter interfaces, overridden with fakes in tests.
+
+## 6. Pregnancy engine
+
+This is pure date-only maths on calendar dates in the device's time zone, with no `DateTime` time-of-day arithmetic, so it is safe across DST.
+
+| Dating method | Pregnancy start (gestational day 0) |
+|---|---|
+| Last period (LMP) | `lmp + (cycleLength − 28)` days |
+| Conception | `conception − 14` days |
+| IVF, day-5 embryo | `transfer − 19` days |
+| IVF, day-3 embryo | `transfer − 17` days |
+| Due date from scan | `scanEdd − 280` days |
+
+- **Due date** = start + 280 days.
+- **Gestational age** = today − start → `weeks = ga ~/ 7`, `days = ga % 7` (shown as "24 weeks 4 days").
+- **Trimester:** 1 for < 14 w, 2 for < 28 w, 3 otherwise (boundaries 13w6d / 27w6d).
+- **Month (display):** `ga ~/ 30.44 + 1`, capped at 10, so 24w4d shows as "Month 6".
+- **Edge cases:**
+  - Gestational age below 0 or above 44 weeks prompts the user to review the dates.
+  - Past the due date, the app shows "due date + N days".
+  - A twins flag changes copy only.
+  - Paused or ended pregnancies freeze the engine output.
+- **Tests:** table-driven unit tests for every method, cycle lengths 21–40, leap years and month ends.
+
+## 7. Reminder scheduler
+
+Every notification goes through one place, so the calm rules always apply.
+
+```mermaid
+flowchart LR
+  S1["Supplement schedules"] --> P
+  S2["Appointments & care items"] --> P
+  S3["Session nudges<br/>(reading, walk)"] --> P
+  S4["Screen Rest rules"] --> P
+  S5["Backup & build-expiry<br/>reminders"] --> P
+  P["Planner (pure)<br/>next 7 days"] --> Q["Quiet hours & rest windows<br/>shift or drop"]
+  Q --> B["Daily budget<br/>priority order"]
+  B --> D["Digest bundling<br/>items within 30 min"]
+  D --> X["Diff vs scheduled<br/>stable ids"]
+  X --> N["flutter_local_notifications"]
+```
+
+1. **Priority when over budget** (default 4 per day):
+   1. Appointments.
+   2. Build expiry and backup.
+   3. Supplements.
+   4. Care items.
+   5. Session nudges.
+
+   Extra items fold into one morning digest instead of being lost.
+2. **Quiet hours / Screen Rest:** reminders inside a window move to its end; nudges are dropped.
+3. **Rolling window:** only the next 7 days are scheduled. iOS caps pending local notifications at 64, and 7 × 4 plus appointments fits comfortably.
+4. **Re-planning triggers:** app start and resume, any change to a source table (Riverpod listeners), time-zone change, and device reboot (handled by the plugin's boot receiver).
+5. **Stable ids** (a hash of source id + due time) let the scheduler cancel or replace exactly what changed.
+6. **Android:** asks for `POST_NOTIFICATIONS` (13+). Uses inexact `inexactAllowWhileIdle` alarms; a few minutes of drift is fine for these reminders and avoids the exact-alarm permission.
+7. **Actions:** supplement notifications have "Taken" and "Snooze 30 min" actions, which write a `DoseLog` without opening the app.
+
+## 8. Data model
+
+All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete). This keeps the schema ready for an optional sync later.
+
+```mermaid
+erDiagram
+  PREGNANCY ||--o{ SUPPLEMENT : has
+  SUPPLEMENT ||--o{ SUPPLEMENT_SCHEDULE : "taken at"
+  SUPPLEMENT_SCHEDULE ||--o{ DOSE_LOG : records
+  PREGNANCY ||--o{ CARE_ITEM : tracks
+  PREGNANCY ||--o{ APPOINTMENT : has
+  APPOINTMENT ||--o{ VISIT_QUESTION : collects
+  APPOINTMENT ||--o{ ATTACHMENT : stores
+  PREGNANCY ||--o{ VITAL_READING : logs
+  PREGNANCY ||--o{ SESSION : logs
+  LIBRARY_ITEM ||--o{ SESSION : "used in"
+  LIBRARY_ITEM ||--o| READING_PROGRESS : tracks
+  PREGNANCY ||--o{ LETTER : writes
+  PREGNANCY ||--o{ KICK_SESSION : logs
+  PREGNANCY ||--o{ CONTRACTION : logs
+  PREGNANCY ||--o{ CHECKLIST_TICK : ticks
+
+  PREGNANCY {
+    string id PK
+    string status "active | paused | ended | delivered"
+    string dating_method "lmp | conception | ivf | scan"
+    date lmp
+    int cycle_length
+    date anchor_date "conception, transfer or scan EDD"
+    int embryo_day
+    date start_date "derived, stored"
+    date due_date "derived, stored"
+    bool twins
+    bool high_risk
+    bool exercise_cleared
+  }
+  SUPPLEMENT_SCHEDULE {
+    string id PK
+    string supplement_id FK
+    int minute_of_day
+    int weekday_mask
+    string label "after breakfast"
+  }
+  DOSE_LOG {
+    string id PK
+    string schedule_id FK
+    datetime due_at
+    datetime taken_at
+    string status "taken | skipped | missed"
+  }
+  SESSION {
+    string id PK
+    string type "reading | listening | walk | exercise | breathing | activity | letter"
+    string library_item_id FK
+    string routine_key
+    datetime started_at
+    int duration_sec
+    int steps
+  }
+  CARE_ITEM {
+    string id PK
+    string kind "vaccine | test | scan"
+    string title
+    int window_start_week
+    int window_end_week
+    datetime scheduled_at
+    datetime done_at
+    string template_key
+  }
+```
+
+Tables not shown in detail:
+
+| Table | Purpose |
+|---|---|
+| `profile` | Name, doctor name, clinic and clinic phone (used on visits) |
+| `supplement` | Name, dose text, notes, stock and refill threshold |
+| `appointment` | Time, doctor, place, notes |
+| `visit_question` | Optionally linked to an appointment |
+| `attachment` | Encrypted file path and MIME type |
+| `vital_reading` | Type, value(s), unit, time |
+| `library_item` | Kind, title, relative file path, duration or pages |
+| `reading_progress` | Position in a library item |
+| `letter` | Letters to baby |
+| `kick_session` | Kick-counter sessions |
+| `contraction` | Start and end of each contraction |
+| `screen_rest_rule` | Screen Rest windows and settings |
+| `checklist_tick` | Ticked items from the weekly checklists |
+| `backup_log` | When each backup or restore happened, size, whether it included the library (never the password) |
+| `settings` | Key-value: theme, daily limit, quiet hours, night reading, text size, backup reminder day |
+
+Migrations are versioned with Drift's `schemaVersion`, and every migration has a test.
+
+## 9. Content
+
+| Source | Where | Rules |
+|---|---|---|
+| Week-by-week notes, checklists, India care template, exercise routines | `assets/content/*.json`, versioned with `schemaVersion` | **Only original or public-domain text.** General information, no doses, no outcome claims |
+| Garbhasanskar books (PDF / text) and audio | Imported in-app with `file_picker`, copied into `<app documents>/library/`; the DB stores the relative path | Never leaves the phone except inside a backup the owner makes. Never committed to the repo |
+
+- `weeks.json` has one entry per week (4–42): size comparison, baby note, body note, checklist keys and trimester.
+- Exercise routines carry `trimesters`, `durationSec`, a short "stop if" note and `avoidIfHighRisk` flags. The Exercise screen filters on these and stays locked until "doctor cleared me" is on.
+
+## 10. Platform integrations
+
+| Capability | MVP behaviour | Platform notes |
+|---|---|---|
+| Steps & walks | Read today's steps; record walk sessions; optionally write a walking workout | iOS: HealthKit capability (available to a free Apple ID) + usage strings. Android: Health Connect permissions + rationale activity; min SDK 26 |
+| Background audio | Plays with the screen off and shows lock-screen controls; sleep timer | iOS Background Modes → audio (available to a free Apple ID); Android media foreground service |
+| "Screen off — keep listening" | Switches to a near-black overlay that wakes on tap, and lets the phone lock normally | No wakelock is held |
+| Backup files | Save with the system "save file" dialog (Files on iOS, Storage Access Framework on Android) or the share sheet; open with the system file picker | Other apps (e.g. Google Drive) do the uploading; Navmaas itself stays offline |
+| Build expiry (iOS) | Reads the signing expiry date; shows it in Me and reminds before it | §12 |
+| Screen Rest (MVP) | In-app only: rest windows, foreground-time counter (`AppLifecycleListener`), eye-rest timer while reading | No special permissions |
+| Screen Rest (P2) | Gentle limits on apps she picks — **Android only** | `UsageStatsManager` + WorkManager (Kotlin). Not possible on iOS with a free Apple ID: Family Controls needs a paid membership |
+
+## 11. Backup and restore
+
+The backup is a single password-protected file (`navmaas-backup-YYYY-MM-DD.navmaas`) that the owner saves wherever she likes. It is the only way data survives a lost phone, a deleted app or a move to a new phone.
+
+```mermaid
+flowchart TB
+  subgraph Create["Create backup"]
+    C1["Password ×2<br/>(min 8 chars, never stored)"] --> C2["Pause writes<br/>WAL checkpoint"]
+    C2 --> C3["Snapshot: DB file + its key,<br/>attachments + their key,<br/>library (optional)"]
+    C3 --> C4["manifest.json<br/>sha256 per file, counts, schemaVersion"]
+    C4 --> C5["ZIP stream"]
+    C5 --> C6["Argon2id(password, salt)<br/>AES-256-GCM in 1 MiB chunks"]
+    C6 --> C7[".navmaas file<br/>Save to Files or share"]
+  end
+  subgraph Restore["Restore"]
+    R1["Pick .navmaas file"] --> R2["Read header<br/>show date, size, app version"]
+    R2 --> R3["Password → decrypt<br/>(tag failure = wrong password or damaged file)"]
+    R3 --> R4["Unpack to temp folder<br/>verify every sha256"]
+    R4 --> R5["Keep a 'before restore'<br/>snapshot for rollback"]
+    R5 --> R6["Swap in DB + files<br/>PRAGMA rekey to a new local key<br/>run migrations if older"]
+    R6 --> R7["Re-plan reminders<br/>delete temp + rollback copy"]
+  end
+```
+
+### File format (version 1)
+
+| Part | Content | Encrypted |
+|---|---|---|
+| Magic | `NAVMAAS` + format byte, 8 bytes | No |
+| Header | JSON with format version, KDF parameters (`argon2id`, memory, iterations, parallelism, salt), cipher, chunk size, created date, app version, schema version, whether the library is included | No, but authenticated: its hash is part of every chunk's associated data |
+| Body | ZIP stream split into 1 MiB chunks. Each chunk = 12-byte nonce + ciphertext + 16-byte tag. Associated data = header hash + chunk index + "last chunk" flag, so chunks can't be reordered, dropped or truncated unnoticed | Yes |
+
+### Rules
+
+- **Password:**
+  - At least 8 characters, typed twice, with a show/hide toggle.
+  - Never stored, logged or included in `backup_log`.
+  - There is no recovery: the screen says so before the backup is created.
+- **Key derivation:** starts at Argon2id with 64 MiB memory, 3 iterations and 1 lane.
+  - In M5, benchmark on the lowest-end target phone and tune so a backup or restore spends at most ~3 s on key derivation.
+  - The parameters live in the header, so they can change later without breaking old backups.
+- **Consistent snapshot:** writes pause briefly while the WAL is checkpointed and the DB file is copied. The DB stays SQLCipher-encrypted inside the backup, and its key travels inside the password-encrypted body.
+- **Streaming:** files are read, zipped and encrypted in chunks, so a 500 MB library never sits in memory.
+- **Library is optional:**
+  - With the library off, a backup is small (a few MB) and quick to send.
+  - With it on, the backup includes imported PDFs and audio.
+  - When restoring a backup without the library, library entries stay listed and show "re-import file".
+- **Restore is all-or-nothing:**
+  - Any failure (wrong password, damaged chunk, checksum mismatch, a newer schema than this app understands) leaves the current data untouched.
+  - A "before restore" snapshot allows rollback if the swap itself fails.
+- **Reminders:**
+  - A weekly backup reminder on a chosen day.
+  - On iOS, an extra reminder the day before the build expires (§12).
+- **What is not in a backup:** scheduled notifications and caches, which are re-created after restore. The backup also contains no password hint.
+
+## 12. iPhone with a free Apple ID
+
+Apple's [capabilities table](https://developer.apple.com/help/account/reference/supported-capabilities-ios) sets what a personal team (free Apple ID) can sign.
+
+| Capability | Free Apple ID | Navmaas use |
+|---|---|---|
+| HealthKit | ✓ | Steps, walking workouts |
+| Background Modes | ✓ | Audio with the screen off |
+| Data Protection | ✓ | File protection classes (below) |
+| Keychain | ✓ | DB and attachment keys |
+| App Groups | ✓ | P2 home-screen widget |
+| Family Controls | ✗ | Other-app Screen Rest is Android-only |
+| Push notifications, iCloud | ✗ | Not needed: local reminders, file backups |
+
+### The 7-day expiry
+
+- **Behaviour:** a free-team build stops opening 7 days after it was signed. Running it again from Xcode (same Apple ID, same bundle ID) installs over the existing app and **keeps all data and Keychain items**.
+- **Detecting it:**
+  - A small Swift method on the `navmaas/build_info` channel reads `embedded.mobileprovision` from the app bundle.
+  - It extracts the XML plist inside it and returns `ExpirationDate`.
+  - On Android, or when the file is absent, it returns `null`.
+- **Surfacing it:**
+  - Me shows "This iPhone build expires Sat 10 Oct · in 6 days".
+  - Today shows a quiet banner when 1 day is left.
+  - The reminder planner schedules a notification the day before, combined with the backup reminder.
+  - If the build lapses, the app won't open (and reminders may stop) until it's run from Xcode again. Data stays on the phone.
+- **Data-loss traps:**
+  - **Deleting the app** deletes its data.
+  - **Changing the Apple ID** changes the Team ID and Keychain group, so the stored DB key can't be read.
+  - **Changing the bundle ID** installs a new, empty app.
+
+  In all three cases, restore from the latest backup.
+
+### Personal install steps
+
+1. Enable Developer Mode on the iPhone (Settings → Privacy & Security). Trust the developer certificate after the first install (Settings → General → VPN & Device Management).
+2. In Xcode, open `ios/Runner.xcworkspace`, choose the personal team, and set a unique bundle ID (e.g. `com.<yourname>.navmaas`). Keep the bundle ID the same forever.
+3. Install a **release** build (`flutter run --release` with the phone connected, or Xcode with the Release scheme). Flutter debug builds on iOS only start from the debugger, not from the home screen.
+4. Repeat step 3 within 7 days. The app reminds you the day before.
+
+**File protection.** The DB and library use `completeUntilFirstUserAuthentication`, so notification actions and background audio work while the phone is locked. Attachments use `complete`.
+
+**Android.** Install a release APK signed with a local keystore that is never committed. Keep the keystore safe: updates must be signed with the same key, or the old app has to be removed, which deletes its data. That case also needs a restore from backup.
+
+## 13. Security and privacy
+
+- **Network:** the app makes no network calls. Release Android builds omit the `INTERNET` permission, so the app itself cannot send data anywhere; debug builds keep it for hot reload. Fonts are bundled.
+- **Database:** encrypted with SQLCipher. The 256-bit key is generated on first run and kept in Keychain / Android Keystore.
+- **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key. Imported books and audio stay as plain files in the app sandbox; they are the owner's own media, not health data.
+- **Backups:** encrypted with a key derived from the owner's password (§11). The password is never stored.
+- **Optional app lock** with biometrics or PIN (`local_auth`).
+- **Deletion:** "Delete all data" wipes the DB, the files and the stored keys. It does not touch backup files saved elsewhere.
+- **Repository hygiene:**
+  - No keystores, provisioning profiles, `google-services` files or personal content in git.
+  - `.gitignore` covers `*.jks`, `key.properties`, `*.mobileprovision`, `*.navmaas` and `/library`.
+
+## 14. Theming and accessibility
+
+- Tokens from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) become `ThemeData.light/dark`: a `ColorScheme` plus the `NavmaasColors` extension. `ThemeMode` is user-selected (Light / Dark / System).
+- The reader has its own Paper / Night palette, switching to Night automatically after 9 pm if enabled.
+- **Accessibility:**
+  - `MaterialTapTargetSize.padded` and minimum 48 dp targets.
+  - `Semantics` labels on icon-only buttons; password fields announce show/hide state.
+  - Text follows `MediaQuery.textScaler` and is tested at 1.0, 1.3 and 2.0.
+  - Motion respects `MediaQuery.disableAnimations`.
+
+## 15. Delivery milestones
+
+| Milestone | Scope | Done when |
+|---|---|---|
+| **M1 Foundation** | Flutter project, lints, CI, theme + fonts, router with 5 tabs, Drift + SQLCipher, pregnancy engine, onboarding, settings, release install on a free-Apple-ID iPhone | Onboarding stores a pregnancy; Today shows the correct week in light and dark on both phones |
+| **M2 Today & Journey** | Content-pack loader, week ring, today's plan, Journey week picker, checklists, trimester progress | Golden tests pass for both themes |
+| **M3 Care** | Supplements + reminder planner/scheduler, notification actions, India care template, visits + questions, vitals | Reminders respect budget and quiet hours in tests and on a device |
+| **M4 Sessions** | Library import (PDF/text/audio), reader with timer + night mode, background audio + screen-off, letters, walk (Health), exercise routines | A 15-min reading and a 20-min walk are logged end to end |
+| **M5 Third trimester & backup** | Kick counter, contraction timer, pause/end tracking, backup & restore (§11), build-expiry reader and reminders (§12) | A backup made on one phone restores on another; a wrong password changes nothing; expiry date shows correctly on the iPhone |
+| **M6 Screen Rest & release** | Rest rules, in-app usage counter, digest polish, accessibility pass, release builds | Signed APK installed; iPhone renewed through one 7-day cycle without data loss |
+
+## 16. Testing and CI
+
+- **Unit tests:** pregnancy engine; reminder planner (budget, quiet hours, bundling, 64-cap window, expiry reminder); repositories on in-memory Drift; build-expiry parser on sample profiles.
+- **Backup tests:**
+  - Round-trip with and without the library.
+  - Wrong password.
+  - Truncated, reordered or tampered chunks.
+  - Restoring an older schema (migrates) and rejecting a newer one.
+  - Interrupted swap (rollback works).
+  - A 500 MB library within the memory budget.
+- **Widget and golden tests:** key screens in light and dark at 1.0× and 2.0× text.
+- **Integration tests:** onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
+- **GitHub Actions** (free for public repos), on every push and PR:
+  - `dart format --set-exit-if-changed`
+  - `flutter analyze`
+  - `flutter test`
+  - `flutter build apk --release` (uploaded as an artifact; signed only locally)
+  - iOS builds happen on the owner's Mac, because personal-team signing can't run in CI.
+
+## 17. Decision log
+
+| ADR | Decision | Why |
+|---|---|---|
+| 001 | Flutter for iOS and Android | Team works in Dart; one codebase; full control of the custom calm UI |
+| 002 | Local-first, no backend, no network | Personal use; maximum privacy; nothing to host or pay for |
+| 003 | Drift + SQLCipher | Relational health logs, typed queries, migrations, encryption at rest |
+| 004 | Riverpod + go_router | Testable DI and state; tab shells with preserved stacks |
+| 005 | Feature-first folders with data / domain / presentation | Features stay independent; pure domain logic is easy to test |
+| 006 | Owner-supplied content on device; repo holds only original or public-domain text | Public repo; no licensing exposure |
+| 007 | Single reminder planner with budget, quiet hours and a rolling 7-day window | Calm by default; works within the iOS 64-notification limit |
+| 008 | Bundle fonts instead of fetching at runtime | No network calls; works offline |
+| 009 | Tracking aid only; no SOS or emergency features | Owner handles emergencies manually, as the doctor advises |
+| 010 | Password-protected `.navmaas` backup file (Argon2id + chunked AES-256-GCM) instead of cloud sync | Survives phone loss and app deletion without a backend; streams large libraries |
+| 011 | Design within free-Apple-ID capabilities; read and surface the 7-day expiry | No paid membership; avoids surprise lock-outs |
+| 012 | Other-app Screen Rest limits are Android-only | Family Controls isn't available to a free Apple ID |
