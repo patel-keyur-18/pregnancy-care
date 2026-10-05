@@ -67,8 +67,9 @@ jobs:
           path: test/goldens/linux/
           retention-days: 7
 
+      # The phone build: Arm only (~64 MB). Plan decision 25.
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --target-platform android-arm,android-arm64
 
       - uses: actions/upload-artifact@v7
         with:
