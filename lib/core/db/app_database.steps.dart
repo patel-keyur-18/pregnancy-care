@@ -302,8 +302,386 @@ i1.GeneratedColumn<String> _column_18(String aliasedName) =>
       type: i1.DriftSqlType.string,
       $customConstraints: 'NOT NULL',
     );
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    pregnancy,
+    settings,
+    checklistTick,
+    profile,
+    supplement,
+    supplementSchedule,
+    doseLog,
+  ];
+  late final Shape0 pregnancy = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'pregnancy',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 settings = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'settings',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_15,
+        _column_16,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 checklistTick = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'checklist_tick',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)', 'UNIQUE(pregnancy_id, item_key)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_17,
+        _column_18,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 profile = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_19,
+        _column_20,
+        _column_21,
+        _column_22,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 supplement = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'supplement',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_17,
+        _column_23,
+        _column_24,
+        _column_25,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 supplementSchedule = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'supplement_schedule',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_28,
+        _column_29,
+        _column_30,
+        _column_31,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 doseLog = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'dose_log',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)', 'UNIQUE(schedule_id, due_at)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_32,
+        _column_33,
+        _column_34,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape3 extends i0.VersionedTable {
+  Shape3({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get doctorName =>
+      columnsByName['doctor_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get clinicName =>
+      columnsByName['clinic_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get clinicPhone =>
+      columnsByName['clinic_phone']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get clinicAddress =>
+      columnsByName['clinic_address']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_19(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'doctor_name',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_20(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'clinic_name',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_21(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'clinic_phone',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<String> _column_22(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'clinic_address',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+
+class Shape4 extends i0.VersionedTable {
+  Shape4({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get pregnancyId =>
+      columnsByName['pregnancy_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get doseText =>
+      columnsByName['dose_text']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get notes =>
+      columnsByName['notes']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get stock =>
+      columnsByName['stock']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get refillAt =>
+      columnsByName['refill_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_23(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'name',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_24(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'dose_text',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL DEFAULT \'\'',
+      defaultValue: const i1.CustomExpression('\'\''),
+    );
+i1.GeneratedColumn<String> _column_25(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'notes',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_26(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'stock',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_27(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'refill_at',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
+
+class Shape5 extends i0.VersionedTable {
+  Shape5({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get supplementId =>
+      columnsByName['supplement_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get minuteOfDay =>
+      columnsByName['minute_of_day']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get weekdayMask =>
+      columnsByName['weekday_mask']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get label =>
+      columnsByName['label']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_28(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'supplement_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL REFERENCES supplement(id)',
+    );
+i1.GeneratedColumn<int> _column_29(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'minute_of_day',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<int> _column_30(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'weekday_mask',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NOT NULL DEFAULT 127',
+      defaultValue: const i1.CustomExpression('127'),
+    );
+i1.GeneratedColumn<String> _column_31(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'label',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+
+class Shape6 extends i0.VersionedTable {
+  Shape6({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get deletedAt =>
+      columnsByName['deleted_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get scheduleId =>
+      columnsByName['schedule_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get dueAt =>
+      columnsByName['due_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get takenAt =>
+      columnsByName['taken_at']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get status =>
+      columnsByName['status']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_32(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'schedule_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL REFERENCES supplement_schedule(id)',
+    );
+i1.GeneratedColumn<String> _column_33(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'due_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL',
+    );
+i1.GeneratedColumn<String> _column_34(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'taken_at',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -312,6 +690,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -320,6 +703,7 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2),
+  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
 );

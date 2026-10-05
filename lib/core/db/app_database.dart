@@ -14,7 +14,17 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'app_database.drift.dart';
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Pregnancies, Settings, ChecklistTicks])
+@DriftDatabase(
+  tables: [
+    Pregnancies,
+    Settings,
+    ChecklistTicks,
+    Profiles,
+    Supplements,
+    SupplementSchedules,
+    DoseLogs,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   new(super.e);
 
@@ -32,13 +42,20 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: stepByStep(
       // v2 (M2): Journey checklist ticks.
       from1To2: (m, schema) => m.createTable(schema.checklistTick),
+      // v3 (M3a): doctor profile, supplements, schedules and dose logs.
+      from2To3: (m, schema) async {
+        await m.createTable(schema.profile);
+        await m.createTable(schema.supplement);
+        await m.createTable(schema.supplementSchedule);
+        await m.createTable(schema.doseLog);
+      },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );
@@ -57,6 +74,8 @@ QueryExecutor encryptedExecutor(File file, String keyHex) =>
         }
         db
           ..execute('''PRAGMA key = "x'$keyHex'"''')
+          // Reminder actions write from a second isolate; wait, don't fail.
+          ..execute('PRAGMA busy_timeout = 5000')
           ..select('SELECT count(*) FROM sqlite_master');
       },
     );

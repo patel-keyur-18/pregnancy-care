@@ -58,6 +58,76 @@ class ChecklistTicks extends Table with BaseColumns {
   ];
 }
 
+/// The owner's doctor and clinic (one row). Everything is optional.
+@DataClassName('Profile')
+class Profiles extends Table with BaseColumns {
+  @override
+  String get tableName => 'profile';
+
+  TextColumn get doctorName => text().nullable()();
+  TextColumn get clinicName => text().nullable()();
+  TextColumn get clinicPhone => text().nullable()();
+  TextColumn get clinicAddress => text().nullable()();
+}
+
+/// A supplement as prescribed. [doseText] is copied from the prescription;
+/// the app never suggests doses.
+@DataClassName('Supplement')
+class Supplements extends Table with BaseColumns {
+  @override
+  String get tableName => 'supplement';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get name => text()();
+  TextColumn get doseText => text().withDefault(const Constant(''))();
+  TextColumn get notes => text().nullable()();
+
+  /// Doses left; each "Taken" uses one. Null when not tracked.
+  IntColumn get stock => integer().nullable()();
+
+  /// Remind to refill at or below this many doses.
+  IntColumn get refillAt => integer().nullable()();
+}
+
+/// When a supplement is taken: a time of day on some weekdays.
+@DataClassName('SupplementSchedule')
+class SupplementSchedules extends Table with BaseColumns {
+  @override
+  String get tableName => 'supplement_schedule';
+
+  TextColumn get supplementId => text().references(Supplements, #id)();
+
+  /// Minutes after midnight, local time.
+  IntColumn get minuteOfDay => integer()();
+
+  /// Bit 0 = Monday … bit 6 = Sunday; 127 = every day.
+  IntColumn get weekdayMask => integer().withDefault(const Constant(127))();
+
+  /// "after breakfast".
+  TextColumn get label => text().nullable()();
+}
+
+enum DoseStatus { taken, skipped, missed }
+
+/// A dose marked for one scheduled slot. Unmarking soft-deletes it.
+@DataClassName('DoseLog')
+class DoseLogs extends Table with BaseColumns {
+  @override
+  String get tableName => 'dose_log';
+
+  TextColumn get scheduleId => text().references(SupplementSchedules, #id)();
+
+  /// The slot's local date and time.
+  DateTimeColumn get dueAt => dateTime()();
+  DateTimeColumn get takenAt => dateTime().nullable()();
+  TextColumn get status => textEnum<DoseStatus>()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {scheduleId, dueAt},
+  ];
+}
+
 /// Key-value app settings (theme, first name, …).
 @DataClassName('Setting')
 class Settings extends Table with BaseColumns {
