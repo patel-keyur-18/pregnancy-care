@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v8 — approved 2026-10-04, updated 2026-10-05 (M1–M3 and M4a built; owner decisions 12–29) |
+| **Status** | v8 — approved 2026-10-04, updated 2026-10-05 (M1–M4 built; owner decisions 12–29) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -36,14 +36,14 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 15 | Prototype fidelity | Screens follow the prototype **exactly**, including its own line icons (drawn in M2) |
 | 16 | Week-by-week text and India care template | Claude drafts **original** text; the owner reviews it and decides what ships |
 | 17 | First name | Optional during onboarding; **editable in Me** (M2) |
-| 18 | Today's plan | **Moved from M2 to M3**, where supplements give it real items; reading joined in M4a, the walk joins in M4b |
+| 18 | Today's plan | **Moved from M2 to M3**, where supplements give it real items; reading joined in M4a, the walk in M4b |
 | 19 | Icon motion | Small, calm tap animations on icons (DESIGN_SYSTEM §5); instant when the phone asks to reduce motion |
 | 20 | Supplement suggestions | **A quick-pick of common pregnancy supplement names** (folic acid, iron + folic acid, calcium + vitamin D, vitamin D3, B12, DHA, multivitamin). She enters the dose exactly as prescribed; the app never suggests doses or which to take |
 | 21 | Reminder timing | **On time even when the phone is locked**: scheduled with the OS, exact alarms on Android |
 | 22 | Notification permission | Asked in onboarding (optional step), switchable in Me, and offered once after the first supplement |
 | 23 | Doctor details | Optional onboarding step (3 of 4, skippable), editable in Me: doctor, clinic, phone and address; Call clinic and Directions (Apple / Google Maps) on visits in M3b |
 | 24 | Book formats | **PDF and plain text (`.txt`, `.md`)** for now; EPUB later. Audio: MP3, M4A, AAC, WAV |
-| 25 | APK build | The phone build is **Arm only** (`--target-platform android-arm,android-arm64`, about 64 MB). The universal APK (about 95 MB, adds x86_64 for emulators) stays available as an option |
+| 25 | APK build | The phone build is **Arm only** (`--target-platform android-arm,android-arm64`, about 65 MB). The universal APK (adds x86_64 for emulators) stays available as an option; since M4b it is about 101 MB, so it's for emulators only |
 | 26 | Safety note on Walk and Exercise | A gentle general line ("Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor.") plus the talk test, **not** the prototype's symptom list, which would be a danger-sign list (§5.5) |
 | 27 | Walking | **Always open** ("it is always good to walk daily"). Only the exercise routines wait for "doctor cleared me" |
 | 28 | Slow breathing and Activity | Breathing is a quiet 5-minute paced timer (no audio in the repo). The path's Activity tile shows one of about 30 original calm activities a day, drafted by Claude for the owner's review |
@@ -136,6 +136,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4a Library & reading ✅ 2026-10-05 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |

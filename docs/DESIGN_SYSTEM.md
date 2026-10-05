@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.6 — decided 2026-10-04, updated 2026-10-05 (icon motion in §5; M3 and M4a components; implementation notes in §8) |
+| **Status** | v1.7 — decided 2026-10-04, updated 2026-10-05 (motion in §5; M3 and M4 components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -112,7 +112,7 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 
 ### Icon micro-interactions
 
-Small, calm feedback when an icon is tapped (owner request, M2). Only these four exist; anything new is added here first.
+Small, calm feedback when an icon is tapped (owner request, M2), plus the breathing pace (M4b). Only these five exist; anything new is added here first.
 
 | Where | Trigger | What moves | Timing |
 |---|---|---|---|
@@ -120,8 +120,9 @@ Small, calm feedback when an icon is tapped (owner request, M2). Only these four
 | Icon buttons: tab bar, theme toggle, cycle stepper | Finger down / up | Shrinks to 92 % while pressed, returns on release | 120 ms down, 200 ms ease-out up |
 | Theme toggle (Today) | Tap | Moon and sun cross-fade with a 30° turn | 300 ms, ease-out |
 | Checklist tick (Journey) | Item ticked | Box fills sage, then the check mark draws itself | 250 ms, ease-out |
+| Slow breathing circle (M4b) | Running | The inner circle grows from 60 % to 100 % over 4 s (in) and shrinks back over 6 s (out); only after she taps Start. With reduce motion it stays still and only the words change | Linear, one step a second |
 
-- No overshoot, no bounce, no looping, nothing plays on its own.
+- No overshoot, no bounce, nothing plays on its own. The breathing circle repeats only while she is breathing with it.
 - With reduce motion on, every state change is instant and nothing scales.
 
 ## 6. Components (as drawn in the prototype)
@@ -207,7 +208,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M4a)
+## 8. Implementation status (M4)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -231,6 +232,14 @@ Deliberate, permanent differences:
 | Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
 | Letters to baby | (not drawn) | A list of letters (date, first lines in Literata) and a writing screen, in the Visit screens' card style | Talk to baby needed somewhere to write |
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
-| Journey tiles | Reading sessions · walks logged · supplements taken | Reading sessions · supplements taken (walks join in M4b) | The M2 "checklist done" stand-in is gone |
+| Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
+| Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
+| Walk screen | "Evening walk" | "Gentle walk"; steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
+| Exercise header | "2nd trimester · step 2 of 4" | "Step 2 of 7" (the trimester is on the Sessions tile) | Shorter at large text |
+| Exercise controls | Pause in the middle | Pause / Resume, then "Finish" when the last move ends | Clear end of the routine |
+| Move & breathe tiles | Four fixed tiles | Walk, this trimester's routines, slow breathing; locked routines show a lock and "Needs 'Doctor cleared me' in Me" and open Me | Routines follow trimester, high risk and clearance |
+| Me → Exercise | "Unlocks walking and exercise routines" | "Unlocks exercise routines. Walking is always open." | Plan decision 27 |
+| Slow breathing | Opens Listen | Its own quiet screen: a lavender circle that grows and shrinks, "Breathe in / Breathe out", 5 min, Start / Pause / Finish | No audio can ship in the repo (Plan decision 28) |
+| Today's plan | Walk as an "Evening walk" row | "Gentle walk · 20 min · easy pace", ticked by a logged walk; the "add supplements" prompt is gone because the walk is always there | Walking is always open |
 
-Still to come: Move & breathe on Sessions, the walk item on Today's plan and Journey's walks tile (M4b); the Kick counter and Contraction timer tiles at the top of Care (M5).
+Still to come: the Kick counter and Contraction timer tiles at the top of Care (M5).
