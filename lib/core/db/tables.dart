@@ -211,6 +211,61 @@ class VitalReadings extends Table with BaseColumns {
   DateTimeColumn get at => dateTime()();
 }
 
+enum LibraryKind { pdf, text, audio }
+
+/// A book or audio file the owner imported (M4). The file is a copy inside
+/// the private `db/library/` folder, which OS backups skip. Not tied to a
+/// pregnancy: the library stays with the phone.
+@DataClassName('LibraryItem')
+class LibraryItems extends Table with BaseColumns {
+  @override
+  String get tableName => 'library_item';
+
+  TextColumn get kind => textEnum<LibraryKind>()();
+  TextColumn get title => text()();
+
+  /// File name inside `db/library/`.
+  TextColumn get fileName => text()();
+
+  /// Audio length, once known.
+  IntColumn get durationSec => integer().nullable()();
+
+  /// Where she left off: PDF page or text paragraph (0-based).
+  IntColumn get position => integer().withDefault(const Constant(0))();
+
+  /// PDF pages or text paragraphs, once opened.
+  IntColumn get total => integer().nullable()();
+  DateTimeColumn get lastOpenedAt => dateTime().nullable()();
+}
+
+enum SessionType { reading, listening, walk, exercise, breathing }
+
+/// A logged session: reading, listening, a walk, a routine or breathing.
+@DataClassName('Session')
+class Sessions extends Table with BaseColumns {
+  @override
+  String get tableName => 'session';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get type => textEnum<SessionType>()();
+  TextColumn get libraryItemId =>
+      text().nullable().references(LibraryItems, #id)();
+  TextColumn get routineKey => text().nullable()();
+  DateTimeColumn get startedAt => dateTime()();
+  IntColumn get durationSec => integer()();
+  IntColumn get steps => integer().nullable()();
+}
+
+/// A letter to baby (Garbhasanskar "talk to baby").
+@DataClassName('Letter')
+class Letters extends Table with BaseColumns {
+  @override
+  String get tableName => 'letter';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get body => text()();
+}
+
 /// Key-value app settings (theme, first name, …).
 @DataClassName('Setting')
 class Settings extends Table with BaseColumns {
