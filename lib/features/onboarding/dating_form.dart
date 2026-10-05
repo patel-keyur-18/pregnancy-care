@@ -4,8 +4,8 @@ import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/date_only.dart';
-import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
+import 'package:navmaas/core/widgets/step_button.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// What the user has entered so far; [date] stays null until picked.
@@ -228,7 +228,7 @@ class DatingForm extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         spacing: 6,
                         children: [
-                          _StepButton(
+                          StepButton(
                             symbol: '−',
                             tooltip: l10n.cycleShorter,
                             onPressed: value.cycleLength > minCycleLength
@@ -251,7 +251,7 @@ class DatingForm extends StatelessWidget {
                               ),
                             ),
                           ),
-                          _StepButton(
+                          StepButton(
                             symbol: '+',
                             tooltip: l10n.cycleLonger,
                             onPressed: value.cycleLength < maxCycleLength
@@ -284,58 +284,6 @@ class DatingForm extends StatelessWidget {
       ],
     ),
   );
-}
-
-/// Round "−" / "+" button from the prototype's cycle stepper (48 dp).
-class _StepButton extends StatelessWidget {
-  const new({
-    required this.symbol,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final String symbol;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final enabled = onPressed != null;
-    return Tooltip(
-      message: tooltip,
-      child: Semantics(
-        button: true,
-        enabled: enabled,
-        label: tooltip,
-        excludeSemantics: true,
-        child: PressScale(
-          child: Material(
-            color: scheme.surface,
-            shape: CircleBorder(side: BorderSide(color: scheme.outlineVariant)),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: onPressed,
-              child: SizedBox.square(
-                dimension: 48,
-                child: Center(
-                  child: Text(
-                    symbol,
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      fontSize: 20,
-                      color: enabled
-                          ? scheme.onSurface
-                          : scheme.onSurface.withValues(alpha: 0.38),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _MethodCard extends StatelessWidget {

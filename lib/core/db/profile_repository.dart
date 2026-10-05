@@ -10,11 +10,12 @@ class ProfileRepository {
 
   final AppDatabase _db;
 
-  Stream<Profile?> watch() =>
-      (_db.select(_db.profiles)
-            ..where((t) => t.deletedAt.isNull())
-            ..limit(1))
-          .watchSingleOrNull();
+  SimpleSelectStatement<$ProfilesTable, Profile> _row() =>
+      _db.select(_db.profiles)
+        ..where((t) => t.deletedAt.isNull())
+        ..limit(1);
+
+  Stream<Profile?> watch() => _row().watchSingleOrNull();
 
   /// Saves the doctor details; blank fields are stored as empty (null).
   Future<void> save({
@@ -33,7 +34,8 @@ class ProfileRepository {
       updatedAt: Value(DateTime.now()),
     );
     return _db.transaction(() async {
-      final current = await watch().first;
+      // A one-off read: a stream would wait for this transaction to end.
+      final current = await _row().getSingleOrNull();
       if (current == null) {
         await _db.into(_db.profiles).insert(row);
       } else {

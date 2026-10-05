@@ -23,7 +23,20 @@ Future<void> _tab(WidgetTester tester, String label) async {
   await tester.pumpAndSettle();
 }
 
-/// Each screen M1 builds, reached the way a user would.
+/// Scrolls [text] into view (screens are long at 2.0×), then taps it.
+Future<void> _tapText(WidgetTester tester, String text) async {
+  await tester.scrollUntilVisible(
+    find.text(text),
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  await tester.ensureVisible(find.text(text));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(text));
+  await tester.pumpAndSettle();
+}
+
+/// Each screen the app has, reached the way a user would.
 final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
   'onboarding 1': (false, (_) async {}),
   'onboarding 2': (
@@ -44,11 +57,44 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pumpAndSettle();
     },
   ),
+  'onboarding 4': (
+    false,
+    (t) async {
+      await t.tap(find.text('Continue'));
+      await t.pumpAndSettle();
+      await pickDate(t, '04/15/2026');
+      await t.tap(find.text('Continue'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Skip'));
+      await t.pumpAndSettle();
+    },
+  ),
   'today': (true, (_) async {}),
   'journey': (true, (t) => _tab(t, 'Journey')),
   'sessions': (true, (t) => _tab(t, 'Sessions')),
   'care': (true, (t) => _tab(t, 'Care')),
   'me': (true, (t) => _tab(t, 'Me')),
+  'supplements': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'See all');
+    },
+  ),
+  'add supplement': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Add');
+    },
+  ),
+  'doctor': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, "Add your doctor's details");
+    },
+  ),
   'edit dates': (
     true,
     (t) async {
@@ -72,6 +118,12 @@ void main() {
           size: _small,
         );
         await open(tester);
+        // Lists build lazily: scroll to the end so every section is laid out.
+        final lists = find.byType(ListView);
+        if (lists.evaluate().isNotEmpty) {
+          await tester.drag(lists.first, const Offset(0, -20000));
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));

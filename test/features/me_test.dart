@@ -46,9 +46,10 @@ void main() {
     expect(find.text('Meera'), findsOneWidget);
     expect(find.text('Due Wed, 20 Jan 2027'), findsOneWidget);
     expect(find.text('Dated by last period'), findsOneWidget);
-    expect(
+    await tester.scrollUntilVisible(
       find.text('Navmaas is a personal tracking aid, not medical advice.'),
-      findsOneWidget,
+      200,
+      scrollable: find.byType(Scrollable).last,
     );
   });
 

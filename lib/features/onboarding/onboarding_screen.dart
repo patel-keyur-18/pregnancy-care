@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/brand_mark.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -19,15 +21,23 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
-  static const _steps = 3;
+  static const _steps = 4;
   final _name = TextEditingController();
+  final _doctor = TextEditingController();
+  final _clinic = TextEditingController();
+  final _phone = TextEditingController();
+  final _address = TextEditingController();
+  var _remindersOn = false;
+  var _remindersDenied = false;
   var _step = 0;
   var _dating = const DatingInput();
   var _saving = false;
 
   @override
   void dispose() {
-    _name.dispose();
+    for (final c in [_name, _doctor, _clinic, _phone, _address]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -44,6 +54,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           .read(settingsRepositoryProvider)
           .put(SettingKeys.firstName, name);
     }
+    final doctor = [_doctor, _clinic, _phone, _address];
+    if (doctor.any((c) => c.text.trim().isNotEmpty)) {
+      await ref
+          .read(profileRepositoryProvider)
+          .save(
+            doctorName: _doctor.text,
+            clinicName: _clinic.text,
+            clinicPhone: _phone.text,
+            clinicAddress: _address.text,
+          );
+    }
     await ref
         .read(pregnancyRepositoryProvider)
         .saveDating(
@@ -52,6 +73,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           cycleLength: _dating.cycleLength,
           embryoDay: _dating.embryoDay,
         );
+  }
+
+  /// Skip leaves the doctor details empty.
+  void _skip() {
+    for (final c in [_doctor, _clinic, _phone, _address]) {
+      c.clear();
+    }
+    FocusScope.of(context).unfocus();
+    setState(() => _step++);
+  }
+
+  Future<void> _turnOnReminders() async {
+    final granted = await ref
+        .read(reminderSchedulerProvider)
+        .requestPermission();
+    if (granted) {
+      await ref
+          .read(settingsRepositoryProvider)
+          .put(SettingKeys.remindersOn, 'true');
+    }
+    if (mounted) {
+      setState(() {
+        _remindersOn = granted;
+        _remindersDenied = !granted;
+      });
+    }
   }
 
   @override
@@ -120,6 +167,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           if (start != null) DatingResultCard(start: start, today: today),
         ],
       ),
+      2 => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 20,
+        children: [
+          heading(l10n.careStepTitle, l10n.careStepBody),
+          DoctorFields(
+            doctor: _doctor,
+            clinic: _clinic,
+            phone: _phone,
+            address: _address,
+          ),
+          _RemindersCard(
+            on: _remindersOn,
+            denied: _remindersDenied,
+            onTurnOn: _turnOnReminders,
+          ),
+        ],
+      ),
       _ => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 20,
@@ -174,11 +239,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: Text(l10n.continueButton),
                     ),
                     if (_step > 0)
-                      TextButton(
-                        onPressed: _saving
-                            ? null
-                            : () => setState(() => _step--),
-                        child: Text(l10n.backButton),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextButton(
+                              onPressed: _saving
+                                  ? null
+                                  : () => setState(() => _step--),
+                              child: Text(l10n.backButton),
+                            ),
+                          ),
+                          if (_step == 2)
+                            Expanded(
+                              child: TextButton(
+                                onPressed: _skip,
+                                child: Text(l10n.skipButton),
+                              ),
+                            ),
+                        ],
                       ),
                     const _PrivacyLine(),
                   ],
@@ -264,6 +342,133 @@ class _Header extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Optional doctor and clinic fields (onboarding and Me → Your doctor).
+class DoctorFields extends StatelessWidget {
+  const new({
+    required this.doctor,
+    required this.clinic,
+    required this.phone,
+    required this.address,
+    super.key,
+  });
+
+  final TextEditingController doctor;
+  final TextEditingController clinic;
+  final TextEditingController phone;
+  final TextEditingController address;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    Widget field(
+      String label,
+      TextEditingController c, {
+      TextInputType? keyboard,
+      List<String>? autofill,
+      int maxLines = 1,
+    }) => TextField(
+      controller: c,
+      keyboardType: keyboard,
+      autofillHints: autofill,
+      maxLines: maxLines,
+      minLines: 1,
+      textCapitalization: keyboard == TextInputType.phone
+          ? TextCapitalization.none
+          : TextCapitalization.words,
+      inputFormatters: [LengthLimitingTextInputFormatter(120)],
+      decoration: InputDecoration(labelText: label),
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        field(l10n.doctorName, doctor),
+        field(l10n.clinicName, clinic),
+        field(
+          l10n.clinicPhone,
+          phone,
+          keyboard: TextInputType.phone,
+          autofill: const [AutofillHints.telephoneNumber],
+        ),
+        field(
+          l10n.clinicAddress,
+          address,
+          keyboard: TextInputType.streetAddress,
+          autofill: const [AutofillHints.fullStreetAddress],
+          maxLines: 3,
+        ),
+      ],
+    );
+  }
+}
+
+class _RemindersCard extends StatelessWidget {
+  const new({required this.on, required this.denied, required this.onTurnOn});
+
+  final bool on;
+  final bool denied;
+  final VoidCallback onTurnOn;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8,
+          children: [
+            Text(l10n.remindersTitle, style: theme.textTheme.titleMedium),
+            Text(
+              l10n.remindersBody,
+              style: theme.textTheme.bodyMedium!.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            if (on)
+              Semantics(
+                liveRegion: true,
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    NmIcon(
+                      NavmaasIcon.check,
+                      size: 18,
+                      strokeWidth: 2.6,
+                      color: scheme.primary,
+                    ),
+                    Text(
+                      l10n.remindersAreOn,
+                      style: theme.textTheme.labelLarge!.copyWith(
+                        color: scheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              OutlinedButton(
+                onPressed: onTurnOn,
+                child: Text(l10n.turnOnReminders),
+              ),
+            if (denied)
+              Text(
+                l10n.remindersDenied,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

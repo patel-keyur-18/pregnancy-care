@@ -13,6 +13,7 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
+import 'package:navmaas/features/today/today_plan_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today, M1 subset: header and the week hero card. The plan, visit and
@@ -48,6 +49,8 @@ class TodayScreen extends ConsumerWidget {
               snapshot,
               size: ref.watch(contentPackProvider).value?[snapshot.weeks]?.size,
             ),
+          const SizedBox(height: 16),
+          const TodayPlanCard(),
         ],
       ),
     );

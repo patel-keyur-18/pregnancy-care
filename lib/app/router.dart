@@ -4,8 +4,12 @@ import 'package:navmaas/app/placeholder_screen.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/features/care/presentation/care_screen.dart';
+import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
+import 'package:navmaas/features/care/presentation/supplements_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
+import 'package:navmaas/features/settings/doctor_screen.dart';
 import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
@@ -48,8 +52,21 @@ GoRouter router(Ref ref) {
           ),
           _branch(
             '/care',
-            (l10n) =>
-                PlaceholderScreen(title: l10n.tabCare, body: l10n.careBody),
+            (_) => const CareScreen(),
+            routes: [
+              GoRoute(
+                path: 'supplements',
+                builder: (_, _) => const SupplementsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'edit',
+                    builder: (_, state) => EditSupplementScreen(
+                      supplementId: state.extra as String?,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           _branch(
             '/me',
@@ -59,6 +76,7 @@ GoRouter router(Ref ref) {
                 path: 'edit',
                 builder: (_, _) => const EditDetailsScreen(),
               ),
+              GoRoute(path: 'doctor', builder: (_, _) => const DoctorScreen()),
             ],
           ),
         ],

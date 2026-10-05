@@ -42,7 +42,14 @@ enum NavmaasIcon {
     'M16 12a4 4 0 1 1-8 0 4 4 0 1 1 8 0z',
     'M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4',
   ]),
-  check(['M5 12.5 9.5 17 19 7.5']);
+  check(['M5 12.5 9.5 17 19 7.5']),
+  pill(['M10.5 20.5a5 5 0 0 1-7-7l7-7a5 5 0 0 1 7 7z', 'M7 10l7 7']),
+  plus(['M12 5v14M5 12h14']),
+  chevronLeft(['M15 6l-6 6 6 6']),
+  chevronRight(['M9 6l6 6-6 6']),
+  bell(['M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z', 'M10 21h4']),
+  // Same line style as the prototype's icons (not drawn there).
+  close(['M6 6l12 12M18 6 6 18']);
 
   new(this.svg);
 

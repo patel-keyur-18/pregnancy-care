@@ -19,3 +19,12 @@ String formatDate(DateTime date) => DateFormat('EEE, d MMM yyyy').format(date);
 
 /// "Wed, 20 Jan".
 String formatShortDate(DateTime date) => DateFormat('EEE, d MMM').format(date);
+
+/// The local calendar day of [d] at midnight (for local-time ranges).
+DateTime localDay(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// "9:30 pm" for [minuteOfDay] minutes after midnight.
+String formatMinuteOfDay(int minuteOfDay) =>
+    DateFormat('h:mm a')
+        .format(DateTime(2000, 1, 1, minuteOfDay ~/ 60, minuteOfDay % 60))
+        .toLowerCase();

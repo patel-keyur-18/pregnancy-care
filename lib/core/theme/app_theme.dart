@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 
 /// "Moonlit Sage" (DESIGN_SYSTEM §2–§7). Exact hex values; do not tweak here
 /// without updating the design system doc.
@@ -160,6 +161,20 @@ abstract final class AppTheme {
         ),
       ),
       dividerTheme: DividerThemeData(color: scheme.outlineVariant, space: 1),
+      // The prototype's chevron instead of Material's back arrow.
+      actionIconTheme: ActionIconThemeData(
+        backButtonIconBuilder: (_) =>
+            const NmIcon(NavmaasIcon.chevronLeft, size: 22, strokeWidth: 2),
+      ),
+      // Prototype switch: 52 × 32 track, sage when on, `track` when off.
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStatePropertyAll(scheme.surface),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) =>
+              s.contains(WidgetState.selected) ? scheme.primary : brand.track,
+        ),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
         linearTrackColor: brand.track,

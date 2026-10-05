@@ -27,7 +27,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Step 2: last period, 28-day cycle; Continue waits for a date.
-      expect(find.text('Step 2 of 3'), findsOneWidget);
+      expect(find.text('Step 2 of 4'), findsOneWidget);
       expect(
         tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
         isNull,
@@ -39,7 +39,20 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      // Step 3: confirm and save.
+      // Step 3: optional doctor and reminders.
+      expect(find.text('Step 3 of 4'), findsOneWidget);
+      await tester.enterText(
+        find.widgetWithText(TextField, "Doctor's name"),
+        'Dr. Mehta',
+      );
+      await tester.ensureVisible(find.text('Turn on reminders'));
+      await tester.tap(find.text('Turn on reminders'));
+      await tester.pumpAndSettle();
+      expect(find.text('Reminders are on'), findsOneWidget);
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      // Step 4: confirm and save.
       expect(find.text('Does this look right?'), findsOneWidget);
       expect(find.text('Dated by last period'), findsOneWidget);
       await tester.tap(find.text('Continue'));
@@ -71,6 +84,14 @@ void main() {
         () => SettingsRepository(db).watch(SettingKeys.firstName).first,
       );
       expect(name, 'Meera');
+      final doctor = await tester.runAsync(
+        () => db.select(db.profiles).getSingle(),
+      );
+      expect(doctor!.doctorName, 'Dr. Mehta');
+      final reminders = await tester.runAsync(
+        () => SettingsRepository(db).watch(SettingKeys.remindersOn).first,
+      );
+      expect(reminders, 'true');
     });
   }
 }
