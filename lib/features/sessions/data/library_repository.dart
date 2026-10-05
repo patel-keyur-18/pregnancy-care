@@ -1,0 +1,126 @@
+import 'dart:io';
+
+import 'package:drift/drift.dart';
+import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/tables.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'library_repository.g.dart';
+
+/// File types the library accepts, by extension (ARCHITECTURE §9).
+const Map<String, LibraryKind> libraryExtensions = {
+  'pdf': LibraryKind.pdf,
+  'txt': LibraryKind.text,
+  'md': LibraryKind.text,
+  'mp3': LibraryKind.audio,
+  'm4a': LibraryKind.audio,
+  'aac': LibraryKind.audio,
+  'wav': LibraryKind.audio,
+};
+
+/// Books and audio the owner imports. Each file is copied into the private
+/// `db/library/` folder (skipped by OS backups) and never leaves the phone.
+class LibraryRepository {
+  new(this._db, {required this.directory});
+
+  final AppDatabase _db;
+
+  /// `db/library/`, resolved lazily.
+  final Future<Directory> Function() directory;
+
+  /// Most recently opened first, then newest.
+  Stream<List<LibraryItem>> watchItems() =>
+      (_db.select(_db.libraryItems)
+            ..where((t) => t.deletedAt.isNull())
+            ..orderBy([
+              (t) => OrderingTerm.desc(t.lastOpenedAt),
+              (t) => OrderingTerm.desc(t.createdAt),
+            ]))
+          .watch();
+
+  Future<LibraryItem?> get(String id) => (_db.select(
+    _db.libraryItems,
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  /// Copies [source] into the library. Returns null for a file type the
+  /// library doesn't read.
+  Future<LibraryItem?> import(File source) async {
+    final ext = p.extension(source.path).replaceFirst('.', '').toLowerCase();
+    final kind = libraryExtensions[ext];
+    if (kind == null) return null;
+    final dir = await directory();
+    await dir.create(recursive: true);
+    final id = newId();
+    final fileName = '$id.$ext';
+    await source.copy(p.join(dir.path, fileName));
+    return await _db
+        .into(_db.libraryItems)
+        .insertReturning(
+          LibraryItemsCompanion.insert(
+            id: Value(id),
+            kind: kind,
+            title: titleFromFileName(source.path),
+            fileName: fileName,
+          ),
+        );
+  }
+
+  Future<File> file(LibraryItem item) async =>
+      File(p.join((await directory()).path, item.fileName));
+
+  Future<void> rename(String id, String title) =>
+      _write(id, LibraryItemsCompanion(title: Value(title.trim())));
+
+  /// Soft-deletes the row and deletes the copied file.
+  Future<void> remove(LibraryItem item) async {
+    await _write(
+      item.id,
+      LibraryItemsCompanion(deletedAt: Value(DateTime.now())),
+    );
+    final f = await file(item);
+    if (f.existsSync()) await f.delete();
+  }
+
+  Future<void> markOpened(String id) =>
+      _write(id, LibraryItemsCompanion(lastOpenedAt: Value(DateTime.now())));
+
+  Future<void> setProgress(String id, {required int position, int? total}) =>
+      _write(
+        id,
+        LibraryItemsCompanion(
+          position: Value(position),
+          total: total == null ? const Value.absent() : Value(total),
+        ),
+      );
+
+  Future<void> setDuration(String id, int seconds) =>
+      _write(id, LibraryItemsCompanion(durationSec: Value(seconds)));
+
+  Future<void> _write(String id, LibraryItemsCompanion row) =>
+      (_db.update(_db.libraryItems)..where((t) => t.id.equals(id))).write(
+        row.copyWith(updatedAt: Value(DateTime.now())),
+      );
+}
+
+/// "evening_stories-vol-2.pdf" → "evening stories vol 2".
+String titleFromFileName(String path) {
+  final name = p
+      .basenameWithoutExtension(path)
+      .replaceAll(RegExp('[_-]+'), ' ')
+      .trim();
+  return name.isEmpty ? p.basename(path) : name;
+}
+
+@Riverpod(keepAlive: true)
+LibraryRepository libraryRepository(Ref ref) => LibraryRepository(
+  ref.watch(appDatabaseProvider),
+  directory: () async => Directory(
+    p.join((await getApplicationSupportDirectory()).path, 'db', 'library'),
+  ),
+);
+
+@riverpod
+Stream<List<LibraryItem>> libraryItems(Ref ref) =>
+    ref.watch(libraryRepositoryProvider).watchItems();
