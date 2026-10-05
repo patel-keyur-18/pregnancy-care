@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/app/router.dart';
 import 'package:navmaas/app/theme_mode.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Opens the database and waits for the first pregnancy and theme values,
+/// Opens the database and waits for the first pregnancy and theme values
+/// and the content pack,
 /// behind the native splash, so the first frame is already the right screen
 /// in the right theme. Listens rather than reads: Riverpod pauses streams
 /// nobody listens to, and drift would never emit.
 Future<void> loadFirstValues(ProviderContainer container) => Future.wait([
   container.listen(activePregnancyProvider.future, (_, _) {}).read(),
   container.listen(themeModeProvider.future, (_, _) {}).read(),
+  container.listen(contentPackProvider.future, (_, _) {}).read(),
 ]);
 
 class NavmaasApp extends ConsumerStatefulWidget {

@@ -42,6 +42,8 @@ hooks:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/content/weeks.json
   # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
   fonts:
     - family: Nunito
