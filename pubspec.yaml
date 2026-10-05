@@ -41,3 +41,11 @@ hooks:
 flutter:
   uses-material-design: true
   generate: true
+  # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Variable.ttf
+    - family: Literata
+      fonts:
+        - asset: assets/fonts/Literata-Variable.ttf
