@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
 
@@ -14,9 +16,23 @@ Future<void> _seed(AppDatabase db) async {
       .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
 }
 
+final Finder _editList = find
+    .descendant(
+      of: find.byType(EditDetailsScreen),
+      matching: find.byType(Scrollable),
+    )
+    .first;
+
+Future<void> _tab(WidgetTester tester, String label) async {
+  await tester.tap(
+    find.descendant(of: find.byType(NavmaasTabBar), matching: find.text(label)),
+  );
+  await tester.pumpAndSettle();
+}
+
 Future<void> _openMe(WidgetTester tester) async {
   await tester.tap(
-    find.descendant(of: find.byType(NavigationBar), matching: find.text('Me')),
+    find.descendant(of: find.byType(NavmaasTabBar), matching: find.text('Me')),
   );
   await tester.pumpAndSettle();
 }
@@ -66,12 +82,21 @@ void main() {
     await _openMe(tester);
     await tester.tap(find.text('Edit'));
     await tester.pumpAndSettle();
-    expect(find.text('24 weeks 5 days'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('24 weeks 5 days'),
+      200,
+      scrollable: _editList,
+    );
 
+    await tester.ensureVisible(find.text('Scan due date'));
     await tester.tap(find.text('Scan due date'));
     await tester.pumpAndSettle();
     await pickDate(tester, '01/27/2027');
-    expect(find.text('23 weeks 5 days'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('23 weeks 5 days'),
+      200,
+      scrollable: _editList,
+    );
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
 
@@ -85,12 +110,34 @@ void main() {
 
     await tester.tap(
       find.descendant(
-        of: find.byType(NavigationBar),
+        of: find.byType(NavmaasTabBar),
         matching: find.text('Today'),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(TodayScreen), findsOneWidget);
-    expect(find.text('23 weeks 5 days'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('23 weeks 5 days')), findsOneWidget);
+  });
+
+  testWidgets('name can be changed, and cleared', (tester) async {
+    await pumpApp(tester, seed: _seed);
+    await _openMe(tester);
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(TextField, 'Meera'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '  Asha ');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Asha'), findsOneWidget);
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('You'), findsOneWidget);
+    await _tab(tester, 'Today');
+    expect(find.textContaining(RegExp(r'^Good \w+$')), findsOneWidget);
   });
 }

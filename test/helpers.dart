@@ -34,16 +34,20 @@ Future<AppDatabase> pumpApp(
   tester.view
     ..physicalSize = size
     ..devicePixelRatio = 1;
-  addTearDown(() async {
+  addTearDown(() {
     tester.platformDispatcher.clearAllTestValues();
     tester.view.reset();
-    await db.close();
+    // The in-memory database is not closed: after a failed test a query from
+    // the abandoned fake-async zone can hold drift's lock, and close() would
+    // wait forever. It is garbage-collected with the test.
   });
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
         todayProvider.overrideWithValue(testToday),
+        // 9:00 am, so the greeting is always "Good morning".
+        nowProvider.overrideWithValue(DateTime(2026, 10, 5, 9)),
       ],
       child: const NavmaasApp(),
     ),
@@ -54,7 +58,7 @@ Future<AppDatabase> pumpApp(
 
 /// Opens the date field and types [mmddyyyy] in the picker's input mode.
 Future<void> pickDate(WidgetTester tester, String mmddyyyy) async {
-  final field = find.byIcon(Icons.calendar_today_outlined);
+  final field = find.byKey(const ValueKey('date-field'));
   await tester.ensureVisible(field);
   await tester.pumpAndSettle();
   await tester.tap(field);

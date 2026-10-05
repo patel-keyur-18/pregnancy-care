@@ -33,6 +33,15 @@ class SettingsRepository {
           target: [_db.settings.key],
         ),
       );
+
+  /// Soft-deletes [key]; `put` brings it back.
+  Future<void> remove(String key) =>
+      (_db.update(_db.settings)..where((t) => t.key.equals(key))).write(
+        SettingsCompanion(
+          deletedAt: Value(DateTime.now()),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
 }
 
 @riverpod

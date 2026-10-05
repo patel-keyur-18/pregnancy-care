@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.2 — decided 2026-10-04, updated 2026-10-05 (SOS removed; red marks destructive actions; M1 implementation notes in §8) |
+| **Status** | v1.3 — decided 2026-10-04, updated 2026-10-05 (SOS removed; red marks destructive actions; icon motion in §5; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -110,6 +110,20 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 - 250–350 ms ease-out fades and short slides. No bounce, no flashing, no auto-playing animation.
 - Respects "reduce motion" and the OS animation scale.
 
+### Icon micro-interactions
+
+Small, calm feedback when an icon is tapped (owner request, M2). Only these four exist; anything new is added here first.
+
+| Where | Trigger | What moves | Timing |
+|---|---|---|---|
+| Tab bar | A tab becomes active | The icon's line draws itself (stroke traced 0 → 100 %) while the sage pill fades in | 350 ms, ease-out |
+| Icon buttons: tab bar, theme toggle, cycle stepper | Finger down / up | Shrinks to 92 % while pressed, returns on release | 120 ms down, 200 ms ease-out up |
+| Theme toggle (Today) | Tap | Moon and sun cross-fade with a 30° turn | 300 ms, ease-out |
+| Checklist tick (Journey) | Item ticked | Box fills sage, then the check mark draws itself | 250 ms, ease-out |
+
+- No overshoot, no bounce, no looping, nothing plays on its own.
+- With reduce motion on, every state change is instant and nothing scales.
+
 ## 6. Components (as drawn in the prototype)
 
 | Component | Spec |
@@ -121,6 +135,8 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 | Card | `surface`, 1 `border`, radius 20, soft shadow (light) |
 | List row | 56+ h, 40 icon tile (soft pair), title 16/700, caption 13/600 `text-3`, divider `border` |
 | Check (done) | 30 circle; done = `primary` fill + check; pending = 2 `border` ring |
+| Checklist row (Journey) | 56+ h; 26 box, radius 8, 2 `border`; done = `primary` fill, check drawn in `on-primary`, text turns `text-3` |
+| Week chip (Journey) | 52 × 60, radius 16, 1.5 border; selected = `primary` fill with `on-primary` text |
 | Switch | 52 × 32 track (`primary` / `track`), 26 thumb `surface` |
 | Segmented control | `surface-2` pill container; selected = `surface` + shadow |
 | Progress | 6–8 h bar on `track`, or ring (stroke 8–10) |
@@ -182,14 +198,17 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader.
 
-## 8. Implementation status (M1)
+## 8. Implementation status (M2)
 
-The prototype is the exact visual spec (Plan decision 15). Where the M1 app still differs, it is listed here and fixed in M2:
+The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
-| Area | Prototype | M1 app |
-|---|---|---|
-| Icons (tab bar, calendar, theme toggle, stepper, lock) | Own 24-grid line icons, 1.8 stroke | Material outline icons as stand-ins |
-| Segmented control | Selected segment = `surface` + soft shadow, inside a `surface-2` pill | Material `SegmentedButton`: selected = `surface`, no shadow, bordered segments |
-| Cycle-length stepper | Label and stepper on one row | Stepper wraps under its label when the row is too narrow (keeps 2.0× text working) |
+Deliberate, permanent differences:
 
-Deliberate, permanent differences: touch targets are 48 dp, not 44 px, and tab-bar labels stop growing at 1.5× text so five tabs fit.
+| Area | Prototype | App | Why |
+|---|---|---|---|
+| Touch targets | Some buttons and segments 40–44 px | At least 48 dp | Accessibility (§4) |
+| Tab-bar labels | Fixed size | Grow with text size up to 1.5× | Five tabs must still fit |
+| Journey trimester caption | 11 px | 12 px | Minimum text size (§3) |
+| Journey week chips | 52 × 60 | Grow with text size up to 1.6× | The week number never clips |
+
+Data-driven parts that fill in later: Today's plan card (M3/M4) and Journey's reading, walk and supplement tiles (M3/M4). Until then Today shows the hero card and Journey shows the "checklist items done" tile.

@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:navmaas/app/theme_mode.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
+import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today, M1 subset: header and the week hero card. The plan, visit and
@@ -41,7 +44,10 @@ class TodayScreen extends ConsumerWidget {
           if (snapshot.needsReview)
             const _CheckDatesCard()
           else
-            _HeroCard(snapshot),
+            _HeroCard(
+              snapshot,
+              size: ref.watch(contentPackProvider).value?[snapshot.weeks]?.size,
+            ),
         ],
       ),
     );
@@ -60,7 +66,7 @@ class _Header extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final hour = DateTime.now().hour;
+    final hour = ref.watch(nowProvider).hour;
     final period = hour < 12
         ? 'morning'
         : hour < 17
@@ -93,16 +99,38 @@ class _Header extends ConsumerWidget {
             ],
           ),
         ),
-        IconButton(
-          tooltip: isDark ? l10n.switchToLight : l10n.switchToDark,
-          style: IconButton.styleFrom(
-            backgroundColor: scheme.surfaceContainerHighest,
-            foregroundColor: scheme.onSurfaceVariant,
-          ),
-          onPressed: () =>
-              setThemeMode(ref, isDark ? ThemeMode.light : ThemeMode.dark),
-          icon: Icon(
-            isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+        PressScale(
+          child: IconButton(
+            tooltip: isDark ? l10n.switchToLight : l10n.switchToDark,
+            style: IconButton.styleFrom(
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
+            onPressed: () =>
+                setThemeMode(ref, isDark ? ThemeMode.light : ThemeMode.dark),
+            // Moon and sun cross-fade with a 30° turn (DESIGN_SYSTEM §5).
+            icon: AnimatedSwitcher(
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeOut,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: RotationTransition(
+                  turns: Tween<double>(
+                    begin: -1 / 12,
+                    end: 0,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: NmIcon(
+                isDark ? NavmaasIcon.sun : NavmaasIcon.moon,
+                key: ValueKey(isDark),
+                size: 22,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
           ),
         ),
       ],
@@ -112,9 +140,12 @@ class _Header extends ConsumerWidget {
 
 /// Week ring, month, trimester, due date and days to go (prototype "Today").
 class _HeroCard extends StatelessWidget {
-  const new(this.s);
+  const new(this.s, {required this.size});
 
   final PregnancySnapshot s;
+
+  /// This week's size comparison, or null outside weeks 4–42.
+  final String? size;
 
   @override
   Widget build(BuildContext context) {
@@ -134,46 +165,50 @@ class _HeroCard extends StatelessWidget {
           child: Row(
             spacing: 18,
             children: [
-              ExcludeSemantics(
-                child: SizedBox.square(
-                  dimension: 100,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      CircularProgressIndicator(
-                        value: (s.gaDays / pregnancyLengthDays).clamp(0, 1),
-                        strokeWidth: 8,
-                        strokeCap: StrokeCap.round,
-                        color: scheme.primary,
-                        backgroundColor: scheme.surface,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: FittedBox(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${s.weeks}',
-                                style: text.headlineSmall!.copyWith(
-                                  height: 28 / 26,
-                                  color: on,
+              // The ring's number is read out as "24 weeks 5 days".
+              Semantics(
+                label: l10n.weeksDays(s.weeks, s.days),
+                child: ExcludeSemantics(
+                  child: SizedBox.square(
+                    dimension: 100,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CircularProgressIndicator(
+                          value: (s.gaDays / pregnancyLengthDays).clamp(0, 1),
+                          strokeWidth: 8,
+                          strokeCap: StrokeCap.round,
+                          color: scheme.primary,
+                          backgroundColor: scheme.surface,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: FittedBox(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${s.weeks}',
+                                  style: text.headlineSmall!.copyWith(
+                                    height: 28 / 26,
+                                    color: on,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                l10n.ringDays(s.days),
-                                style: text.bodySmall!.copyWith(
-                                  fontSize: 12,
-                                  height: 16 / 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: on,
+                                Text(
+                                  l10n.ringDays(s.days),
+                                  style: text.bodySmall!.copyWith(
+                                    fontSize: 12,
+                                    height: 16 / 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: on,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -191,13 +226,18 @@ class _HeroCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      l10n.weeksDays(s.weeks, s.days),
+                      size == null
+                          ? l10n.weeksDays(s.weeks, s.days)
+                          : l10n.heroSize(size!),
                       style: text.titleMedium!.copyWith(color: on),
                     ),
                     Text(
                       s.daysPastDue > 0
                           ? l10n.pastDue(s.daysPastDue)
-                          : l10n.daysToGo(formatDate(s.dueDate), s.daysToGo),
+                          : l10n.daysToGo(
+                              formatShortDate(s.dueDate),
+                              s.daysToGo,
+                            ),
                       style: text.bodyMedium!.copyWith(
                         fontSize: 14,
                         height: 20 / 14,
@@ -244,7 +284,7 @@ class _CheckDatesCard extends StatelessWidget {
               ),
             ),
             OutlinedButton(
-              onPressed: () => context.go('/me/dates'),
+              onPressed: () => context.go('/me/edit'),
               child: Text(l10n.checkDates),
             ),
           ],

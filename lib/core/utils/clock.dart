@@ -7,3 +7,8 @@ part 'clock.g.dart';
 /// refreshes it when it comes back to the foreground.
 @riverpod
 DateTime today(Ref ref) => dateOnly(DateTime.now());
+
+/// The current time, for time-of-day wording such as the greeting. Fixed in
+/// tests; refreshed with [todayProvider] when the app resumes.
+@riverpod
+DateTime now(Ref ref) => DateTime.now();

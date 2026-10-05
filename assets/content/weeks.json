@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 1,
+  "weeks": [
+    {
+      "week": 4,
+      "size": "a poppy seed (khus khus)",
+      "baby": "The tiny embryo has settled into the lining of your womb and the placenta is starting to form.",
+      "you": "A missed period is often the first sign. Feeling tired or a little bloated is common.",
+      "checklist": [
+        {"key": "w04-first-visit", "text": "Book your first visit with a gynaecologist"},
+        {"key": "w04-folic", "text": "Ask your doctor about folic acid if you are not already taking it"}
+      ]
+    },
+    {
+      "week": 5,
+      "size": "a sesame seed (til)",
+      "baby": "The neural tube, which becomes the brain and spine, is forming, and a simple heart has begun to beat.",
+      "you": "Nausea, tender breasts and needing to pass urine more often may begin now.",
+      "checklist": [
+        {"key": "w05-medicines", "text": "Write down every medicine and supplement you take, to show your doctor"}
+      ]
+    },
+    {
+      "week": 6,
+      "size": "a masoor dal grain",
+      "baby": "Small buds that will become arms and legs appear. An early scan may show the heartbeat flickering.",
+      "you": "Morning sickness can happen at any time of day. Small, frequent meals often sit better.",
+      "checklist": [
+        {"key": "w06-meals", "text": "Keep a light snack, like a few crackers, by your bed"}
+      ]
+    },
+    {
+      "week": 7,
+      "size": "a green pea (matar)",
+      "baby": "The brain is growing quickly and the face is beginning to take shape.",
+      "you": "Strong smells may bother you, and some favourite foods may suddenly feel wrong.",
+      "checklist": [
+        {"key": "w07-blood-tests", "text": "Your doctor may suggest first blood tests, such as blood group, haemoglobin, sugar and thyroid"}
+      ]
+    },
+    {
+      "week": 8,
+      "size": "a rajma bean",
+      "baby": "Fingers and toes are forming, and baby is already making small movements you cannot feel yet.",
+      "you": "Nausea and tiredness are often strongest around now. Rest when you can.",
+      "checklist": [
+        {"key": "w08-dating-scan", "text": "Ask whether you need a dating scan to confirm your due date"}
+      ]
+    },
+    {
+      "week": 9,
+      "size": "a grape (angoor)",
+      "baby": "All the main organs have started to form. From now on, baby is mostly growing and maturing.",
+      "you": "Mood swings are common as hormones rise. Be gentle with yourself.",
+      "checklist": [
+        {"key": "w09-water", "text": "Keep a water bottle within reach through the day"}
+      ]
+    },
+    {
+      "week": 10,
+      "size": "a jamun",
+      "baby": "Tiny nails are forming and the organs have begun to work.",
+      "you": "Your waistline may start to thicken, even before a bump shows.",
+      "checklist": [
+        {"key": "w10-nt-scan", "text": "Ask your doctor about the NT scan, usually done between 11 and 14 weeks"}
+      ]
+    },
+    {
+      "week": 11,
+      "size": "an amla (Indian gooseberry)",
+      "baby": "Baby can open and close their hands, and the bones are starting to harden.",
+      "you": "For many women, nausea begins to ease over the next few weeks.",
+      "checklist": [
+        {"key": "w11-nt-scan", "text": "Have the NT scan and blood test if your doctor has advised them"}
+      ]
+    },
+    {
+      "week": 12,
+      "size": "a lime (nimbu)",
+      "baby": "Reflexes are developing. Baby may curl their toes or startle at a touch on your tummy.",
+      "you": "The womb is rising out of the pelvis, so you may need the toilet a little less often.",
+      "checklist": [
+        {"key": "w12-share", "text": "Decide when you would like to share your news, in your own time"}
+      ]
+    },
+    {
+      "week": 13,
+      "size": "a chikoo (sapota)",
+      "baby": "Fingerprints are forming. This is the last week of the first trimester.",
+      "you": "Energy often starts to return as you move into the second trimester.",
+      "checklist": [
+        {"key": "w13-td-vaccine", "text": "Ask your doctor when to take the Td (tetanus-diphtheria) vaccine"}
+      ]
+    },
+    {
+      "week": 14,
+      "size": "a mosambi (sweet lime)",
+      "baby": "Baby can make small facial expressions, like squinting and frowning.",
+      "you": "Your appetite may come back. Simple, home-cooked meals are a good choice.",
+      "checklist": [
+        {"key": "w14-walk", "text": "If your doctor agrees, start a gentle daily walk"}
+      ]
+    },
+    {
+      "week": 15,
+      "size": "an apple (seb)",
+      "baby": "Baby can sense light through closed eyelids, and the skeleton keeps getting stronger.",
+      "you": "Gums may bleed a little when you brush. A soft toothbrush helps.",
+      "checklist": [
+        {"key": "w15-dental", "text": "Book a dental check-up and tell the dentist you are pregnant"}
+      ]
+    },
+    {
+      "week": 16,
+      "size": "a guava (amrood)",
+      "baby": "Neck and back muscles are stronger, so baby can hold their head more upright.",
+      "you": "Some women feel the first flutters now, often earlier in a second pregnancy.",
+      "checklist": [
+        {"key": "w16-marker", "text": "Ask whether a quadruple marker blood test is advised for you"}
+      ]
+    },
+    {
+      "week": 17,
+      "size": "a pomegranate (anaar)",
+      "baby": "A layer of fat is beginning to form under the skin, which will keep baby warm after birth.",
+      "you": "Brief twinges low in the belly are common as the ligaments stretch.",
+      "checklist": [
+        {"key": "w17-side-sleep", "text": "Try sleeping on your side with a pillow between your knees"}
+      ]
+    },
+    {
+      "week": 18,
+      "size": "a shakarkandi (sweet potato)",
+      "baby": "The ears are in their final position and baby may hear muffled sounds.",
+      "you": "Feeling a little dizzy when you stand up quickly is common. Rise slowly.",
+      "checklist": [
+        {"key": "w18-anomaly-scan", "text": "Book the anomaly scan, usually done between 18 and 22 weeks"}
+      ]
+    },
+    {
+      "week": 19,
+      "size": "a shimla mirch (capsicum)",
+      "baby": "A creamy coating called vernix is forming to protect baby's skin.",
+      "you": "Leg cramps, especially at night, may start. Gentle calf stretches can help.",
+      "checklist": [
+        {"key": "w19-stretch", "text": "Do a few gentle calf stretches before bed"}
+      ]
+    },
+    {
+      "week": 20,
+      "size": "a banana (kela)",
+      "baby": "Halfway there. Baby swallows fluid and is practising for life outside.",
+      "you": "Your bump is probably showing now, and your navel may start to flatten.",
+      "checklist": [
+        {"key": "w20-movements", "text": "Notice when you feel baby move, and when they seem most active"}
+      ]
+    },
+    {
+      "week": 21,
+      "size": "a carrot (gajar)",
+      "baby": "Baby is swallowing and practising sucking.",
+      "you": "Movements may start to feel stronger and more regular.",
+      "checklist": [
+        {"key": "w21-read-aloud", "text": "Spend a few quiet minutes talking or reading to baby"}
+      ]
+    },
+    {
+      "week": 22,
+      "size": "a small papaya",
+      "baby": "Eyebrows and eyelids have formed.",
+      "you": "Backache is common now. Gentle stretches and good posture can help.",
+      "checklist": [
+        {"key": "w22-posture", "text": "Sit with your back supported and feet flat on the floor"}
+      ]
+    },
+    {
+      "week": 23,
+      "size": "a mango (aam)",
+      "baby": "Baby can hear sounds from outside, a lovely time to read aloud.",
+      "you": "Swollen feet are common. Rest with your feet raised when you can.",
+      "checklist": [
+        {"key": "w23-feet-up", "text": "Rest with your feet up for a few minutes each day"}
+      ]
+    },
+    {
+      "week": 24,
+      "size": "a bhutta (corn cob)",
+      "baby": "The lungs are growing branches and tiny air sacs.",
+      "you": "The glucose test (GTT) is often done between weeks 24 and 28.",
+      "checklist": [
+        {"key": "w24-gtt", "text": "Book the glucose test (GTT) if your doctor has advised it"}
+      ]
+    },
+    {
+      "week": 25,
+      "size": "a cauliflower (phool gobhi)",
+      "baby": "Baby responds to your voice and touch.",
+      "you": "Heartburn may increase. Smaller meals and not lying down right after eating can help.",
+      "checklist": [
+        {"key": "w25-meals", "text": "Try smaller meals and wait a while before lying down"}
+      ]
+    },
+    {
+      "week": 26,
+      "size": "a baingan (brinjal)",
+      "baby": "The eyes are beginning to open.",
+      "you": "As your bump grows, sleeping on your side may feel better.",
+      "checklist": [
+        {"key": "w26-pillows", "text": "Set up pillows to support your bump and back at night"}
+      ]
+    },
+    {
+      "week": 27,
+      "size": "a cabbage (patta gobhi)",
+      "baby": "This is the last week of the second trimester.",
+      "you": "A good week to plan your third-trimester visits and tests with your doctor.",
+      "checklist": [
+        {"key": "w27-plan-visits", "text": "Ask your doctor how often you should visit in the third trimester"}
+      ]
+    },
+    {
+      "week": 28,
+      "size": "a kheera (large cucumber)",
+      "baby": "Baby can blink, and the brain is growing fast.",
+      "you": "Visits usually become more frequent from now on.",
+      "checklist": [
+        {"key": "w28-rh", "text": "If your blood group is Rh negative, ask your doctor about the anti-D injection"},
+        {"key": "w28-pattern", "text": "Get to know baby's usual pattern of movements"}
+      ]
+    },
+    {
+      "week": 29,
+      "size": "a lauki (bottle gourd)",
+      "baby": "Muscles and lungs keep maturing, and kicks may feel strong.",
+      "you": "You may feel short of breath as baby takes up more room.",
+      "checklist": [
+        {"key": "w29-pace", "text": "Slow your pace on stairs and take breaks when you need them"}
+      ]
+    },
+    {
+      "week": 30,
+      "size": "a nariyal (coconut)",
+      "baby": "The fine body hair (lanugo) is starting to disappear.",
+      "you": "Tiredness may return. Extra pillows can make sleep more comfortable.",
+      "checklist": [
+        {"key": "w30-growth-scan", "text": "Ask whether a growth scan is planned for you"}
+      ]
+    },
+    {
+      "week": 31,
+      "size": "an ananas (pineapple)",
+      "baby": "All five senses are working, and baby turns their head from side to side.",
+      "you": "Practice tightenings (Braxton Hicks) may come and go. Mention them at your next visit.",
+      "checklist": [
+        {"key": "w31-questions", "text": "Note down any questions to ask at your next visit"}
+      ]
+    },
+    {
+      "week": 32,
+      "size": "a kharbooja (muskmelon)",
+      "baby": "Baby is practising breathing movements, and toenails have grown.",
+      "you": "Backache and disturbed sleep are common. Rest whenever you can.",
+      "checklist": [
+        {"key": "w32-hospital", "text": "Decide on your hospital and ask about visiting the labour ward"}
+      ]
+    },
+    {
+      "week": 33,
+      "size": "a small kathal (jackfruit)",
+      "baby": "Bones are hardening, though the skull stays soft for birth.",
+      "you": "Hands and feet may swell a little. Remove tight rings if they feel snug.",
+      "checklist": [
+        {"key": "w33-birth-wishes", "text": "Talk with your doctor about your wishes for the birth"}
+      ]
+    },
+    {
+      "week": 34,
+      "size": "a large papaya",
+      "baby": "The lungs and nervous system are maturing well.",
+      "you": "You may feel more pressure low in your pelvis.",
+      "checklist": [
+        {"key": "w34-support", "text": "Plan who will be with you and help at home after the birth"}
+      ]
+    },
+    {
+      "week": 35,
+      "size": "a bunch of bananas",
+      "baby": "The kidneys are fully developed. Most growth now is gaining weight.",
+      "you": "You may need the toilet more often again as baby moves lower.",
+      "checklist": [
+        {"key": "w35-bag", "text": "Start packing your hospital bag"}
+      ]
+    },
+    {
+      "week": 36,
+      "size": "a small tarbooz (watermelon)",
+      "baby": "Many babies settle head-down around now.",
+      "you": "Visits are often weekly from here. Breathing may ease as baby drops.",
+      "checklist": [
+        {"key": "w36-papers", "text": "Keep your pregnancy file and ID together with the hospital bag"}
+      ]
+    },
+    {
+      "week": 37,
+      "size": "a petha (ash gourd)",
+      "baby": "Baby is practising grasping and is getting ready for birth.",
+      "you": "Many women feel an urge to tidy and prepare the home.",
+      "checklist": [
+        {"key": "w37-baby-things", "text": "Get a few baby clothes washed and ready"}
+      ]
+    },
+    {
+      "week": 38,
+      "size": "a kaddu (pumpkin)",
+      "baby": "The fine body hair has mostly gone, and baby keeps gaining weight.",
+      "you": "Rest as much as you can. Short walks may still feel good if your doctor agrees.",
+      "checklist": [
+        {"key": "w38-rest", "text": "Plan a little rest time every day"}
+      ]
+    },
+    {
+      "week": 39,
+      "size": "a large tarbooz (watermelon)",
+      "baby": "Baby is fully ready. The brain keeps growing, even after birth.",
+      "you": "Waiting can feel long. Gentle routines help the days pass.",
+      "checklist": [
+        {"key": "w39-calm", "text": "Do something calming you enjoy, like music or a short walk"}
+      ]
+    },
+    {
+      "week": 40,
+      "size": "a full-grown kathal (jackfruit)",
+      "baby": "Your due date. Only a few babies arrive exactly on it.",
+      "you": "Follow your doctor's plan for the coming days.",
+      "checklist": [
+        {"key": "w40-plan", "text": "Confirm the plan with your doctor if baby has not arrived yet"}
+      ]
+    },
+    {
+      "week": 41,
+      "size": "a full-grown kathal (jackfruit)",
+      "baby": "Baby is still growing and keeping well inside.",
+      "you": "Your doctor may check on you and baby more often now.",
+      "checklist": [
+        {"key": "w41-checks", "text": "Go for the extra check-ups your doctor suggests"}
+      ]
+    },
+    {
+      "week": 42,
+      "size": "a full-grown kathal (jackfruit)",
+      "baby": "Baby is ready to meet you.",
+      "you": "Your doctor will guide the next steps for the birth.",
+      "checklist": [
+        {"key": "w42-guidance", "text": "Stay in close touch with your doctor"}
+      ]
+    }
+  ]
+}
