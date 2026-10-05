@@ -107,4 +107,34 @@ void main() {
       );
     });
   });
+
+  group('daily activities', () {
+    final source = File('assets/content/activities.json').readAsStringSync();
+    final items = parseActivities(source);
+
+    test('about a month of unique, filled-in ideas', () {
+      expect(items.length, greaterThanOrEqualTo(28));
+      expect(items.map((i) => i.key).toSet(), hasLength(items.length));
+      for (final i in items) {
+        expect(i.title.trim(), isNotEmpty);
+        expect(i.text, i.text.trim(), reason: i.key);
+      }
+    });
+
+    test('hard lines: no forbidden words', () {
+      final forbidden = RegExp(
+        r'\b(mg|mcg|ml|iu|dose|doses|dosage|tablets?|boy|girl|gender|sex|iq|smarter|intelligen\w*|guarantee\w*|emergency|danger\w*|sos)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(source).map((m) => m[0]), isEmpty);
+    });
+
+    test('docs/content/activities.md matches the JSON', () {
+      expect(
+        File('docs/content/activities.md').readAsStringSync(),
+        renderActivitiesMarkdown(source),
+        reason: 'run: dart run tool/content_md.dart',
+      );
+    });
+  });
 }

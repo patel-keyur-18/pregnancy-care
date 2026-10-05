@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "key": "draw-calm",
+      "title": "Draw something calm",
+      "text": "Sketch a place where you feel at peace: a riverbank, a terrace at dusk, your mother's kitchen. No skill needed, just a few quiet minutes."
+    },
+    {
+      "key": "hum-song",
+      "title": "Hum a favourite song",
+      "text": "Hum or sing softly a song you loved as a child. Rest a hand on your belly while you do."
+    },
+    {
+      "key": "three-good",
+      "title": "Three good things",
+      "text": "Write down three things that went well today, however small."
+    },
+    {
+      "key": "watch-sky",
+      "title": "Watch the sky",
+      "text": "Sit by a window or step outside for five minutes. Notice the colour of the sky and the sounds around you."
+    },
+    {
+      "key": "slow-cup",
+      "title": "A slow cup",
+      "text": "Make a warm drink and sip it slowly, without your phone. Notice its warmth and taste."
+    },
+    {
+      "key": "your-name",
+      "title": "The story of your name",
+      "text": "Think about who chose your name and why. Write a few lines you might tell your child one day."
+    },
+    {
+      "key": "rangoli",
+      "title": "A small rangoli",
+      "text": "Draw a simple rangoli or kolam pattern on paper. Let the repeating shapes slow your mind."
+    },
+    {
+      "key": "happy-memory",
+      "title": "A happy memory",
+      "text": "Close your eyes and recall a day you felt truly happy. Where were you? Who was with you?"
+    },
+    {
+      "key": "tend-plant",
+      "title": "Tend a plant",
+      "text": "Water a plant, wipe its leaves, or sit near some greenery for a few minutes."
+    },
+    {
+      "key": "colour-page",
+      "title": "Colour a page",
+      "text": "Colour a pattern or a picture slowly, in colours that feel soft and restful."
+    },
+    {
+      "key": "family-recipe",
+      "title": "A family recipe",
+      "text": "Ask an elder about a dish your family loves. Write it down to share with your child someday."
+    },
+    {
+      "key": "one-song",
+      "title": "Listen to one song",
+      "text": "Play a piece of calm music you love and simply listen, eyes closed, until it ends."
+    },
+    {
+      "key": "read-aloud",
+      "title": "Read aloud",
+      "text": "Read a short poem or a few lines of a favourite book aloud, slowly, as if to someone listening."
+    },
+    {
+      "key": "lullaby",
+      "title": "Remember a lullaby",
+      "text": "Recall a lullaby from your family or region and hum it softly a few times."
+    },
+    {
+      "key": "hands-busy",
+      "title": "Make something small",
+      "text": "Knit, stitch, fold paper or shape clay. Let your hands work slowly while your mind rests."
+    },
+    {
+      "key": "old-photos",
+      "title": "Old photos",
+      "text": "Look through family photos. Pick one and write down the story behind it."
+    },
+    {
+      "key": "kind-message",
+      "title": "A kind message",
+      "text": "Send a short, kind message to someone you care about."
+    },
+    {
+      "key": "count-sounds",
+      "title": "Count the sounds",
+      "text": "Sit quietly and count the different sounds you can hear: birds, leaves, distant voices."
+    },
+    {
+      "key": "your-hopes",
+      "title": "Your hopes",
+      "text": "Write one hope you hold for your child, and one for yourself as a parent."
+    },
+    {
+      "key": "calm-corner",
+      "title": "One calm corner",
+      "text": "Tidy one small space, a shelf or a drawer, and enjoy how it looks afterwards."
+    },
+    {
+      "key": "flowers",
+      "title": "Flowers or leaves",
+      "text": "Arrange a few flowers or leaves in a bowl of water and place them where you can see them."
+    },
+    {
+      "key": "describe-today",
+      "title": "Describe today",
+      "text": "Write three lines about today: the weather, a feeling, and something you noticed."
+    },
+    {
+      "key": "favourite-scent",
+      "title": "A favourite scent",
+      "text": "Notice a scent you love: jasmine, sandalwood, fresh rain, cardamom. Breathe it in slowly."
+    },
+    {
+      "key": "soft-light",
+      "title": "Soft light",
+      "text": "Spend a few minutes in gentle morning or evening light, sitting comfortably."
+    },
+    {
+      "key": "picture-baby",
+      "title": "A picture for baby",
+      "text": "Draw a simple picture for your baby: your home, the moon, a tree. Keep it with your letters."
+    },
+    {
+      "key": "tell-story",
+      "title": "Tell a story",
+      "text": "Tell your baby a short story from your childhood, out loud or in your head."
+    },
+    {
+      "key": "short-poem",
+      "title": "Write a short poem",
+      "text": "Write four short lines about this moment. They don't need to rhyme."
+    },
+    {
+      "key": "quiet-minutes",
+      "title": "Five quiet minutes",
+      "text": "Sit comfortably, let your shoulders drop, and rest in silence for five minutes."
+    },
+    {
+      "key": "look-forward",
+      "title": "Something to look forward to",
+      "text": "Plan one small, pleasant thing for this week: a call, an outing with someone, a favourite meal."
+    },
+    {
+      "key": "thank-someone",
+      "title": "Thank someone",
+      "text": "Think of someone who helped you this week and tell them thank you, in person or in a message."
+    }
+  ]
+}

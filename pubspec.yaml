@@ -57,6 +57,7 @@ flutter:
   assets:
     - assets/content/weeks.json
     - assets/content/care_template_in.json
+    - assets/content/activities.json
   # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
   fonts:
     - family: Nunito

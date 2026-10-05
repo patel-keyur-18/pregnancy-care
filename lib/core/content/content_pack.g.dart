@@ -92,3 +92,42 @@ final class CareTemplateProvider
 }
 
 String _$careTemplateHash() => r'683d498e975d8a54505c17ad7ead2c83176aff55';
+
+@ProviderFor(activities)
+final activitiesProvider = ActivitiesProvider._();
+
+final class ActivitiesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  ActivitiesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'activitiesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$activitiesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    return activities(ref);
+  }
+}
+
+String _$activitiesHash() => r'a37f517645efff8158ae1cb492a68bff6da302e4';

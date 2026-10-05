@@ -1,7 +1,8 @@
 // Regenerates the owner's review copies of the content packs:
 //   dart run tool/content_md.dart
 // docs/content/weeks.md from assets/content/weeks.json, and
-// docs/content/care_template.md from assets/content/care_template_in.json.
+// docs/content/care_template.md from assets/content/care_template_in.json, and
+// docs/content/activities.md from assets/content/activities.json.
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,6 +10,8 @@ const weeksJson = 'assets/content/weeks.json';
 const weeksMd = 'docs/content/weeks.md';
 const careJson = 'assets/content/care_template_in.json';
 const careMd = 'docs/content/care_template.md';
+const activitiesJson = 'assets/content/activities.json';
+const activitiesMd = 'docs/content/activities.md';
 
 void main() {
   File(
@@ -16,6 +19,9 @@ void main() {
   ).writeAsStringSync(renderWeeksMarkdown(File(weeksJson).readAsStringSync()));
   File(careMd)
       .writeAsStringSync(renderCareMarkdown(File(careJson).readAsStringSync()));
+  File(activitiesMd).writeAsStringSync(
+    renderActivitiesMarkdown(File(activitiesJson).readAsStringSync()),
+  );
 }
 
 String renderWeeksMarkdown(String json) {
@@ -82,6 +88,30 @@ Tests, scans and vaccines commonly offered in pregnancy in India, written to the
   for (final i in items) {
     final weeks = '${i['fromWeek']}–${i['toWeek']}';
     out.write('| $weeks | ${i['kind']} | ${i['title']} | ${i['note']} |\n');
+  }
+  return out.toString();
+}
+
+String renderActivitiesMarkdown(String json) {
+  final items = ((jsonDecode(json) as Map<String, dynamic>)['items'] as List)
+      .cast<Map<String, dynamic>>();
+  final out = StringBuffer('''
+# Daily calm activities (review copy)
+
+Generated from [`assets/content/activities.json`](../../assets/content/activities.json) by `dart run tool/content_md.dart`. Edit the JSON, not this file. A test fails if they differ.
+
+The "Activity" tile on the Garbhasanskar path shows one of these a day, in order, starting again after the last. Original text: small, calm things to do, with no claims about what they do for the baby.
+
+**If you only have five minutes, check these:**
+
+1. Do the ideas feel natural for your days?
+2. Anything you'd add from your own family's traditions?
+
+| # | Activity | Text |
+|---|---|---|
+''');
+  for (final (n, i) in items.indexed) {
+    out.write('| ${n + 1} | ${i['title']} | ${i['text']} |\n');
   }
   return out.toString();
 }

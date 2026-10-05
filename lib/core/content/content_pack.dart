@@ -123,3 +123,27 @@ Future<List<CareTemplateItem>> careTemplate(Ref ref) async => parseCareTemplate(
     cache: false,
   ),
 );
+
+/// One calm idea for the Garbhasanskar path's "Activity" (original text).
+typedef Activity = ({String key, String title, String text});
+
+/// Parses `activities.json` (schemaVersion 1), in file order.
+List<Activity> parseActivities(String source) {
+  final json = jsonDecode(source) as Map<String, dynamic>;
+  if (json['schemaVersion'] != 1) {
+    throw FormatException('Unsupported activities schemaVersion', json);
+  }
+  return [
+    for (final i in (json['items'] as List).cast<Map<String, dynamic>>())
+      (
+        key: i['key'] as String,
+        title: i['title'] as String,
+        text: i['text'] as String,
+      ),
+  ];
+}
+
+@Riverpod(keepAlive: true)
+Future<List<Activity>> activities(Ref ref) async => parseActivities(
+  await rootBundle.loadString('assets/content/activities.json', cache: false),
+);
