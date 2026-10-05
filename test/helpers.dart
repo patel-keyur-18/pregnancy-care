@@ -51,3 +51,23 @@ Future<AppDatabase> pumpApp(
   await tester.pumpAndSettle();
   return db;
 }
+
+/// Opens the date field and types [mmddyyyy] in the picker's input mode.
+Future<void> pickDate(WidgetTester tester, String mmddyyyy) async {
+  final field = find.byIcon(Icons.calendar_today_outlined);
+  await tester.ensureVisible(field);
+  await tester.pumpAndSettle();
+  await tester.tap(field);
+  await tester.pumpAndSettle();
+  await tester.tap(find.byTooltip('Switch to input'));
+  await tester.pumpAndSettle();
+  await tester.enterText(
+    find.descendant(
+      of: find.byType(DatePickerDialog),
+      matching: find.byType(TextField),
+    ),
+    mmddyyyy,
+  );
+  await tester.tap(find.text('OK'));
+  await tester.pumpAndSettle();
+}
