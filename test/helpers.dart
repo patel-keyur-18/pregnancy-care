@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/platform/audio.dart';
+import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -108,6 +109,28 @@ class FakeAudio implements AudioPlayback {
   ));
 }
 
+/// Steps without Apple Health / Health Connect: [walk] for any interval
+/// that starts today after midnight, [today] for the whole day.
+class FakeSteps implements StepSource {
+  bool access = true;
+  int walk = 1420;
+  int today = 4820;
+  int asked = 0;
+
+  @override
+  Future<bool> requestAccess() async {
+    asked++;
+    return access;
+  }
+
+  @override
+  Future<int?> steps(DateTime from, DateTime to) async {
+    if (!access) return null;
+    final midnight = from.hour == 0 && from.minute == 0 && from.second == 0;
+    return midnight ? today : walk;
+  }
+}
+
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
 final testToday = DateTime.utc(2026, 10, 5);
 
@@ -117,6 +140,7 @@ Future<AppDatabase> pumpApp(
   WidgetTester tester, {
   FakeScheduler? scheduler,
   FakeAudio? audio,
+  FakeSteps? steps,
   Directory? library,
   PickFile? pickFile,
   Future<void> Function(AppDatabase db)? seed,
@@ -157,6 +181,7 @@ Future<AppDatabase> pumpApp(
           scheduler ?? FakeScheduler(),
         ),
         audioPlaybackProvider.overrideWith((_) async => audio ?? FakeAudio()),
+        stepSourceProvider.overrideWithValue(steps ?? FakeSteps()),
         libraryRepositoryProvider.overrideWith(
           (ref) => LibraryRepository(
             ref.watch(appDatabaseProvider),

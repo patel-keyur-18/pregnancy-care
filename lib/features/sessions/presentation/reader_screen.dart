@@ -14,6 +14,7 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:pdfrx/pdfrx.dart';
@@ -33,15 +34,13 @@ class ReaderScreen extends ConsumerStatefulWidget {
   ConsumerState<ReaderScreen> createState() => _ReaderScreenState();
 }
 
-class _ReaderScreenState extends ConsumerState<ReaderScreen> {
+class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
   // Read up front: dispose() logs the session and can't use ref.
   late final LibraryRepository _library;
   late final SessionRepository _sessions;
   late final String? _pregnancyId;
   final _startedAt = DateTime.now();
   final _scroll = ScrollController();
-  late final AppLifecycleListener _lifecycle;
-  Timer? _tick;
 
   LibraryItem? _item;
   late String _path;
@@ -54,9 +53,6 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// Thousandths of the way through a text, kept as she scrolls (the
   /// scroll view is gone by the time dispose() runs).
   int? _textPosition;
-  int _seconds = 0;
-  bool _paused = false;
-  bool _visible = true;
 
   @override
   void initState() {
@@ -73,14 +69,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         );
       }
     });
-    // Only time on screen counts as reading.
-    _lifecycle = AppLifecycleListener(
-      onHide: () => _visible = false,
-      onShow: () => _visible = true,
-    );
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_paused && _visible) setState(() => _seconds++);
-    });
+    startClock(); // only time on screen counts as reading
     unawaited(_load());
   }
 
@@ -119,8 +108,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   void dispose() {
-    _tick?.cancel();
-    _lifecycle.dispose();
+    stopClock();
     final item = _item;
     if (item != null) {
       if (_textPosition case final position?) {
@@ -132,13 +120,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           _library.setProgress(item.id, position: _page! - 1, total: _pages),
         );
       }
-      if (_seconds >= 60 && _pregnancyId != null) {
+      if (seconds >= 60 && _pregnancyId != null) {
         unawaited(
           _sessions.log(
             pregnancyId: _pregnancyId,
             type: SessionType.reading,
             startedAt: _startedAt,
-            durationSec: _seconds,
+            durationSec: seconds,
             libraryItemId: item.id,
           ),
         );
@@ -166,8 +154,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final fg = night ? brand.readNightText : brand.readPaperText;
     final item = _item;
     const goal = readGoalMinutes * 60;
-    final left = goal - _seconds;
-    final minutes = _seconds ~/ 60;
+    final left = goal - seconds;
+    final minutes = seconds ~/ 60;
     final subtitle = switch (item?.kind) {
       LibraryKind.pdf when _pages != null && _page != null => l10n.readerPage(
         _page!,
@@ -245,7 +233,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
-                          value: (_seconds / goal).clamp(0, 1),
+                          value: (seconds / goal).clamp(0, 1),
                           minHeight: 4,
                           color: fg.withValues(alpha: 0.6),
                           backgroundColor: fg.withValues(alpha: 0.18),
@@ -336,9 +324,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                                 fontSize: 16,
                               ),
                             ),
-                            onPressed: () => setState(() => _paused = !_paused),
+                            onPressed: () => setState(() => paused = !paused),
                             child: Text(
-                              _paused ? l10n.resumeButton : l10n.pauseButton,
+                              paused ? l10n.resumeButton : l10n.pauseButton,
                             ),
                           ),
                         ),
@@ -461,10 +449,6 @@ ColorFilter _nightFilter(BuildContext context) {
     0,
   ]);
 }
-
-/// "6:10" for [seconds].
-String clockText(int seconds) =>
-    '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
 /// Splits plain text or Markdown into paragraphs at blank lines; single
 /// line breaks inside a paragraph become spaces. Headings keep their `#`.

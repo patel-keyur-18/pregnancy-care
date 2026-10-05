@@ -27,6 +27,9 @@ Future<void> _seed(AppDatabase db) async {
     Stream.value(utf8.encode('# The little lamp\n\nIn a quiet village.')),
   );
   await library.import('om_chanting.mp3', Stream.value([0]));
+  // Routines unlocked, so the exercise screen is reachable.
+  final pregnancy = await db.select(db.pregnancies).getSingle();
+  await PregnancyRepository(db).setFlags(pregnancy.id, exerciseCleared: true);
 }
 
 /// Lets real file reads finish (they run outside fake time).
@@ -172,6 +175,27 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'om chanting', last: true); // library row
       await _settleIo(t);
       await _tapText(t, 'Screen off — keep listening');
+    },
+  ),
+  'walk': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Walk');
+    },
+  ),
+  'exercise': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Gentle flow');
+    },
+  ),
+  'slow breathing': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Slow breathing');
     },
   ),
   'letters': (

@@ -46,3 +46,13 @@ class DeviceSteps implements StepSource {
 
 @Riverpod(keepAlive: true)
 StepSource stepSource(Ref ref) => DeviceSteps();
+
+/// Today's steps so far, without asking for access (null until she allows
+/// it on the Walk screen).
+@riverpod
+Future<int?> todaySteps(Ref ref) {
+  final now = DateTime.now();
+  return ref
+      .watch(stepSourceProvider)
+      .steps(DateTime(now.year, now.month, now.day), now);
+}

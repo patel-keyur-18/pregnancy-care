@@ -83,14 +83,11 @@ void main() {
 
   testWidgets("Today's plan lists and ticks today's doses", (tester) async {
     await pumpApp(tester, seed: _seed);
-    expect(
-      find.text('Add the supplements your doctor prescribed to see them here.'),
-      findsOneWidget,
-    );
+    expect(find.text('0 of 1 done'), findsOneWidget, reason: 'the walk');
     await _addIron(tester);
     await _tab(tester, 'Today');
     expect(find.text("Today's gentle plan"), findsOneWidget);
-    expect(find.text('0 of 1 done'), findsOneWidget);
+    expect(find.text('0 of 2 done'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.bySemanticsLabel('Mark done: Iron + folic acid'),
       200,
@@ -98,7 +95,7 @@ void main() {
     );
     await tester.tap(find.bySemanticsLabel('Mark done: Iron + folic acid'));
     await tester.pumpAndSettle();
-    expect(find.text('1 of 1 done'), findsOneWidget);
+    expect(find.text('1 of 2 done'), findsOneWidget);
   });
 
   testWidgets('See all: this week, edit and remove', (tester) async {
@@ -132,8 +129,10 @@ void main() {
   testWidgets('Me: reminders need permission; limit and quiet hours persist', (
     tester,
   ) async {
-    // Me has two switches; reminders is the last.
-    final reminders = find.byType(Switch).last;
+    final reminders = find.descendant(
+      of: find.ancestor(of: find.text('Reminders'), matching: find.byType(Row)),
+      matching: find.byType(Switch),
+    );
     final scheduler = FakeScheduler()..granted = false;
     final db = await pumpApp(tester, seed: _seed, scheduler: scheduler);
     await _tab(tester, 'Me');

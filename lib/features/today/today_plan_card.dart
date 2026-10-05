@@ -14,10 +14,11 @@ import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/library_actions.dart';
 import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
+import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// "Today's gentle plan" (prototype Today): today's supplement doses and,
-/// once there's a book, a reading session. The walk joins in M4b.
+/// "Today's gentle plan" (prototype Today): today's supplement doses, a
+/// reading session once there's a book, and a gentle walk.
 class TodayPlanCard extends ConsumerWidget {
   const new({super.key});
 
@@ -38,9 +39,10 @@ class TodayPlanCard extends ConsumerWidget {
     final book = (ref.watch(libraryItemsProvider).value ?? const [])
         .where((i) => i.kind != LibraryKind.audio)
         .firstOrNull;
-    final readToday =
-        (ref.watch(sessionsBetweenProvider(day, tomorrow)).value ?? const [])
-            .any((s) => s.type == SessionType.reading);
+    final todaySessions =
+        ref.watch(sessionsBetweenProvider(day, tomorrow)).value ?? const [];
+    final readToday = todaySessions.any((s) => s.type == SessionType.reading);
+    final walkedToday = todaySessions.any((s) => s.type == SessionType.walk);
 
     final rows = <Widget>[
       for (final slot in slots)
@@ -73,10 +75,26 @@ class TodayPlanCard extends ConsumerWidget {
           done: readToday,
           onOpen: () => openLibraryItem(context, book),
         ),
+      // Walking is always open (Plan decision 27).
+      _PlanRow(
+        tile: IconTile(
+          background: scheme.primaryContainer,
+          child: NmIcon(
+            NavmaasIcon.walk,
+            size: 20,
+            color: scheme.onPrimaryContainer,
+          ),
+        ),
+        title: l10n.walkTitle,
+        subtitle: l10n.walkEasy(walkGoalMinutes),
+        done: walkedToday,
+        onOpen: () => context.push('/walk'),
+      ),
     ];
     final done = [
       for (final s in slots) taken.contains(s.key),
       if (book != null) readToday,
+      walkedToday,
     ].where((d) => d).length;
 
     return Column(
@@ -92,47 +110,25 @@ class TodayPlanCard extends ConsumerWidget {
               header: true,
               child: Text(l10n.planTitle, style: text.titleMedium),
             ),
-            if (rows.isNotEmpty)
-              Text(
-                l10n.planDone(done, rows.length),
-                style: text.bodySmall!.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: scheme.outline,
-                ),
+            Text(
+              l10n.planDone(done, rows.length),
+              style: text.bodySmall!.copyWith(
+                fontWeight: FontWeight.w700,
+                color: scheme.outline,
               ),
+            ),
           ],
         ),
         Card(
           clipBehavior: Clip.antiAlias,
-          child: rows.isEmpty
-              ? InkWell(
-                  onTap: () => context.go('/care/supplements/edit'),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      spacing: 12,
-                      children: [
-                        pillTile(scheme),
-                        Expanded(
-                          child: Text(
-                            l10n.planEmpty,
-                            style: text.bodyMedium!.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : Column(
-                  children: [
-                    for (final (i, row) in rows.indexed) ...[
-                      if (i > 0) const Divider(height: 1),
-                      row,
-                    ],
-                  ],
-                ),
+          child: Column(
+            children: [
+              for (final (i, row) in rows.indexed) ...[
+                if (i > 0) const Divider(height: 1),
+                row,
+              ],
+            ],
+          ),
         ),
       ],
     );

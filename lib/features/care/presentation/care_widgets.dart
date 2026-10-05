@@ -377,12 +377,14 @@ class TextEntryDialog extends StatefulWidget {
     required this.title,
     this.initial,
     this.singleLine = false,
+    this.keyboardType,
     super.key,
   });
 
   final String title;
   final String? initial;
   final bool singleLine;
+  final TextInputType? keyboardType;
 
   @override
   State<TextEntryDialog> createState() => _TextEntryDialogState();
@@ -405,6 +407,7 @@ class _TextEntryDialogState extends State<TextEntryDialog> {
       content: TextField(
         controller: _c,
         autofocus: true,
+        keyboardType: widget.keyboardType,
         maxLines: widget.singleLine ? 1 : 6,
         minLines: widget.singleLine ? 1 : 3,
         inputFormatters: [

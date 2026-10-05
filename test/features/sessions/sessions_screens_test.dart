@@ -106,7 +106,7 @@ void main() {
     );
     // Today's plan offers the reading.
     await tester.scrollUntilVisible(find.text('Garbhasanskar reading'), 200);
-    expect(find.text('0 of 1 done'), findsOneWidget);
+    expect(find.text('0 of 2 done'), findsOneWidget); // reading and walk
 
     await _tab(tester, 'Sessions');
     await tester.tap(find.text('evening stories'));
@@ -141,7 +141,7 @@ void main() {
     // Ticked on Today; counted on Journey.
     await _tab(tester, 'Today');
     await tester.scrollUntilVisible(find.text('Garbhasanskar reading'), 200);
-    expect(find.text('1 of 1 done'), findsOneWidget);
+    expect(find.text('1 of 2 done'), findsOneWidget);
     await _tab(tester, 'Journey');
     await tester.scrollUntilVisible(
       find.text('reading session'),

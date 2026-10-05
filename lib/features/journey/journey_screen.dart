@@ -122,7 +122,7 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
           _TrimesterProgress(
             trimester: snapshot.trimester,
             week: snapshot.weeks,
-            readingSessions: _readingSessions(
+            sessions: _sessionCounts(
               ref,
               start: pregnancy.startDate,
               trimester: snapshot.trimester,
@@ -152,8 +152,8 @@ DateTime _trimesterStart(DateTime start, int trimester) {
   return DateTime(first.year, first.month, first.day);
 }
 
-/// Reading sessions logged since the current trimester began.
-int _readingSessions(
+/// Reading sessions and walks logged since the current trimester began.
+({int reading, int walks}) _sessionCounts(
   WidgetRef ref, {
   required DateTime start,
   required int trimester,
@@ -164,7 +164,8 @@ int _readingSessions(
           .watch(sessionsBetweenProvider(_trimesterStart(start, trimester), to))
           .value ??
       const [];
-  return sessions.where((s) => s.type == SessionType.reading).length;
+  int count(SessionType type) => sessions.where((s) => s.type == type).length;
+  return (reading: count(SessionType.reading), walks: count(SessionType.walk));
 }
 
 /// Percentage of supplement doses taken from the start of the current
@@ -575,13 +576,13 @@ class _TrimesterProgress extends StatelessWidget {
   const new({
     required this.trimester,
     required this.week,
-    required this.readingSessions,
+    required this.sessions,
     this.supplementsPercent,
   });
 
   final int trimester;
   final int week;
-  final int readingSessions;
+  final ({int reading, int walks}) sessions;
 
   /// Share of supplement doses taken so far this trimester; null if none.
   final int? supplementsPercent;
@@ -642,7 +643,6 @@ class _TrimesterProgress extends StatelessWidget {
                 ),
               ),
             ),
-            // The walks tile joins these in M4b.
             IntrinsicHeight(
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -650,8 +650,14 @@ class _TrimesterProgress extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _StatTile(
-                      value: '$readingSessions',
-                      label: l10n.readingSessions(readingSessions),
+                      value: '${sessions.reading}',
+                      label: l10n.readingSessions(sessions.reading),
+                    ),
+                  ),
+                  Expanded(
+                    child: _StatTile(
+                      value: '${sessions.walks}',
+                      label: l10n.walksLogged(sessions.walks),
                     ),
                   ),
                   if (supplementsPercent case final pct?)
@@ -663,7 +669,6 @@ class _TrimesterProgress extends StatelessWidget {
                     )
                   else
                     const Spacer(),
-                  const Spacer(),
                 ],
               ),
             ),

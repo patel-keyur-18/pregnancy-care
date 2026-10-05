@@ -11,10 +11,13 @@ import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
+import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
+import 'package:navmaas/features/sessions/presentation/exercise_screen.dart';
 import 'package:navmaas/features/sessions/presentation/letters_screen.dart';
 import 'package:navmaas/features/sessions/presentation/listen_screen.dart';
 import 'package:navmaas/features/sessions/presentation/reader_screen.dart';
 import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
+import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/features/settings/doctor_screen.dart';
 import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
@@ -44,7 +47,8 @@ GoRouter router(Ref ref) {
     },
     routes: [
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
-      // Full screen, above the tab bar (prototype Reader and Listen).
+      // Full screen, above the tab bar (prototype Reader, Listen, Walk and
+      // Exercise).
       GoRoute(
         path: '/read',
         builder: (_, state) => ReaderScreen(itemId: state.extra! as String),
@@ -53,6 +57,13 @@ GoRouter router(Ref ref) {
         path: '/listen',
         builder: (_, state) => ListenScreen(itemId: state.extra! as String),
       ),
+      GoRoute(path: '/walk', builder: (_, _) => const WalkScreen()),
+      GoRoute(
+        path: '/exercise',
+        builder: (_, state) =>
+            ExerciseScreen(routineKey: state.extra! as String),
+      ),
+      GoRoute(path: '/breathe', builder: (_, _) => const BreathingScreen()),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => _Shell(shell),
         branches: [

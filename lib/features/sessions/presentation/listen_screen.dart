@@ -9,7 +9,7 @@ import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/listening_log.dart';
-import 'package:navmaas/features/sessions/presentation/reader_screen.dart';
+import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Listening (prototype "Listen"): plays an imported audio file that keeps

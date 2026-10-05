@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
@@ -14,14 +16,16 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/library_actions.dart';
+import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// A reading session's gentle goal (prototype "15 min").
 const readGoalMinutes = 15;
 
-/// Sessions tab (prototype "Sessions"): the Garbhasanskar path and the
-/// library. Move & breathe joins in M4b.
+/// Sessions tab (prototype "Sessions"): the Garbhasanskar path, the
+/// library, and Move & breathe.
 class SessionsScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -84,6 +88,13 @@ class SessionsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
           const _LibraryCard(),
+          const SizedBox(height: 18),
+          Semantics(
+            header: true,
+            child: Text(l10n.moveAndBreathe, style: text.titleMedium),
+          ),
+          const SizedBox(height: 10),
+          const _MoveAndBreathe(),
         ],
       ),
     );
@@ -422,6 +433,142 @@ class _LibraryRow extends ConsumerWidget {
                         ),
                       ),
                   ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Walk (always open), the routines for this trimester (locked until
+/// "doctor cleared me"), and slow breathing (prototype "Move & breathe").
+class _MoveAndBreathe extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final pregnancy = ref.watch(activePregnancyProvider).value;
+    final trimester = pregnancy == null
+        ? 1
+        : PregnancySnapshot.of(
+            start: pregnancy.startDate,
+            today: ref.watch(todayProvider),
+          ).trimester;
+    final cleared = pregnancy?.exerciseCleared ?? false;
+    final routines = routinesFor(
+      ref.watch(routinesProvider).value ?? const [],
+      trimester: trimester,
+      highRisk: pregnancy?.highRisk ?? false,
+    );
+    final steps = ref.watch(todayStepsProvider).value;
+    final goal = ref.watch(stepGoalProvider).value ?? defaultStepGoal;
+
+    final tiles = [
+      _MoveTile(
+        icon: NavmaasIcon.walk,
+        background: scheme.primaryContainer,
+        foreground: scheme.onPrimaryContainer,
+        title: l10n.walkTile,
+        subtitle: steps != null && steps > 0
+            ? l10n.walkTileSteps(formatSteps(steps), formatSteps(goal))
+            : l10n.walkEasy(walkGoalMinutes),
+        onTap: () => context.push('/walk'),
+      ),
+      for (final r in routines)
+        _MoveTile(
+          icon: r.key == 'pelvic-floor'
+              ? NavmaasIcon.pelvic
+              : cleared
+              ? NavmaasIcon.lotus
+              : NavmaasIcon.lock,
+          background: r.key == 'pelvic-floor'
+              ? scheme.secondaryContainer
+              : scheme.primaryContainer,
+          foreground: r.key == 'pelvic-floor'
+              ? scheme.onSecondaryContainer
+              : scheme.onPrimaryContainer,
+          title: r.title,
+          subtitle: !cleared
+              ? l10n.routineLocked
+              : r.trimesters.length == 1
+              ? l10n.routineOneTrimester(trimester, (r.seconds / 60).ceil())
+              : l10n.minutesShort((r.seconds / 60).ceil()),
+          onTap: cleared
+              ? () => context.push('/exercise', extra: r.key)
+              : () => context.go('/me'),
+        ),
+      _MoveTile(
+        icon: NavmaasIcon.breath,
+        background: scheme.tertiaryContainer,
+        foreground: scheme.onTertiaryContainer,
+        title: l10n.breathingTitle,
+        subtitle: l10n.breathingSub(breathingMinutes),
+        onTap: () => context.push('/breathe'),
+      ),
+    ];
+    return Column(
+      spacing: 10,
+      children: [
+        for (var i = 0; i < tiles.length; i += 2)
+          _TilePair(
+            tiles[i],
+            i + 1 < tiles.length ? tiles[i + 1] : const SizedBox.shrink(),
+          ),
+      ],
+    );
+  }
+}
+
+class _MoveTile extends StatelessWidget {
+  const new({
+    required this.icon,
+    required this.background,
+    required this.foreground,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final NavmaasIcon icon;
+  final Color background;
+  final Color foreground;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 10,
+            children: [
+              IconTile(
+                background: background,
+                child: NmIcon(icon, size: 20, color: foreground),
+              ),
+              Text(
+                title,
+                style: theme.textTheme.bodyLarge!.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  color: theme.colorScheme.outline,
                 ),
               ),
             ],
