@@ -214,18 +214,20 @@ class _Header extends StatelessWidget {
           spacing: 10,
           children: [
             const BrandMark(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.appTitle,
-                  style: theme.textTheme.headlineSmall!.copyWith(
-                    fontSize: 22,
-                    height: 26 / 22,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.appTitle,
+                    style: theme.textTheme.headlineSmall!.copyWith(
+                      fontSize: 22,
+                      height: 26 / 22,
+                    ),
                   ),
-                ),
-                Text(l10n.tagline, style: caption),
-              ],
+                  Text(l10n.tagline, style: caption),
+                ],
+              ),
             ),
           ],
         ),

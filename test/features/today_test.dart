@@ -60,7 +60,7 @@ void main() {
       tester,
       seed: (db) =>
           PregnancyRepository(db)
-              .saveDating(method: .lmp, date: DateTime.utc(2025, 10, 1)),
+              .saveDating(method: .lmp, date: DateTime.utc(2025, 10, 2)),
     );
     expect(find.text('24 weeks 5 days'), findsNothing);
     await tester.tap(find.text('Check dates'));

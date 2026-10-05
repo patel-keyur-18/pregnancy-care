@@ -237,13 +237,15 @@ class DatingForm extends StatelessWidget {
                                 : null,
                             icon: const Icon(Icons.remove_rounded),
                           ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 72),
-                            child: Text(
-                              l10n.cycleDays(value.cycleLength),
-                              textAlign: TextAlign.center,
-                              style: text.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w800,
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(minWidth: 72),
+                              child: Text(
+                                l10n.cycleDays(value.cycleLength),
+                                textAlign: TextAlign.center,
+                                style: text.bodyLarge!.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),
