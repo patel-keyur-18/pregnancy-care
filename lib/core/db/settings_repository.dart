@@ -17,6 +17,9 @@ abstract final class SettingKeys {
 
   /// Reader opens in night colours after 9 pm (default on).
   static const nightReading = 'night_reading';
+
+  /// Walk: daily step goal (default 6,000).
+  static const stepGoal = 'step_goal';
 }
 
 class SettingsRepository {
@@ -82,3 +85,12 @@ Stream<bool> nightReading(Ref ref) => ref
     .watch(settingsRepositoryProvider)
     .watch(SettingKeys.nightReading)
     .map((v) => v != 'false');
+
+/// The daily step goal she set on the Walk screen.
+@riverpod
+Stream<int> stepGoal(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.stepGoal)
+    .map((v) => int.tryParse(v ?? '') ?? defaultStepGoal);
+
+const defaultStepGoal = 6000;

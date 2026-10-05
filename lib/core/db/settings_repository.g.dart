@@ -127,3 +127,41 @@ final class NightReadingProvider
 }
 
 String _$nightReadingHash() => r'e2fb78068998232c10315df9286526204102de4a';
+
+/// The daily step goal she set on the Walk screen.
+
+@ProviderFor(stepGoal)
+final stepGoalProvider = StepGoalProvider._();
+
+/// The daily step goal she set on the Walk screen.
+
+final class StepGoalProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  /// The daily step goal she set on the Walk screen.
+  StepGoalProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'stepGoalProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$stepGoalHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    return stepGoal(ref);
+  }
+}
+
+String _$stepGoalHash() => r'301ea04d8b2ba445c22737247c10053feccbd2b6';

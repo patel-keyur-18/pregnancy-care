@@ -147,3 +147,70 @@ List<Activity> parseActivities(String source) {
 Future<List<Activity>> activities(Ref ref) async => parseActivities(
   await rootBundle.loadString('assets/content/activities.json', cache: false),
 );
+
+/// One step of a routine, timed.
+typedef Move = ({String name, String how, int sec});
+
+/// A guided exercise routine (original text). Shown only for its
+/// [trimesters], hidden when [avoidIfHighRisk] and the pregnancy is marked
+/// high-risk, and locked until "doctor cleared me" is on.
+@immutable
+class Routine {
+  const new({
+    required this.key,
+    required this.title,
+    required this.trimesters,
+    required this.avoidIfHighRisk,
+    required this.moves,
+  });
+
+  factory fromJson(Map<String, dynamic> json) => Routine(
+    key: json['key'] as String,
+    title: json['title'] as String,
+    trimesters: (json['trimesters'] as List).cast<int>().toSet(),
+    avoidIfHighRisk: json['avoidIfHighRisk'] as bool,
+    moves: [
+      for (final m in (json['moves'] as List).cast<Map<String, dynamic>>())
+        (
+          name: m['name'] as String,
+          how: m['how'] as String,
+          sec: m['sec'] as int,
+        ),
+    ],
+  );
+
+  final String key;
+  final String title;
+  final Set<int> trimesters;
+  final bool avoidIfHighRisk;
+  final List<Move> moves;
+
+  int get seconds => moves.fold(0, (sum, m) => sum + m.sec);
+}
+
+/// Parses `routines.json` (schemaVersion 1), in file order.
+List<Routine> parseRoutines(String source) {
+  final json = jsonDecode(source) as Map<String, dynamic>;
+  if (json['schemaVersion'] != 1) {
+    throw FormatException('Unsupported routines schemaVersion', json);
+  }
+  return [
+    for (final r in (json['routines'] as List).cast<Map<String, dynamic>>())
+      Routine.fromJson(r),
+  ];
+}
+
+/// The routines for [trimester], without the cautious ones when [highRisk].
+List<Routine> routinesFor(
+  List<Routine> all, {
+  required int trimester,
+  required bool highRisk,
+}) => [
+  for (final r in all)
+    if (r.trimesters.contains(trimester) && !(highRisk && r.avoidIfHighRisk)) r,
+];
+
+@Riverpod(keepAlive: true)
+Future<List<Routine>> routines(Ref ref) async => parseRoutines(
+  await rootBundle.loadString('assets/content/routines.json', cache: false),
+);

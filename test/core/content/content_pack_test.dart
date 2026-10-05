@@ -137,4 +137,55 @@ void main() {
       );
     });
   });
+
+  group('exercise routines', () {
+    final source = File('assets/content/routines.json').readAsStringSync();
+    final routines = parseRoutines(source);
+
+    test('unique keys, valid trimesters, timed moves', () {
+      expect(routines.map((r) => r.key).toSet(), hasLength(routines.length));
+      for (final r in routines) {
+        expect(r.trimesters, isNotEmpty, reason: r.key);
+        expect(r.trimesters.difference({1, 2, 3}), isEmpty, reason: r.key);
+        expect(r.moves, isNotEmpty, reason: r.key);
+        for (final m in r.moves) {
+          expect(m.sec, greaterThan(0), reason: '${r.key}: ${m.name}');
+          expect(m.how.trim(), isNotEmpty, reason: '${r.key}: ${m.name}');
+        }
+      }
+    });
+
+    test('every trimester has routines, even when high-risk', () {
+      for (final t in [1, 2, 3]) {
+        expect(
+          routinesFor(routines, trimester: t, highRisk: true),
+          isNotEmpty,
+          reason: 'trimester $t',
+        );
+        expect(
+          routinesFor(routines, trimester: t, highRisk: false).length,
+          greaterThan(
+            routinesFor(routines, trimester: t, highRisk: true).length,
+          ),
+          reason: 'trimester $t: high risk hides the cautious ones',
+        );
+      }
+    });
+
+    test('hard lines: no forbidden words, no lying flat on the back', () {
+      final forbidden = RegExp(
+        r'\b(mg|mcg|ml|iu|dose|doses|dosage|tablets?|boy|girl|gender|sex|iq|smarter|intelligen\w*|guarantee\w*|emergency|danger\w*|sos|on your back)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(source).map((m) => m[0]), isEmpty);
+    });
+
+    test('docs/content/routines.md matches the JSON', () {
+      expect(
+        File('docs/content/routines.md').readAsStringSync(),
+        renderRoutinesMarkdown(source),
+        reason: 'run: dart run tool/content_md.dart',
+      );
+    });
+  });
 }
