@@ -53,6 +53,20 @@ jobs:
           path: test/**/failures/
           retention-days: 7
 
+      # After an intended visual change: download `linux-goldens` into
+      # test/goldens/linux/ (this runner's renders are the Linux set).
+      - name: Regenerate Linux goldens
+        if: failure()
+        run: flutter test test/goldens --update-goldens
+
+      - name: Upload Linux goldens
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-goldens
+          path: test/goldens/linux/
+          retention-days: 7
+
       - name: Build release APK
         run: flutter build apk --release
 

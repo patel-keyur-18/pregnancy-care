@@ -77,7 +77,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Assets in tests:** load with `rootBundle.loadString(path, cache: false)`. A cached asset future from one widget test never completes in the next.
 - **Lazy lists:** don't look up a child's context to scroll to it (it may not be built). Compute the offset, as Journey's week chips do.
 - **Widget-test scrolling:** `scrollUntilVisible` stops at "partly visible", possibly under the tab bar. Follow it with `ensureVisible` before tapping.
-- **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push the branch, run `gh workflow run linux-goldens.yml --ref <branch>`, then `gh run download <run-id> -n linux-goldens -D test/goldens/linux`.
+- **Goldens:** one exact set per platform. `test/goldens/macos/` is updated locally. For `test/goldens/linux/`, push to the PR; when CI's tests fail it uploads fresh Linux renders as `linux-goldens`: `gh run download <run-id> -n linux-goldens -D test/goldens/linux`.
 - **Semantics in Cards:** `Card` merges its children into one node. A custom tappable inside a card needs `Semantics(container: true, …)` or screen readers lose it.
 - **Drift transactions:** read with `get…()` inside a transaction, never `watch().first` (the stream waits for the transaction).
 - **Reminder actions** run in a background isolate: no app channels there (`navmaas/files` is skipped), and the app refreshes drift streams on resume.
