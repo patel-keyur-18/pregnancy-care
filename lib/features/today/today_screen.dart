@@ -268,7 +268,7 @@ class _CheckDatesCard extends StatelessWidget {
               ),
             ),
             OutlinedButton(
-              onPressed: () => context.go('/me/dates'),
+              onPressed: () => context.go('/me/edit'),
               child: Text(l10n.checkDates),
             ),
           ],

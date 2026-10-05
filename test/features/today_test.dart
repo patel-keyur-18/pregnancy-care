@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
-import 'package:navmaas/features/settings/edit_dates_screen.dart';
+import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
 
 import '../helpers.dart';
@@ -65,6 +65,6 @@ void main() {
     expect(find.text('24 weeks 5 days'), findsNothing);
     await tester.tap(find.text('Check dates'));
     await tester.pumpAndSettle();
-    expect(find.byType(EditDatesScreen), findsOneWidget);
+    expect(find.byType(EditDetailsScreen), findsOneWidget);
   });
 }

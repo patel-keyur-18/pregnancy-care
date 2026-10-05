@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/drift.dart' hide isNotNull;
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -112,6 +112,16 @@ void main() {
       await repo.put(SettingKeys.themeMode, 'light');
       expect(await repo.watch(SettingKeys.themeMode).first, 'light');
       expect(await db.select(db.settings).get(), hasLength(1));
+    });
+
+    test('settings remove soft-deletes; put brings the key back', () async {
+      final repo = SettingsRepository(db);
+      await repo.put(SettingKeys.firstName, 'Meera');
+      await repo.remove(SettingKeys.firstName);
+      expect(await repo.watch(SettingKeys.firstName).first, isNull);
+      expect((await db.select(db.settings).getSingle()).deletedAt, isNotNull);
+      await repo.put(SettingKeys.firstName, 'Asha');
+      expect(await repo.watch(SettingKeys.firstName).first, 'Asha');
     });
   });
 }

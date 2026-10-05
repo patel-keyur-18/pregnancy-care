@@ -1,26 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/onboarding/dating_form.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Re-dates the active pregnancy; saving re-runs the engine.
-class EditDatesScreen extends ConsumerStatefulWidget {
+/// Edits the first name and re-dates the active pregnancy; saving re-runs
+/// the engine. An empty name removes it.
+class EditDetailsScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
   @override
-  ConsumerState<EditDatesScreen> createState() => _EditDatesScreenState();
+  ConsumerState<EditDetailsScreen> createState() => _EditDetailsScreenState();
 }
 
-class _EditDatesScreenState extends ConsumerState<EditDatesScreen> {
+class _EditDetailsScreenState extends ConsumerState<EditDetailsScreen> {
+  late final _name = TextEditingController(
+    text: ref.read(firstNameProvider).value,
+  );
   DatingInput? _dating;
   var _saving = false;
 
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
   Future<void> _save(DatingInput d) async {
     setState(() => _saving = true);
+    final settings = ref.read(settingsRepositoryProvider);
+    final name = _name.text.trim();
+    await (name.isEmpty
+        ? settings.remove(SettingKeys.firstName)
+        : settings.put(SettingKeys.firstName, name));
     await ref
         .read(pregnancyRepositoryProvider)
         .saveDating(
@@ -35,6 +52,7 @@ class _EditDatesScreenState extends ConsumerState<EditDatesScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
     final today = ref.watch(todayProvider);
     final pregnancy = ref.watch(activePregnancyProvider).value;
     final dating =
@@ -44,7 +62,7 @@ class _EditDatesScreenState extends ConsumerState<EditDatesScreen> {
             : DatingInput.fromPregnancy(pregnancy));
     final start = dating.start;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.editDates)),
+      appBar: AppBar(title: Text(l10n.editDetails)),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,6 +76,21 @@ class _EditDatesScreenState extends ConsumerState<EditDatesScreen> {
                   20,
                 ),
                 children: [
+                  Text(
+                    l10n.firstNameLabel,
+                    style: text.bodyLarge!.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _name,
+                    textCapitalization: TextCapitalization.words,
+                    autofillHints: const [AutofillHints.givenName],
+                    inputFormatters: [LengthLimitingTextInputFormatter(40)],
+                    decoration: InputDecoration(hintText: l10n.firstNameHint),
+                  ),
+                  const SizedBox(height: 24),
                   DatingForm(
                     value: dating,
                     today: today,

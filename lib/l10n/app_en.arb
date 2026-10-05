@@ -77,7 +77,8 @@
 
   "meTitle": "Me",
   "meNoName": "You",
-  "editDates": "Edit pregnancy dates",
+  "editDetails": "Edit details",
+  "editDetailsLabel": "Edit name and pregnancy dates",
   "editButton": "Edit",
   "appearance": "Appearance",
   "themeLight": "Light",

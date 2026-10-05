@@ -5,7 +5,7 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
-import 'package:navmaas/features/settings/edit_dates_screen.dart';
+import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -61,8 +61,8 @@ GoRouter router(Ref ref) {
             (_) => const MeScreen(),
             routes: [
               GoRoute(
-                path: 'dates',
-                builder: (_, _) => const EditDatesScreen(),
+                path: 'edit',
+                builder: (_, _) => const EditDetailsScreen(),
               ),
             ],
           ),

@@ -121,10 +121,10 @@ class MeScreen extends ConsumerWidget {
                         minimumSize: const Size(64, 48),
                         textStyle: text.labelLarge,
                       ),
-                      onPressed: () => context.go('/me/dates'),
+                      onPressed: () => context.go('/me/edit'),
                       child: Text(
                         l10n.editButton,
-                        semanticsLabel: l10n.editDates,
+                        semanticsLabel: l10n.editDetailsLabel,
                       ),
                     ),
                   ],
