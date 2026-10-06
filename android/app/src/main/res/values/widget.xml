@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget (ARCHITECTURE §10): Moonlit Sage light tokens. Its
+     words come from the app's snapshot; only the gallery text is here. -->
+<resources>
+    <color name="widget_surface">#FFFDF9</color>
+    <color name="widget_text">#2F2A28</color>
+    <color name="widget_text_2">#5E5650</color>
+    <color name="widget_text_3">#6E655E</color>
+    <color name="widget_primary">#4A6F5D</color>
+    <color name="widget_primary_soft">#E2ECE5</color>
+    <color name="widget_on_primary_soft">#2C4638</color>
+    <string name="widget_description">Your week and the next reminder</string>
+</resources>
