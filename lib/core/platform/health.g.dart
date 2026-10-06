@@ -89,4 +89,4 @@ final class TodayStepsProvider
   }
 }
 
-String _$todayStepsHash() => r'c514972370eadf565450a7eb1e91db85ed93e90b';
+String _$todayStepsHash() => r'10e3f731b881959d0382f0ec5fe6867e944f4e3b';

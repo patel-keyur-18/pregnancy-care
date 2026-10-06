@@ -26,7 +26,7 @@ dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dar
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
-flutter test integration_test -d <phone>     # on-device checks (allow notifications first)
+flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test runs only on an empty install)
 flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~65 MB, Arm only; what CI builds; limit 100 MB)
 flutter build apk --release           # universal APK (~101 MB, adds x86_64; emulators only); --split-per-abi ~30 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
@@ -39,13 +39,13 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/core/widgets/`: shared widgets (`PillSegmented`, icon motion). New motion is specified in DESIGN_SYSTEM §5 first.
 - `lib/core/reminders/`: the pure planner, the OS scheduler adapter (`ReminderScheduler`, faked in tests by `FakeScheduler`) and calm-notification settings. **Every notification goes through `ReminderSync` in `lib/app/reminders.dart`**, never straight to the plugin.
 - `lib/core/content/`: content-pack loaders. `assets/content/weeks.json` (week-by-week text), `care_template_in.json` (India tests, scans, vaccines) `activities.json` (daily calm activities) and `routines.json` (exercise routines) are the sources; `docs/content/*.md` are generated review copies.
-- `lib/core/platform/`: platform adapters. `audio.dart`: `AudioPlayback` (just_audio behind audio_service; faked in tests by `FakeAudio`), the playback stream and the sleep timer. `health.dart`: `StepSource` (read-only steps from HealthKit / Health Connect; faked by `FakeSteps`).
+- `lib/core/platform/`: platform adapters. `audio.dart`: `AudioPlayback` (just_audio behind audio_service; faked in tests by `FakeAudio`), the playback stream and the sleep timer. `health.dart`: `StepSource` (read-only steps from HealthKit / Health Connect; faked by `FakeSteps`). `build_info.dart`: the iPhone build's expiry from `embedded.mobileprovision` (`pumpApp(buildExpiry:)` in tests).
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
-- `lib/core/utils/`: date-only maths (UTC-midnight dates), `todayProvider` / `nowProvider` (the clock)
-- `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing; the listening log turns playback into sessions; `SessionClock` is the shared once-a-second timer
+- `lib/core/utils/`: date-only maths (UTC-midnight dates), `clockNow` (the one wall clock), `todayProvider` / `nowProvider`
+- `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing; the listening log turns playback into sessions; `SessionClock` is the shared once-a-second timer. `third_trimester/`: kick counter and contraction timer (`domain/patterns.dart`: her averages, never a verdict). `settings/`: Me, pause or end tracking and the quiet "tracking stopped" page. `backup/`: the `.navmaas` file (`backup_file.dart`, pure Dart), `BackupService` (faked by `FakeBackupService` in `pumpApp`), the backup log and the Backup & restore screen
 - `lib/l10n/app_en.arb`: every user-facing string. No literals in widgets.
-- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 at 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
+- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 with `clockNow` pinned to 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker, an optional build expiry, `FakeBackupService` and a fake share sheet); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
 
 ## Hard lines
 
@@ -97,3 +97,9 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **APK ABIs:** `build.gradle.kts` drops every ABI not passed in `--target-platform`, so the Arm-only APK carries no stray x86_64 library.
 - **Repeating animations** never let `pumpAndSettle` finish. Slow breathing animates only after Start, so tests and the accessibility pass see it still; drive a running session with `pump(duration)`.
 - **Health access** is asked on the first walk only; Sessions and Today read steps without asking (null until allowed).
+- **The clock:** never call `DateTime.now()` in `lib/`; use `clockNow()`. Widget tests pin it to 9:00 on 5 Oct 2026 (moving with real and fake time). Rows stamped with the real clock land on another day than the screens show.
+- **Tracking status:** features read only the *active* pregnancy, so a paused / ended / delivered one makes them empty; the router shows `/stopped` instead of the tabs (`latestPregnancyProvider`). Never add per-screen status checks.
+- **Backup & restore from onboarding or the quiet page uses `context.go('/backup')`**, not push: a router refresh re-checks the route *underneath* a pushed one, so restored data appearing would close the screen before "Restored" shows.
+- **Restore stages in `backup-work-restore/`**, never in `backup-work/` (where the backup she just made lives).
+- **The real backup service reads the database lazily** (`database()`): a restore swaps `appDatabaseProvider` underneath it.
+- **Buttons that change colour with state:** give each state its own `key`, or the label fades through the fill (the contraction button failed the contrast test mid-tween).

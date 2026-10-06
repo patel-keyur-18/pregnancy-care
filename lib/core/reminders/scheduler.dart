@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:navmaas/core/reminders/planner.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:timezone/data/latest_all.dart' as tzdata;
@@ -182,7 +183,7 @@ class LocalNotificationsScheduler implements ReminderScheduler {
         have.add(r.id);
       }
     }
-    final now = DateTime.now();
+    final now = clockNow();
     for (final MapEntry(key: id, value: (p, payload)) in want.entries) {
       if (have.contains(id) || !p.at.isAfter(now)) continue;
       await _schedule(id, p.at, payload, l10n);
@@ -191,7 +192,7 @@ class LocalNotificationsScheduler implements ReminderScheduler {
 
   @override
   Future<void> snooze(ReminderPayload payload, AppLocalizations l10n) {
-    final at = DateTime.now().add(const Duration(minutes: 30));
+    final at = clockNow().add(const Duration(minutes: 30));
     final snoozed = ReminderPayload(
       keys: payload.keys,
       title: payload.title,

@@ -11,10 +11,48 @@ import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Opens a book in the reader or audio in the player (full screen).
-void openLibraryItem(BuildContext context, LibraryItem item) => context.push(
-  item.kind == LibraryKind.audio ? '/listen' : '/read',
-  extra: item.id,
-);
+Future<void> openLibraryItem(
+  BuildContext context,
+  WidgetRef ref,
+  LibraryItem item,
+) async {
+  final repo = ref.read(libraryRepositoryProvider);
+  // A backup restored without books and audio lists them, but their files
+  // aren't on this phone: choose the same file again.
+  if (!(await repo.file(item)).existsSync()) {
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final again = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.fileMissing),
+        content: Text(l10n.fileMissingBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancelButton),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.reimportFile),
+          ),
+        ],
+      ),
+    );
+    if (again != true) return;
+    final picked = await ref.read(pickFileProvider)([
+      for (final MapEntry(key: ext, value: kind) in libraryExtensions.entries)
+        if (kind == item.kind) ext,
+    ]);
+    if (picked == null) return;
+    await repo.replaceFile(item, picked.bytes);
+  }
+  if (!context.mounted) return;
+  await context.push(
+    item.kind == LibraryKind.audio ? '/listen' : '/read',
+    extra: item.id,
+  );
+}
 
 /// Picks a book or an audio file and copies it into the library.
 Future<void> addToLibrary(

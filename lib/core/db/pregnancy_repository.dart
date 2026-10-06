@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -23,6 +24,26 @@ class PregnancyRepository {
         ..limit(1);
 
   Stream<Pregnancy?> watchActive() => _active().watchSingleOrNull();
+
+  /// The newest pregnancy, whatever its status: the router shows a calm
+  /// "tracking stopped" page when it isn't active.
+  Stream<Pregnancy?> watchLatest() =>
+      (_db.select(_db.pregnancies)
+            ..where((t) => t.deletedAt.isNull())
+            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
+            ..limit(1))
+          .watchSingleOrNull();
+
+  /// Me → "Pause or end pregnancy tracking", and Resume. Anything but
+  /// active stops baby content and pregnancy reminders at once, because
+  /// every feature reads only the active pregnancy.
+  Future<void> setStatus(String id, PregnancyStatus status) =>
+      (_db.update(_db.pregnancies)..where((t) => t.id.equals(id))).write(
+        PregnanciesCompanion(
+          status: Value(status),
+          updatedAt: Value(clockNow()),
+        ),
+      );
 
   /// Creates the active pregnancy, or re-dates it if one exists.
   Future<void> saveDating({
@@ -46,7 +67,7 @@ class PregnancyRepository {
       embryoDay: Value(method == DatingMethod.ivf ? embryoDay : null),
       startDate: Value(start),
       dueDate: Value(addDays(start, pregnancyLengthDays)),
-      updatedAt: Value(DateTime.now()),
+      updatedAt: Value(clockNow()),
     );
     return _db.transaction(() async {
       final current = await _active().getSingleOrNull();
@@ -70,7 +91,7 @@ class PregnancyRepository {
         PregnanciesCompanion(
           exerciseCleared: Value.absentIfNull(exerciseCleared),
           highRisk: Value.absentIfNull(highRisk),
-          updatedAt: Value(DateTime.now()),
+          updatedAt: Value(clockNow()),
         ),
       );
 }
@@ -83,3 +104,8 @@ PregnancyRepository pregnancyRepository(Ref ref) =>
 @Riverpod(keepAlive: true)
 Stream<Pregnancy?> activePregnancy(Ref ref) =>
     ref.watch(pregnancyRepositoryProvider).watchActive();
+
+/// The newest pregnancy in any status. Kept alive for the router.
+@Riverpod(keepAlive: true)
+Stream<Pregnancy?> latestPregnancy(Ref ref) =>
+    ref.watch(pregnancyRepositoryProvider).watchLatest();

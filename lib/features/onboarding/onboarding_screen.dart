@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
@@ -238,6 +239,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       onPressed: canContinue ? _continue : null,
                       child: Text(l10n.continueButton),
                     ),
+                    // A new phone: bring everything back from a backup.
+                    if (_step == 0)
+                      TextButton(
+                        onPressed: () => context.go('/backup', extra: true),
+                        child: Text(l10n.restoreFromBackup),
+                      ),
                     if (_step > 0)
                       Row(
                         children: [

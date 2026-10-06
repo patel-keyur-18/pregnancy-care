@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/platform/audio.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -12,7 +13,7 @@ part 'listening_log.g.dart';
 /// while it actually plays (screen on or off). Logged from one minute.
 class ListeningLogger {
   new(this._sessions, {required this.pregnancyId, DateTime Function()? clock})
-    : _clock = clock ?? DateTime.now;
+    : _clock = clock ?? clockNow;
 
   final SessionRepository _sessions;
   final String? Function() pregnancyId;

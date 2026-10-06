@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/features/backup/presentation/backup_screen.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_visit_screen.dart';
@@ -21,6 +23,9 @@ import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/features/settings/doctor_screen.dart';
 import 'package:navmaas/features/settings/edit_details_screen.dart';
 import 'package:navmaas/features/settings/me_screen.dart';
+import 'package:navmaas/features/settings/tracking_stopped_screen.dart';
+import 'package:navmaas/features/third_trimester/presentation/contraction_screen.dart';
+import 'package:navmaas/features/third_trimester/presentation/kick_counter_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -29,26 +34,42 @@ part 'router.g.dart';
 
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
-  // Re-run the redirect whenever the active pregnancy appears or goes away.
+  // Re-run the redirect whenever a pregnancy appears or changes status.
   final refresh = ValueNotifier(0);
   ref
-    ..listen(activePregnancyProvider, (_, _) => refresh.value++)
+    ..listen(latestPregnancyProvider, (_, _) => refresh.value++)
     ..onDispose(refresh.dispose);
 
   final router = GoRouter(
     initialLocation: '/today',
     refreshListenable: refresh,
     redirect: (context, state) {
-      final pregnancy = ref.read(activePregnancyProvider);
-      if (!pregnancy.hasValue) return null;
-      final onboarding = state.matchedLocation == '/onboarding';
-      if (pregnancy.value == null) return onboarding ? null : '/onboarding';
-      return onboarding ? '/today' : null;
+      final latest = ref.read(latestPregnancyProvider);
+      if (!latest.hasValue) return null;
+      final pregnancy = latest.value;
+      final at = state.matchedLocation;
+      // No pregnancy yet: onboarding.
+      // Backup & restore is open in every state (a new phone restores
+      // from onboarding). Onboarding and the quiet page *go* there rather
+      // than push: a refresh re-checks the route underneath, which would
+      // close it as soon as the restored data appears.
+      if (at == '/backup') return null;
+      if (pregnancy == null) return at == '/onboarding' ? null : '/onboarding';
+      // Paused, ended or delivered: only the quiet page (and onboarding, to
+      // start a new pregnancy).
+      if (pregnancy.status != PregnancyStatus.active) {
+        return at == '/stopped' || at == '/onboarding' ? null : '/stopped';
+      }
+      return at == '/onboarding' || at == '/stopped' ? '/today' : null;
     },
     routes: [
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingScreen()),
-      // Full screen, above the tab bar (prototype Reader, Listen, Walk and
-      // Exercise).
+      GoRoute(
+        path: '/stopped',
+        builder: (_, _) => const TrackingStoppedScreen(),
+      ),
+      // Full screen, above the tab bar (prototype Reader, Listen, Walk,
+      // Exercise, Kick counter, Contraction timer and Backup & restore).
       GoRoute(
         path: '/read',
         builder: (_, state) => ReaderScreen(itemId: state.extra! as String),
@@ -64,6 +85,15 @@ GoRouter router(Ref ref) {
             ExerciseScreen(routineKey: state.extra! as String),
       ),
       GoRoute(path: '/breathe', builder: (_, _) => const BreathingScreen()),
+      GoRoute(path: '/kicks', builder: (_, _) => const KickCounterScreen()),
+      GoRoute(
+        path: '/backup',
+        builder: (_, state) => BackupScreen(restore: state.extra == true),
+      ),
+      GoRoute(
+        path: '/contractions',
+        builder: (_, _) => const ContractionScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => _Shell(shell),
         branches: [

@@ -115,7 +115,18 @@ enum NavmaasIcon {
   notice(['M12 3.5 2.5 20h19z', 'M12 10v4.5M12 17.5v.01']),
   // Same line style as the prototype's icons (not drawn there).
   close(['M6 6l12 12M18 6 6 18']),
-  scan(['M4 5h16v12H4z', 'M12 17v3M8 20h8', 'M7 12c1.5-3 3.5-3 5 0s3.5 3 5 0']);
+  scan(['M4 5h16v12H4z', 'M12 17v3M8 20h8', 'M7 12c1.5-3 3.5-3 5 0s3.5 3 5 0']),
+  kick([
+    'M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z',
+    'M7 7a7 7 0 0 0 0 10M17 7a7 7 0 0 1 0 10',
+  ]),
+  contraction(['M2.5 12c2 0 2-5 4.5-5s2.5 10 5 10 2.5-10 5-10 2.5 5 4.5 5']),
+  clock([
+    'M12 6a7.5 7.5 0 1 0 0 15a7.5 7.5 0 1 0 0-15z',
+    'M12 10v3.5l2.5 2M9.5 2.5h5',
+  ]),
+  download(['M12 4v11M7 10.5l5 5 5-5M5 20h14']),
+  upload(['M12 20V9M7 13.5l5-5 5 5M5 4h14']);
 
   new(this.svg, {this.fill = false});
 

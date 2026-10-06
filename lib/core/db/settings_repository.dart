@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'settings_repository.g.dart';
@@ -20,6 +21,10 @@ abstract final class SettingKeys {
 
   /// Walk: daily step goal (default 6,000).
   static const stepGoal = 'step_goal';
+
+  /// Weekly backup reminder: 1 (Monday) to 7 (Sunday, the default), or 0
+  /// for off.
+  static const backupDay = 'backup_day';
 }
 
 class SettingsRepository {
@@ -54,7 +59,7 @@ class SettingsRepository {
         onConflict: DoUpdate(
           (_) => SettingsCompanion(
             value: Value(value),
-            updatedAt: Value(DateTime.now()),
+            updatedAt: Value(clockNow()),
             deletedAt: const Value(null),
           ),
           target: [_db.settings.key],
@@ -65,8 +70,8 @@ class SettingsRepository {
   Future<void> remove(String key) =>
       (_db.update(_db.settings)..where((t) => t.key.equals(key))).write(
         SettingsCompanion(
-          deletedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
+          deletedAt: Value(clockNow()),
+          updatedAt: Value(clockNow()),
         ),
       );
 }
@@ -94,3 +99,11 @@ Stream<int> stepGoal(Ref ref) => ref
     .map((v) => int.tryParse(v ?? '') ?? defaultStepGoal);
 
 const defaultStepGoal = 6000;
+
+/// The weekly backup reminder's day (`DateTime.monday` … `DateTime.sunday`),
+/// or 0 when off. Sunday by default (Plan decision 32).
+@riverpod
+Stream<int> backupDay(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.backupDay)
+    .map((v) => int.tryParse(v ?? '') ?? DateTime.sunday);

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -226,7 +227,7 @@ class _BreathingScreenState extends ConsumerState<BreathingScreen>
                       onPressed: started
                           ? () => context.pop()
                           : () => setState(() {
-                              _startedAt = DateTime.now();
+                              _startedAt = clockNow();
                               paused = false;
                             }),
                       child: Text(

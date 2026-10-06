@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -66,7 +67,7 @@ class SupplementRepository {
     int? stock,
     int? refillAt,
   }) => _db.transaction(() async {
-    final now = DateTime.now();
+    final now = clockNow();
     final row = SupplementsCompanion(
       pregnancyId: Value(pregnancyId),
       name: Value(name.trim()),
@@ -114,7 +115,7 @@ class SupplementRepository {
 
   /// Removes a supplement and its times (soft delete; logs stay).
   Future<void> remove(String id) => _db.transaction(() async {
-    final gone = Value<DateTime?>(DateTime.now());
+    final gone = Value<DateTime?>(clockNow());
     await (_db.update(_db.supplements)..where((t) => t.id.equals(id))).write(
       SupplementsCompanion(deletedAt: gone),
     );
@@ -153,7 +154,7 @@ class SupplementRepository {
             .getSingleOrNull();
     final wasTaken = existing != null && existing.deletedAt == null;
     if (wasTaken == taken) return;
-    final now = DateTime.now();
+    final now = clockNow();
     if (existing == null) {
       await _db
           .into(_db.doseLogs)

@@ -10,10 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/platform/audio.dart';
+import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/backup/data/backup_file.dart';
+import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -131,6 +134,58 @@ class FakeSteps implements StepSource {
   }
 }
 
+/// Backups without files or crypto: records what the screens ask for.
+/// [password] opens its one backup; anything else is "wrong password".
+class FakeBackupService implements BackupService {
+  String password = 'correct horse';
+  final created = <({String password, bool includeLibrary})>[];
+  final shared = <File>[];
+  int restores = 0;
+
+  static final _header = BackupHeader(
+    createdAt: DateTime(2026, 10, 3, 21, 12),
+    appVersion: '1.0.0',
+    schemaVersion: 6,
+    includesLibrary: false,
+  );
+
+  @override
+  Future<BackupResult> create({
+    required String password,
+    required bool includeLibrary,
+  }) async {
+    created.add((password: password, includeLibrary: includeLibrary));
+    return (
+      file: File('navmaas-backup-2026-10-05.navmaas'),
+      sizeBytes: 2516582,
+      entries: 1284,
+      photos: 6,
+    );
+  }
+
+  @override
+  Future<({int base, int library})> sizes() async =>
+      (base: 2516582, library: 191260672);
+
+  @override
+  Future<({File file, int size})> receive(Stream<List<int>> bytes) async {
+    await bytes.drain<void>();
+    return (file: File('picked.navmaas'), size: 2516582);
+  }
+
+  @override
+  Future<BackupHeader> inspect(File file) async => _header;
+
+  @override
+  Future<RestoreResult> restore(File file, String password) async {
+    if (password != this.password) {
+      throw const BackupException(BackupError.wrongPassword);
+    }
+    restores++;
+    return (madeAt: _header.createdAt, entries: 1284, photos: 6);
+  }
+}
+
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
 final testToday = DateTime.utc(2026, 10, 5);
 
@@ -143,12 +198,25 @@ Future<AppDatabase> pumpApp(
   FakeSteps? steps,
   Directory? library,
   PickFile? pickFile,
+  DateTime? buildExpiry,
+  FakeBackupService? backup,
+  ShareFile? share,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
   double textScale = 1,
   Size size = const Size(390, 844),
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  // The app's wall clock starts at 9:00 on the test's day and moves with
+  // real and fake time, so rows it stamps fall on the day the screens show
+  // and still come in order.
+  final fakeStart = tester.binding.clock.now();
+  final real = Stopwatch()..start();
+  final pinned = DateTime(testToday.year, testToday.month, testToday.day, 9);
+  clockNow = () => pinned.add(
+    real.elapsed + tester.binding.clock.now().difference(fakeStart),
+  );
+  addTearDown(() => clockNow = DateTime.now);
   // Synchronous stream closing: no drift timer outlives the widget tree.
   final db = AppDatabase(
     DatabaseConnection(
@@ -190,6 +258,11 @@ Future<AppDatabase> pumpApp(
           ),
         ),
         pickFileProvider.overrideWithValue(pickFile ?? (_) async => null),
+        buildExpiryProvider.overrideWith((_) async => buildExpiry),
+        backupServiceProvider.overrideWith(
+          (_) async => backup ?? FakeBackupService(),
+        ),
+        shareFileProvider.overrideWithValue(share ?? (_) async {}),
       ],
       child: const NavmaasApp(),
     ),

@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
@@ -159,7 +160,7 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
         .where((a) => a.id == widget.visitId)
         .firstOrNull;
     if (visit == null) return const Scaffold();
-    final now = DateTime.now();
+    final now = clockNow();
     final questions = questionsFor(
       visit,
       ref.watch(visitQuestionsProvider).value ?? const [],

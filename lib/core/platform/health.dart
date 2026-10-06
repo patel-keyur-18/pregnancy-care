@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:health/health.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'health.g.dart';
@@ -51,7 +52,7 @@ StepSource stepSource(Ref ref) => DeviceSteps();
 /// it on the Walk screen).
 @riverpod
 Future<int?> todaySteps(Ref ref) {
-  final now = DateTime.now();
+  final now = clockNow();
   return ref
       .watch(stepSourceProvider)
       .steps(DateTime(now.year, now.month, now.day), now);

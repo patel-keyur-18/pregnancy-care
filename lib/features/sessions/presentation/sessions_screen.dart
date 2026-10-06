@@ -172,7 +172,7 @@ class _PathCard extends ConsumerWidget {
                     : l10n.minutesTitle(readGoalMinutes, book.title),
                 onTap: () => book == null
                     ? addToLibrary(context, ref, audio: false)
-                    : openLibraryItem(context, book),
+                    : openLibraryItem(context, ref, book),
               ),
               _PathTile(
                 icon: NavmaasIcon.headphones,
@@ -188,7 +188,7 @@ class _PathCard extends ConsumerWidget {
                       },
                 onTap: () => audio == null
                     ? addToLibrary(context, ref, audio: true)
-                    : openLibraryItem(context, audio),
+                    : openLibraryItem(context, ref, audio),
               ),
             ),
             _TilePair(
@@ -363,7 +363,7 @@ class _LibraryRow extends ConsumerWidget {
             showLibraryItemActions(context, ref, item),
       },
       child: InkWell(
-        onTap: () => openLibraryItem(context, item),
+        onTap: () => openLibraryItem(context, ref, item),
         onLongPress: () => showLibraryItemActions(context, ref, item),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

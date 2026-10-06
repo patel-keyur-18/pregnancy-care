@@ -82,6 +82,14 @@ Future<List<int>> readOrCreateAttachmentKey(
   ];
 }
 
+/// Replaces the attachment key: a restore brings the backup's photos and
+/// the key they were sealed with.
+Future<void> writeAttachmentKey(FlutterSecureStorage storage, List<int> key) =>
+    storage.write(
+      key: _attachmentKeyName,
+      value: key.map((b) => b.toRadixString(16).padLeft(2, '0')).join(),
+    );
+
 @Riverpod(keepAlive: true)
 Future<AttachmentStore> attachmentStore(Ref ref) async {
   final support = await getApplicationSupportDirectory();

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.7 — decided 2026-10-04, updated 2026-10-05 (motion in §5; M3 and M4 components; implementation notes in §8) |
+| **Status** | v1.9 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M5 components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -241,5 +241,12 @@ Deliberate, permanent differences:
 | Me → Exercise | "Unlocks walking and exercise routines" | "Unlocks exercise routines. Walking is always open." | Plan decision 27 |
 | Slow breathing | Opens Listen | Its own quiet screen: a lavender circle that grows and shrinks, "Breathe in / Breathe out", 5 min, Start / Pause / Finish | No audio can ship in the repo (Plan decision 28) |
 | Today's plan | Walk as an "Evening walk" row | "Gentle walk · 20 min · easy pace", ticked by a logged walk; the "add supplements" prompt is gone because the walk is always there | Walking is always open |
-
-Still to come: the Kick counter and Contraction timer tiles at the top of Care (M5).
+| Kick counter | Fixed sample count and times | The session starts at the first tap ("Started —" before it); leaving with a count saves it too; "Usually most active" appears from three sessions (the two-hour window with the most movements per minute); "Saved sessions appear here." when empty | Nothing is lost; a pattern needs a few sessions |
+| Contraction timer | Sample log | Shows the last day's contractions (up to 12); averages cover the last hour, "—" until there are two; a contraction is also saved if she leaves mid-way | A log for the doctor, never a verdict |
+| Me → Your data | "Last backup Sat 3 Oct · password protected" | Same row ("No backup yet · password protected" before the first); "Pause or end pregnancy tracking" opens a sheet: Pause tracking, Baby has arrived, End tracking | Plan decision 30 |
+| Tracking stopped | (not drawn) | One quiet page in place of the tabs: the moon in a sage circle, a title ("Tracking is paused", "Tracking has ended", "Congratulations"), a calm line, Resume or Start a new pregnancy, and Backup & restore | Plan decision 31; no baby content |
+| Backup header | "Saved to Files › Navmaas backups" | "Next reminder Sun 11 Oct" (or "— the day before this iPhone build expires", or "Weekly reminder is off"), and a "Remind me weekly · Sunday" row under it | The app can't know where the share sheet saved it; the reminder day needed a home |
+| Backup screen | Fixed sample sizes and counts | Real sizes ("about 2.4 MB" / "about 184.8 MB" with books and audio) and counts; the restore card shows the file's date, size and Navmaas version before the password; Done after a restore goes to Today; the free-Apple-ID note shows on iPhone only | Real data; the note is about iPhone |
+| Onboarding step 1 | (no restore) | A "Restore from a backup" link under Continue | A new phone needs to restore before onboarding |
+| Library row after a restore without books | (not drawn) | Opening it explains "This file isn't on this phone" with "Re-import file" | ARCHITECTURE §11 |
+| Today | (no expiry banner drawn) | An amber banner with the clock icon when the iPhone build expires within a day | ARCHITECTURE §12 |

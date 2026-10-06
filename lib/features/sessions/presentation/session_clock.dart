@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:navmaas/core/utils/clock.dart';
 
 /// A once-a-second clock for a timed session screen: [seconds] counts while
 /// not [paused]. In the background it stops, except for a walk
@@ -21,14 +22,12 @@ mixin SessionClock<T extends StatefulWidget> on State<T> {
 
   void startClock() {
     _lifecycle = AppLifecycleListener(
-      onHide: () => _hiddenAt = DateTime.now(),
+      onHide: () => _hiddenAt = clockNow(),
       onShow: () {
         final hiddenAt = _hiddenAt;
         _hiddenAt = null;
         if (countWhileHidden && hiddenAt != null && !paused && mounted) {
-          setState(
-            () => seconds += DateTime.now().difference(hiddenAt).inSeconds,
-          );
+          setState(() => seconds += clockNow().difference(hiddenAt).inSeconds);
         }
       },
     );

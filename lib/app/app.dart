@@ -18,6 +18,7 @@ import 'package:navmaas/l10n/gen/app_localizations.dart';
 /// nobody listens to, and drift would never emit.
 Future<void> loadFirstValues(ProviderContainer container) => Future.wait([
   container.listen(activePregnancyProvider.future, (_, _) {}).read(),
+  container.listen(latestPregnancyProvider.future, (_, _) {}).read(),
   container.listen(themeModeProvider.future, (_, _) {}).read(),
   container.listen(contentPackProvider.future, (_, _) {}).read(),
 ]);

@@ -55,7 +55,7 @@ final class TodayProvider
   }
 }
 
-String _$todayHash() => r'ae866eb498142ff730a4f2130ab772b96940bacb';
+String _$todayHash() => r'c5a40ffe017712dff79bc46c4cacaac32e6cc79c';
 
 /// The current time, for time-of-day wording such as the greeting. Fixed in
 /// tests; refreshed with [todayProvider] when the app resumes.
@@ -104,4 +104,4 @@ final class NowProvider
   }
 }
 
-String _$nowHash() => r'cd84bcb298b7b9e78457b899f2d2445afe8d297f';
+String _$nowHash() => r'810d768cae31a46f26690d5f1bef273aed5eb51d';

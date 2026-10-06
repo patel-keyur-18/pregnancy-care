@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
@@ -18,7 +19,7 @@ class NextVisitCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final brand = context.navmaas;
-    final now = DateTime.now();
+    final now = clockNow();
     final visit = (ref.watch(appointmentsProvider).value ?? const [])
         .where((a) => a.at.isAfter(now))
         .firstOrNull;

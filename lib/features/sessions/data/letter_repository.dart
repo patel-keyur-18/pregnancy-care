@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'letter_repository.g.dart';
@@ -34,16 +35,13 @@ class LetterRepository {
       return;
     }
     await (_db.update(_db.letters)..where((t) => t.id.equals(id))).write(
-      LettersCompanion(
-        body: Value(body.trim()),
-        updatedAt: Value(DateTime.now()),
-      ),
+      LettersCompanion(body: Value(body.trim()), updatedAt: Value(clockNow())),
     );
   }
 
   Future<void> remove(String id) =>
       (_db.update(_db.letters)..where((t) => t.id.equals(id))).write(
-        LettersCompanion(deletedAt: Value(DateTime.now())),
+        LettersCompanion(deletedAt: Value(clockNow())),
       );
 }
 

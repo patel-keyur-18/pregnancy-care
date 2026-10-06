@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'checklist_repository.g.dart';
@@ -28,12 +29,12 @@ class ChecklistRepository {
         ChecklistTicksCompanion.insert(
           pregnancyId: pregnancyId,
           itemKey: itemKey,
-          deletedAt: Value(ticked ? null : DateTime.now()),
+          deletedAt: Value(ticked ? null : clockNow()),
         ),
         onConflict: DoUpdate(
           (_) => ChecklistTicksCompanion(
-            deletedAt: Value(ticked ? null : DateTime.now()),
-            updatedAt: Value(DateTime.now()),
+            deletedAt: Value(ticked ? null : clockNow()),
+            updatedAt: Value(clockNow()),
           ),
           target: [_db.checklistTicks.pregnancyId, _db.checklistTicks.itemKey],
         ),

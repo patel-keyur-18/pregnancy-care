@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -74,6 +75,19 @@ class LibraryRepository {
         );
   }
 
+  /// Writes [bytes] as [item]'s file again (after a restore without the
+  /// library). Her place in it stays.
+  Future<void> replaceFile(LibraryItem item, Stream<List<int>> bytes) async {
+    final dir = await directory();
+    await dir.create(recursive: true);
+    final sink = File(p.join(dir.path, item.fileName)).openWrite();
+    try {
+      await sink.addStream(bytes);
+    } finally {
+      await sink.close();
+    }
+  }
+
   Future<File> file(LibraryItem item) async =>
       File(p.join((await directory()).path, item.fileName));
 
@@ -82,16 +96,13 @@ class LibraryRepository {
 
   /// Soft-deletes the row and deletes the copied file.
   Future<void> remove(LibraryItem item) async {
-    await _write(
-      item.id,
-      LibraryItemsCompanion(deletedAt: Value(DateTime.now())),
-    );
+    await _write(item.id, LibraryItemsCompanion(deletedAt: Value(clockNow())));
     final f = await file(item);
     if (f.existsSync()) await f.delete();
   }
 
   Future<void> markOpened(String id) =>
-      _write(id, LibraryItemsCompanion(lastOpenedAt: Value(DateTime.now())));
+      _write(id, LibraryItemsCompanion(lastOpenedAt: Value(clockNow())));
 
   Future<void> setProgress(String id, {required int position, int? total}) =>
       _write(
@@ -107,7 +118,7 @@ class LibraryRepository {
 
   Future<void> _write(String id, LibraryItemsCompanion row) =>
       (_db.update(_db.libraryItems)..where((t) => t.id.equals(id))).write(
-        row.copyWith(updatedAt: Value(DateTime.now())),
+        row.copyWith(updatedAt: Value(clockNow())),
       );
 }
 

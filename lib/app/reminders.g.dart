@@ -46,7 +46,7 @@ final class ReminderSyncProvider extends $NotifierProvider<ReminderSync, void> {
   }
 }
 
-String _$reminderSyncHash() => r'c5077b188ee3e6ebc384cab608c5fb13e9e986d8';
+String _$reminderSyncHash() => r'0cc694dbdbd85785d2aafb2b048dc4b3a08cbe46';
 
 /// Keeps the OS schedule in step with supplements, taken doses and the
 /// calm-notification settings. Re-plans on any change and on resume.
