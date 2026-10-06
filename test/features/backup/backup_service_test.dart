@@ -172,7 +172,10 @@ void main() {
     expect((await b.db.select(b.db.backupLog).get()).map((r) => r.kind), [
       BackupKind.restore,
     ]);
-    expect(Directory(p.join(b.root.path, 'backup-work')).existsSync(), false);
+    expect(
+      Directory(p.join(b.root.path, 'backup-work-restore')).existsSync(),
+      isFalse,
+    );
     expect(rollbackDirFor(b.dataDir).existsSync(), isFalse);
   });
 
@@ -298,5 +301,19 @@ void main() {
     b.container.invalidate(appDatabaseProvider);
     final pregnancy = await b.db.select(b.db.pregnancies).getSingle();
     expect(pregnancy.lmp, DateTime.utc(2026, 6, 2));
+  });
+
+  test('restores the backup this phone just made', () async {
+    final made = await a.service.create(
+      password: 'correct horse',
+      includeLibrary: false,
+    );
+    await PregnancyRepository(a.db)
+        .saveDating(method: .lmp, date: DateTime.utc(2026, 6, 2));
+    await a.service.restore(made.file, 'correct horse');
+    expect(
+      (await a.db.select(a.db.pregnancies).getSingle()).lmp,
+      DateTime.utc(2026, 4, 15),
+    );
   });
 }

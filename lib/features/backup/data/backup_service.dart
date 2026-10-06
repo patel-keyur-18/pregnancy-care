@@ -178,8 +178,9 @@ class DeviceBackupService implements BackupService {
     if (header.schemaVersion > database().schemaVersion) {
       throw const BackupException(BackupError.tooNew);
     }
-    final staging = Directory(p.join(workDir.path, 'restore'));
-    if (workDir.existsSync()) await workDir.delete(recursive: true);
+    // Its own folder: the file being restored may sit in [workDir].
+    final staging = Directory('${workDir.path}-restore');
+    if (staging.existsSync()) await staging.delete(recursive: true);
     await staging.create(recursive: true);
     try {
       final manifest = await Isolate.run(
@@ -212,7 +213,7 @@ class DeviceBackupService implements BackupService {
         photos: manifest['photos'] as int? ?? 0,
       );
     } finally {
-      if (workDir.existsSync()) await workDir.delete(recursive: true);
+      if (staging.existsSync()) await staging.delete(recursive: true);
     }
   }
 
