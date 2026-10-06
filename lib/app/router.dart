@@ -13,6 +13,7 @@ import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
+import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart';
 import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/exercise_screen.dart';
 import 'package:navmaas/features/sessions/presentation/letters_screen.dart';
@@ -69,14 +70,19 @@ GoRouter router(Ref ref) {
         builder: (_, _) => const TrackingStoppedScreen(),
       ),
       // Full screen, above the tab bar (prototype Reader, Listen, Walk,
-      // Exercise, Kick counter, Contraction timer and Backup & restore).
+      // Exercise, Kick counter, Contraction timer, Screen Rest and Backup &
+      // restore).
       GoRoute(
         path: '/read',
         builder: (_, state) => ReaderScreen(itemId: state.extra! as String),
       ),
       GoRoute(
         path: '/listen',
-        builder: (_, state) => ListenScreen(itemId: state.extra! as String),
+        // `?screen=off` opens in screen-off mode (the wind-down reminder).
+        builder: (_, state) => ListenScreen(
+          itemId: state.extra! as String,
+          screenOff: state.uri.queryParameters['screen'] == 'off',
+        ),
       ),
       GoRoute(path: '/walk', builder: (_, _) => const WalkScreen()),
       GoRoute(
@@ -86,6 +92,10 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(path: '/breathe', builder: (_, _) => const BreathingScreen()),
       GoRoute(path: '/kicks', builder: (_, _) => const KickCounterScreen()),
+      GoRoute(
+        path: '/screen-rest',
+        builder: (_, _) => const ScreenRestScreen(),
+      ),
       GoRoute(
         path: '/backup',
         builder: (_, state) => BackupScreen(restore: state.extra == true),

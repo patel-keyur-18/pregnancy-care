@@ -212,6 +212,21 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _settleIo(t);
     },
   ),
+  'reader with an eye rest': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'evening stories');
+      await _settleIo(t);
+      await t.pump(const Duration(minutes: 20));
+    },
+  ),
+  'screen rest': (
+    true,
+    (t) async {
+      await _tapText(t, 'Screen-free from 9:30 pm');
+    },
+  ),
   'listen': (
     true,
     (t) async {

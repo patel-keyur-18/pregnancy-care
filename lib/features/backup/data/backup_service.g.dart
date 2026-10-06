@@ -92,7 +92,7 @@ final class BackupSizesProvider
   }
 }
 
-String _$backupSizesHash() => r'155596f3aae1046a1a3bfe11a502174d9fdb901c';
+String _$backupSizesHash() => r'734844e6cff4e30debcaecccbd8d85d5a4fcb872';
 
 @ProviderFor(shareFile)
 final shareFileProvider = ShareFileProvider._();

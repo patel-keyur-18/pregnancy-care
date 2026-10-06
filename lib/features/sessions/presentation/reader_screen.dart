@@ -12,6 +12,7 @@ import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/screen_rest/data/screen_use.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
@@ -53,6 +54,19 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
   /// Thousandths of the way through a text, kept as she scrolls (the
   /// scroll view is gone by the time dispose() runs).
   int? _textPosition;
+
+  /// Seconds left of an eye rest (Screen Rest → Eye-rest nudge).
+  int _eyeRestLeft = 0;
+
+  @override
+  void onSecond() {
+    if (_eyeRestLeft > 0) {
+      _eyeRestLeft--;
+    } else if (seconds % eyeRestEvery == 0 &&
+        (ref.read(eyeRestProvider).value ?? true)) {
+      _eyeRestLeft = eyeRestSeconds;
+    }
+  }
 
   @override
   void initState() {
@@ -143,6 +157,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     final brand = context.navmaas;
     final scheme = theme.colorScheme;
     final nightSetting = ref.watch(nightReadingProvider).value;
+    ref.watch(eyeRestProvider);
     if (_night == null && nightSetting != null) {
       final hour = ref.read(nowProvider).hour;
       _night =
@@ -250,7 +265,24 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
                 ],
               ),
             ),
-            Expanded(child: _body(context, l10n, bg, fg, night)),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(child: _body(context, l10n, bg, fg, night)),
+                  // Over the page, so the book doesn't jump.
+                  if (_eyeRestLeft > 0)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: _EyeRest(
+                        secondsLeft: _eyeRestLeft,
+                        onClose: () => setState(() => _eyeRestLeft = 0),
+                      ),
+                    ),
+                ],
+              ),
+            ),
             DecoratedBox(
               decoration: BoxDecoration(
                 border: Border(
@@ -457,3 +489,63 @@ List<String> paragraphsOf(String text) => [
     if (block.trim().isNotEmpty)
       block.trim().replaceAll(RegExp(r'\s*\n\s*'), ' '),
 ];
+
+/// Every 20 minutes of reading, a 20-second rest for her eyes.
+const int eyeRestEvery = 20 * 60;
+const eyeRestSeconds = 20;
+
+/// "Rest your eyes: look far away for 20 seconds." with its countdown.
+class _EyeRest extends StatelessWidget {
+  const new({required this.secondsLeft, required this.onClose});
+
+  final int secondsLeft;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final on = scheme.onTertiaryContainer;
+    final style = theme.textTheme.bodyMedium!.copyWith(
+      fontWeight: FontWeight.w700,
+      color: on,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 4, 4),
+          child: Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(l10n.eyeRestNow, style: style),
+                ),
+              ),
+              ExcludeSemantics(
+                child: Text(
+                  l10n.eyeRestSeconds(secondsLeft),
+                  style: style.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.closeButton,
+                onPressed: onClose,
+                icon: NmIcon(NavmaasIcon.close, size: 20, color: on),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -16,11 +16,12 @@ import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/core/widgets/notice_box.dart';
 import 'package:navmaas/features/today/next_visit_card.dart';
+import 'package:navmaas/features/today/screen_rest_card.dart';
 import 'package:navmaas/features/today/today_plan_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today: header, the iPhone build-expiry banner when it's close, the week
-/// hero card, today's plan and the next visit. Screen Rest joins in M6.
+/// hero card, today's plan, the next visit and Screen Rest.
 class TodayScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -56,6 +57,7 @@ class TodayScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           const TodayPlanCard(),
           const NextVisitCard(),
+          const ScreenRestCard(),
         ],
       ),
     );
