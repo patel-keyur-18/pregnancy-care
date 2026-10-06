@@ -208,7 +208,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M6a)
+## 8. Implementation status (M6)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -256,3 +256,4 @@ Deliberate, permanent differences:
 | Today → Screen Rest card | "Screen-free from 9:30 pm" · "Wind-down audio at 9:00 pm — phone down, baby time." | Same with wind-down on; "Phone down, baby time." when it's off; "Screen Rest" · "Set calm, screen-free times." when bedtime rest is off | Wind-down is off by default |
 | Me → Quiet hours | "Matches your Screen Rest bedtime" | Same; shows "Off" when bedtime rest is off; still tappable to change the times | Same setting in both places |
 | Reader eye rest | (not drawn) | A lavender banner over the top of the page: "Rest your eyes: look far away for 20 seconds.", a countdown and Close; gone after 20 seconds | Screen Rest → Eye-rest nudge |
+| Me → Your data | Backup row and "Pause or end pregnancy tracking" | Also a red "Delete all data" text button under them; its dialog (title, what goes, last backup) has "Back up first", Cancel and a red "Delete everything" | Plan decision 35; red only for destructive actions |

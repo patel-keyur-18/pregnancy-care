@@ -26,9 +26,9 @@ dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dar
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
-flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test runs only on an empty install)
-flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~65 MB, Arm only; what CI builds; limit 100 MB)
-flutter build apk --release           # universal APK (~101 MB, adds x86_64; emulators only); --split-per-abi ~30 MB per phone
+flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test backs up, restores and deletes all data, so it runs only on an empty install)
+flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~66 MB, Arm only; what CI builds; CI fails it over 100 MB)
+flutter build apk --release           # universal APK (~103 MB, adds x86_64; emulators only; limit 150 MB); --split-per-abi ~30 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
 
@@ -45,7 +45,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/core/utils/`: date-only maths (UTC-midnight dates), `clockNow` (the one wall clock), `todayProvider` / `nowProvider`
 - `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing; the listening log turns playback into sessions; `SessionClock` is the shared once-a-second timer. `third_trimester/`: kick counter and contraction timer (`domain/patterns.dart`: her averages, never a verdict). `settings/`: Me, pause or end tracking and the quiet "tracking stopped" page. `screen_rest/`: Screen Rest (rules in `settings`, ADR 037), time in Navmaas (`ScreenUse`, saved when the app leaves the screen), rest windows and nudges (`domain/`, pure). `backup/`: the `.navmaas` file (`backup_file.dart`, pure Dart), `BackupService` (faked by `FakeBackupService` in `pumpApp`), the backup log and the Backup & restore screen
 - `lib/l10n/app_en.arb`: every user-facing string. No literals in widgets.
-- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 with `clockNow` pinned to 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker, an optional build expiry, `FakeBackupService` and a fake share sheet); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
+- `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 with `clockNow` pinned to 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker, an optional build expiry, `FakeBackupService`, a fake share sheet and a delete-all-data that empties the in-memory DB); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
 
 ## Hard lines
 
@@ -57,6 +57,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
   - ≥ 48 dp touch targets
   - `Semantics`/tooltip on icon-only buttons
   - no overflow at 1.0×, 1.3× and 2.0× text
+  - a heading (`Semantics(header: true)`) on every screen, sheet and dialog
   - respect reduce motion
 
   `test/accessibility_test.dart` enforces this for every screen; add new screens to it.
@@ -101,6 +102,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Tracking status:** features read only the *active* pregnancy, so a paused / ended / delivered one makes them empty; the router shows `/stopped` instead of the tabs (`latestPregnancyProvider`). Never add per-screen status checks.
 - **Backup & restore from onboarding or the quiet page uses `context.go('/backup')`**, not push: a router refresh re-checks the route *underneath* a pushed one, so restored data appearing would close the screen before "Restored" shows.
 - **Restore stages in `backup-work-restore/`**, never in `backup-work/` (where the backup she just made lives).
+- **Providers that swap the database** (`backupService`, `deleteAllData`) are `keepAlive`: an auto-dispose one is disposed mid-run once nothing listens (the simulator caught it).
 - **The real backup service reads the database lazily** (`database()`): a restore swaps `appDatabaseProvider` underneath it.
 - **Reminder settings compare by value** (`ReminderSettings ==`, `.distinct()`): writing an unrelated setting (time in Navmaas, saved on every hide) must not re-plan reminders. Add new rule fields to `_fields`.
 - **Notification taps** go through `openReminder` (`ReminderPayload.open`); a tap that launched the app comes from `ReminderScheduler.launchResponse()` after the first frame.

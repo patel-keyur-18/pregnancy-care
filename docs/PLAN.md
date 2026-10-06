@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v11 — approved 2026-10-04, updated 2026-10-06 (M1–M5 and M6a built; owner decisions 12–34) |
+| **Status** | v11 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–36) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -32,7 +32,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 11 | Backup & restore | **In the MVP.** Password-protected backup file plus restore |
 | 12 | Bundle ID | **`com.patelkeyur.navmaas`** on iOS and Android. It never changes: a new ID installs a new, empty app |
 | 13 | OS backups | **Stay on for both platforms**, but Navmaas's encrypted database and its key are left out of them on both, so behaviour is the same. The `.navmaas` backup file is how data moves between phones |
-| 14 | App size | **Up to 100 MB** is fine |
+| 14 | App size | **Up to 100 MB** for the phone APK is fine; the universal APK (emulators) may be up to 150 MB (decision 36) |
 | 15 | Prototype fidelity | Screens follow the prototype **exactly**, including its own line icons (drawn in M2) |
 | 16 | Week-by-week text and India care template | Claude drafts **original** text; the owner reviews it and decides what ships |
 | 17 | First name | Optional during onboarding; **editable in Me** (M2) |
@@ -43,7 +43,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 22 | Notification permission | Asked in onboarding (optional step), switchable in Me, and offered once after the first supplement |
 | 23 | Doctor details | Optional onboarding step (3 of 4, skippable), editable in Me: doctor, clinic, phone and address; Call clinic and Directions (Apple / Google Maps) on visits in M3b |
 | 24 | Book formats | **PDF and plain text (`.txt`, `.md`)** for now; EPUB later. Audio: MP3, M4A, AAC, WAV |
-| 25 | APK build | The phone build is **Arm only** (`--target-platform android-arm,android-arm64`, about 65 MB). The universal APK (adds x86_64 for emulators) stays available as an option; since M4b it is about 101 MB, so it's for emulators only |
+| 25 | APK build | The phone build is **Arm only** (`--target-platform android-arm,android-arm64`, about 65 MB). The universal APK (adds x86_64 for emulators) stays available as an option; since M4b it is over 100 MB (about 103 MB at M6), so it's for emulators only |
 | 26 | Safety note on Walk and Exercise | A gentle general line ("Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor.") plus the talk test, **not** the prototype's symptom list, which would be a danger-sign list (§5.5) |
 | 27 | Walking | **Always open** ("it is always good to walk daily"). Only the exercise routines wait for "doctor cleared me" |
 | 28 | Slow breathing and Activity | Breathing is a quiet 5-minute paced timer (no audio in the repo). The path's Activity tile shows one of about 30 original calm activities a day, drafted by Claude for the owner's review |
@@ -53,6 +53,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 32 | Weekly backup reminder | On by default, **Sundays at 10:00**, day changeable (or off) on the Backup screen; skipped when she backed up in the last 6 days |
 | 33 | M5 technical changes | Backups use **ChaCha20-Poly1305** (as strong as AES-256-GCM, twice as fast in pure Dart) and a simple list of files inside the encrypted body instead of ZIP, so `archive` isn't needed. The iPhone build expiry is read in Dart (no Swift channel). Backups are saved through the share sheet, since the save dialog needs the whole file in memory |
 | 34 | Screen Rest rules | Four rules, as drawn: **Bedtime rest** (the quiet hours), **Meal times** (hold reminders until each 45-minute window ends, and send one gentle notice as it starts), **Eye-rest nudge** (a 20-second rest every 20 minutes of reading, in the reader only) and **Wind-down audio** (off by default; a 9:00 pm nudge that opens the audio she played last with the screen off, or Sessions if she has none). Time in Navmaas today is counted on the phone. The prototype's Phase 2 "Limits for other apps" card is left out until P2 |
+| 35 | Delete all data | **In the MVP (M6).** Me → Your data → "Delete all data" (red). A dialog says what goes, shows the last backup with "Back up first", then "Delete everything" wipes the phone's Navmaas data and keys and starts again at onboarding. Backup files saved elsewhere stay |
+| 36 | Universal APK size | Up to **150 MB** (it's for emulators); the phone APK stays at 100 MB at most |
 
 ### What these decisions change
 
@@ -141,6 +143,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6a Screen Rest ✅ 2026-10-06 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |

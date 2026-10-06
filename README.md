@@ -12,11 +12,42 @@ It combines:
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
 
-> **Status:** M1–M4 are built (2026-10-05), and M5 and M6a (2026-10-06): onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, Sessions with the Garbhasanskar path, your own books (PDF, text) and audio with a calm reader and screen-off listening, letters to baby, walks with steps from Apple Health / Health Connect, gentle exercise routines once the doctor has cleared you, slow breathing, a kick counter and contraction timer, pause or end tracking with one quiet page, the iPhone build-expiry reminder, password-protected backup and restore (with a weekly reminder), Screen Rest (bedtime and meal-time rest that keep reminders quiet, an eye rest while reading, a wind-down nudge and time in Navmaas today), and Me — all on an encrypted on-device database. Next is M6b (delete all data, an accessibility pass and release builds).
+> **Status:** the MVP (M1–M6) is built: M1–M4 on 2026-10-05, M5 and M6 on 2026-10-06: onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, Sessions with the Garbhasanskar path, your own books (PDF, text) and audio with a calm reader and screen-off listening, letters to baby, walks with steps from Apple Health / Health Connect, gentle exercise routines once the doctor has cleared you, slow breathing, a kick counter and contraction timer, pause or end tracking with one quiet page, the iPhone build-expiry reminder, password-protected backup and restore (with a weekly reminder), Screen Rest (bedtime and meal-time rest that keep reminders quiet, an eye rest while reading, a wind-down nudge and time in Navmaas today), and Me (with delete all data) — all on an encrypted on-device database.
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
 > The iPhone build is signed with a free Apple ID and renewed from Xcode every 7 days ([how](docs/ARCHITECTURE.md#12-iphone-with-a-free-apple-id)).
+
+## Install on your phones
+
+**Android** (once: make a signing key and keep it safe, outside this repo; every update must be signed with the same key, or the old app has to be removed, which deletes its data):
+
+```sh
+keytool -genkeypair -v -keystore ~/navmaas-upload.jks -keyalg RSA -keysize 2048 \
+  -validity 10000 -alias navmaas
+```
+
+Then create `android/key.properties` (git-ignored, never committed):
+
+```properties
+storeFile=/Users/<you>/navmaas-upload.jks
+storePassword=<the password you chose>
+keyAlias=navmaas
+keyPassword=<the password you chose>
+```
+
+Build the phone APK (Arm only, about 66 MB) and install it with the phone connected over USB (USB debugging on):
+
+```sh
+flutter build apk --release --target-platform android-arm,android-arm64
+adb install -r build/app/outputs/flutter-apk/app-release.apk
+```
+
+`-r` installs over the existing app and keeps its data. Without `key.properties` the build is signed with the debug key, which is fine for a try-out but can't update a phone that has the release-signed app.
+
+**iPhone** (free Apple ID): connect the phone, then `flutter run --release`, and do it again within 7 days; the app reminds you the day before. First-time steps (Developer Mode, the personal team, trusting the certificate) are in [Architecture §12](docs/ARCHITECTURE.md#personal-install-steps).
+
+Before reinstalling or moving phones, make a backup in Me → Backup & restore.
 
 ## Documents
 
