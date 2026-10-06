@@ -254,6 +254,13 @@ Stream<String?> wellbeingCardHidden(Ref ref) => ref
     .watch(settingsRepositoryProvider)
     .watch(SettingKeys.wellbeingCardHidden);
 
+/// Whether today's glasses have reached the goal (skips today's water
+/// nudges). Changes only when it flips, so each glass doesn't re-plan.
+@riverpod
+bool waterGoalReached(Ref ref) =>
+    ref.watch(wellbeingWeekProvider).first.glasses >=
+    (ref.watch(waterGoalProvider).value ?? defaultWaterGoal);
+
 const defaultWaterGoal = 8;
 const minWaterGoal = 4;
 const maxWaterGoal = 16;

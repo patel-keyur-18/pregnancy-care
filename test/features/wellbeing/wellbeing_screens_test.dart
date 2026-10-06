@@ -245,4 +245,38 @@ void main() {
       expect(card(), findsNothing);
     });
   });
+
+  testWidgets("water nudges go through ReminderSync; today's stop at the "
+      'goal', (tester) async {
+    final scheduler = FakeScheduler();
+    await pumpApp(
+      tester,
+      scheduler: scheduler,
+      seed: (db) async {
+        await _seed(db);
+        final settings = SettingsRepository(db);
+        await settings.put(SettingKeys.remindersOn, 'true');
+        await settings.put(SettingKeys.waterRemind, 'true');
+        await settings.put(SettingKeys.waterGoal, '4');
+      },
+    );
+    List<DateTime> water(int day) => [
+      for (final p in scheduler.scheduled)
+        if (p.at.day == day && p.keys.any((k) => k.startsWith('water@'))) p.at,
+    ];
+    // Every 2 hours from 9:00; lunch drops the 1 pm one, and the lunch
+    // notice takes the 4th place under the daily limit of 4.
+    expect(water(5), [
+      for (final h in [9, 11, 15]) DateTime(2026, 10, 5, h),
+    ]);
+    expect(water(6), isNotEmpty);
+
+    // Reaching the goal from Today's card re-plans: today's are gone.
+    for (var i = 0; i < 4; i++) {
+      await _tap(tester, find.byTooltip('Add a glass'));
+    }
+    await tester.pumpAndSettle();
+    expect(water(5), isEmpty);
+    expect(water(6), isNotEmpty);
+  });
 }

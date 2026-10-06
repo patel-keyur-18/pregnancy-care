@@ -389,3 +389,52 @@ final class WellbeingCardHiddenProvider
 
 String _$wellbeingCardHiddenHash() =>
     r'3c200ee1a7d75d0727df627a1e01757d281b835a';
+
+/// Whether today's glasses have reached the goal (skips today's water
+/// nudges). Changes only when it flips, so each glass doesn't re-plan.
+
+@ProviderFor(waterGoalReached)
+final waterGoalReachedProvider = WaterGoalReachedProvider._();
+
+/// Whether today's glasses have reached the goal (skips today's water
+/// nudges). Changes only when it flips, so each glass doesn't re-plan.
+
+final class WaterGoalReachedProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether today's glasses have reached the goal (skips today's water
+  /// nudges). Changes only when it flips, so each glass doesn't re-plan.
+  WaterGoalReachedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'waterGoalReachedProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$waterGoalReachedHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return waterGoalReached(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$waterGoalReachedHash() => r'fac7224f310d28b0a26d2864900a45c2d5d97402';
