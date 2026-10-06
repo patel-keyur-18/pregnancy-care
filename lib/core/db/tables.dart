@@ -291,6 +291,94 @@ class Contractions extends Table with BaseColumns {
   DateTimeColumn get endedAt => dateTime()();
 }
 
+// Wellbeing (M7, Plan decisions 39–44). The database stores these keys;
+// their words live in app_en.arb (moodWord*, symptomPick*, severity*,
+// restedWord*), checked by the content hard-line test.
+enum MoodWord { calm, happy, okay, tired, low }
+
+enum SymptomKind {
+  nausea,
+  heartburn,
+  backache,
+  swollenFeet,
+  headache,
+  legCramps,
+  constipation,
+  tiredness,
+  troubleSleeping,
+  bloating,
+}
+
+enum Severity { mild, moderate, strong }
+
+enum Rested { rested, bitTired, veryTired }
+
+/// One mood check-in a day; only today's can change.
+@DataClassName('MoodEntry')
+class MoodEntries extends Table with BaseColumns {
+  @override
+  String get tableName => 'mood_entry';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get day => text().map(const DateOnlyConverter())();
+  TextColumn get mood => textEnum<MoodWord>()();
+  TextColumn get note => text().nullable()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, day},
+  ];
+}
+
+/// A logged discomfort: a pick-list key or her own name. A log, never advice.
+@DataClassName('SymptomEntry')
+class SymptomEntries extends Table with BaseColumns {
+  @override
+  String get tableName => 'symptom_entry';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  DateTimeColumn get loggedAt => dateTime()();
+  TextColumn get symptomKey => textEnum<SymptomKind>().nullable()();
+  TextColumn get customName => text().nullable()();
+  TextColumn get severity => textEnum<Severity>()();
+  TextColumn get note => text().nullable()();
+}
+
+/// One night's sleep, dated by the day she woke up.
+@DataClassName('SleepLog')
+class SleepLogs extends Table with BaseColumns {
+  @override
+  String get tableName => 'sleep_log';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get day => text().map(const DateOnlyConverter())();
+  DateTimeColumn get bedAt => dateTime()();
+  DateTimeColumn get wokeAt => dateTime()();
+  IntColumn get napMinutes => integer().withDefault(const Constant(0))();
+  TextColumn get rested => textEnum<Rested>().nullable()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, day},
+  ];
+}
+
+/// Glasses of water on a day.
+@DataClassName('WaterLog')
+class WaterLogs extends Table with BaseColumns {
+  @override
+  String get tableName => 'water_log';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get day => text().map(const DateOnlyConverter())();
+  IntColumn get glasses => integer()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, day},
+  ];
+}
+
 enum BackupKind { backup, restore }
 
 /// When a backup was made or restored. Never holds the password.
