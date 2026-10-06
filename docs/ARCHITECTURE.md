@@ -28,7 +28,7 @@
 - 100 % offline.
 - No network calls.
 - Every screen usable at 200 % text size and with TalkBack / VoiceOver.
-- Backup of a 500 MB library streams in under 50 MB of RAM (measured in M5b: +32 MB at peak).
+- A backup streams through in a fixed amount of memory, whatever the library size: a 500 MB library needs about what a 50 MB one does (about +30 MB on a Mac, up to ~80 MB on CI's Linux, depending on garbage collection; owner decision 2026-10-06).
 
 ## 2. Architecture at a glance
 
@@ -379,7 +379,7 @@ flowchart TB
   - The parameters live in the header, so they can change later without breaking old backups.
 - **Consistent snapshot:** `VACUUM INTO` writes a consistent copy of the database, still SQLCipher-encrypted with its key (ADR 035). The DB key and the attachment key travel in the manifest, inside the password-encrypted body.
 - **Integrity:** every 1 MiB piece is authenticated (ChaCha20-Poly1305 tag, header hash, index, last-piece flag), and each file's size is checked, so per-file hashes aren't needed. A failure on the first piece is reported as a wrong password, later ones as a damaged file. File names are checked so a crafted backup can't write outside its folder.
-- **Streaming:** files are read and encrypted piece by piece, so a 500 MB library never sits in memory (a test measures the peak).
+- **Streaming:** files are read and encrypted piece by piece into one reused buffer, so a 500 MB library never sits in memory (a test checks memory doesn't grow with its size).
 - **Saving:** the finished file is handed to the share sheet ("Save to Files" on iPhone; Files, Drive or another app on Android). A picked backup is copied onto the phone first, so it can be read in pieces.
 - **Library is optional:**
   - With the library off, a backup is small (a few MB) and quick to send.
@@ -490,7 +490,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
   - Truncated, reordered or tampered chunks.
   - Restoring an older schema (migrates) and rejecting a newer one.
   - Interrupted swap (rollback works).
-  - A 500 MB library within the memory budget.
+  - A 500 MB library needs about the memory of a 50 MB one (under 48 MB more; under 128 MB in all).
 - **Widget and golden tests:** onboarding, Today, Journey, Sessions and Me in light and dark; the 15-min reading and 20-min walk logged end to end; kick counter and contraction timer logged; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
 - **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent (weeks, care template, activities, routines), routines for every trimester even when high-risk, no lying on the back, review copies in sync.
 - **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); `integration_test/build_expiry_test.dart` reads the iPhone build's expiry; `integration_test/backup_test.dart` backs up and restores with the real keychain and files (empty installs only, since a restore replaces data); later: onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
