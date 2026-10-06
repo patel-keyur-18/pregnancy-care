@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–50; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred) |
+| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–54; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -69,6 +69,10 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 48 | App lock timeout (M10) | Always locks on a fresh open; after leaving Navmaas for **1, 5 or 15 minutes** (default 1), so a file picker, share sheet or Health dialog never locks her out mid-task |
 | 49 | Widget's next reminder (M10) | **Whatever notification fires next**, nudges and the digest included, as the notification titles it |
 | 50 | M10 split | **M10a** (widgets, hide details) and **M10b** (app lock), stacked PRs |
+| 51 | App-limit notice wording (M11) | Title **"Time for a pause"**, body **"{minutes} min on {app} today. Phone down, baby time."**. One per app per day; nothing is blocked |
+| 52 | App-limit minute steps (M11) | **15 · 30 · 45 · 60 · 90 · 120** minutes a day per app, default 30 |
+| 53 | How the Android check follows the calm rules (M11) | **A rules snapshot.** Dart writes, for the week ahead, the times a notice may go out (outside quiet hours and meal windows, so a notice waits until a window ends, the same day), each day's room under the daily limit after the planned reminders, and the ready-made notice per app. A Kotlin WorkManager job every 15 minutes, only while a limit is set, applies it. Over the daily limit the notice is dropped. No new pub package; WorkManager is already in the app through `home_widget` (ADR 050) |
+| 54 | M11 split | **M11a** (schema v10, Usage access, app picker, limits, the check and notice) and **M11b** (the deferred integration tests, accessibility pass over Phase 2 screens, version 1.1.0, release builds), stacked PRs |
 
 ### What these decisions change
 
