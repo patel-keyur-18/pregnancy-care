@@ -50,7 +50,7 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 ## Hard lines
 
 - **No network calls** of any kind: no analytics, crash reporting, ads or remote fonts. Release Android builds have no `INTERNET` permission.
-- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction. No symptom or danger-sign lists: Walk and Exercise show one general line (Plan decision 26).
+- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction. No warning or danger-sign lists anywhere: nothing tells her a symptom is serious, normal, or a reason to act. The only symptom list is Wellbeing's log of common discomforts (Plan decision 39): she records what she felt; nothing is advised, rated or flagged. Walk and Exercise show one general line (Plan decision 26).
 - **No copyrighted text or audio** in the repo. Only original or public-domain content.
 - **Red (`error`) only for destructive actions and errors.** Notices use amber.
 - **Accessibility:**
