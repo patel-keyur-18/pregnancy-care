@@ -11,6 +11,8 @@ part 'listening_log.g.dart';
 
 /// Turns playback into listening sessions: one per item she plays, growing
 /// while it actually plays (screen on or off). Logged from one minute.
+/// Meditation (the timer's track or her own audio, M7b) is logged the same
+/// way as a `meditation` session.
 class ListeningLogger {
   new(this._sessions, {required this.pregnancyId, DateTime Function()? clock})
     : _clock = clock ?? clockNow;
@@ -42,6 +44,19 @@ class ListeningLogger {
       _sessionId = _startedAt = _since = _savedAt = null;
       _played = Duration.zero;
     }
+    // A meditation ends at Finish (back to the start) or at the end bell;
+    // the next one is a new session.
+    final ended = p.completed || p.position == Duration.zero;
+    if ((_itemId?.startsWith(meditationPrefix) ?? false) &&
+        !p.playing &&
+        ended &&
+        (_since != null || _played > Duration.zero)) {
+      _stopClock(now);
+      await _save(now);
+      _sessionId = _startedAt = _savedAt = null;
+      _played = Duration.zero;
+      return;
+    }
     if (p.playing && _since == null) {
       _since = now;
       _startedAt ??= now;
@@ -68,12 +83,14 @@ class ListeningLogger {
       await _sessions.setDuration(id, _played.inSeconds);
       return;
     }
+    final item = _itemId!;
+    final meditation = item.startsWith(meditationPrefix);
     _sessionId = await _sessions.log(
       pregnancyId: pregnancy,
-      type: SessionType.listening,
+      type: meditation ? SessionType.meditation : SessionType.listening,
       startedAt: _startedAt!,
       durationSec: _played.inSeconds,
-      libraryItemId: _itemId,
+      libraryItemId: meditation ? meditationLibraryItem(item) : item,
     );
   }
 }

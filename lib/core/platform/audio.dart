@@ -23,6 +23,21 @@ const Playback idlePlayback = (
   duration: null,
 );
 
+/// Playback ids that start with this are meditation (M7b): the timer's track
+/// (`meditation:timer-10`) or her own audio (`meditation:<library item id>`).
+const meditationPrefix = 'meditation:';
+
+String meditationTimerId(int minutes) => '${meditationPrefix}timer-$minutes';
+
+String meditationAudioId(String libraryItemId) =>
+    '$meditationPrefix$libraryItemId';
+
+/// The library item a meditation id plays, or null for the timer's track.
+String? meditationLibraryItem(String playbackId) {
+  final rest = playbackId.substring(meditationPrefix.length);
+  return rest.startsWith('timer-') ? null : rest;
+}
+
 /// Audio that keeps playing with the screen off, with lock-screen controls
 /// (ARCHITECTURE §10). Faked in widget tests.
 abstract interface class AudioPlayback {
@@ -35,6 +50,14 @@ abstract interface class AudioPlayback {
     required String itemId,
     required String title,
     required String path,
+  });
+
+  /// Loads the meditation timer as one track (Plan decision 42): the bell,
+  /// quiet until [minutes] have passed, then the bell again. Position and
+  /// length are of the whole track, so it keeps time with the phone locked.
+  Future<Duration?> openMeditation({
+    required int minutes,
+    required String title,
   });
   Future<void> play();
   Future<void> pause();
@@ -72,6 +95,10 @@ class DeviceAudioPlayback extends BaseAudioHandler
   String? _itemId;
   Playback _current = idlePlayback;
 
+  /// For the meditation track: where each piece starts, and its length.
+  List<Duration>? _offsets;
+  Duration? _total;
+
   @override
   Playback get current => _current;
 
@@ -84,8 +111,10 @@ class DeviceAudioPlayback extends BaseAudioHandler
       itemId: _itemId,
       playing: _player.playing && !completed,
       completed: completed,
-      position: _player.position,
-      duration: _player.duration,
+      position:
+          (_offsets?[_player.currentIndex ?? 0] ?? Duration.zero) +
+          _player.position,
+      duration: _total ?? _player.duration,
     );
     _changes.add(_current);
     playbackState.add(
@@ -105,7 +134,7 @@ class DeviceAudioPlayback extends BaseAudioHandler
           ProcessingState.completed: AudioProcessingState.completed,
         }[_player.processingState]!,
         playing: _player.playing,
-        updatePosition: _player.position,
+        updatePosition: _current.position,
         bufferedPosition: _player.bufferedPosition,
         speed: _player.speed,
       ),
@@ -120,10 +149,56 @@ class DeviceAudioPlayback extends BaseAudioHandler
   }) async {
     if (_itemId == itemId) return _player.duration;
     _itemId = itemId;
+    _offsets = _total = null;
     final duration = await _player.setFilePath(path);
     mediaItem.add(MediaItem(id: itemId, title: title, duration: duration));
     _emit();
     return duration;
+  }
+
+  @override
+  Future<Duration?> openMeditation({
+    required int minutes,
+    required String title,
+  }) async {
+    final id = meditationTimerId(minutes);
+    if (_itemId == id) return _total;
+    _itemId = id;
+    const bell = Duration(seconds: 4);
+    const quiet = Duration(seconds: 30);
+    final length = Duration(minutes: minutes);
+    // The quiet clip fills the time after the first bell, the last piece
+    // clipped, so the second bell starts exactly at [length].
+    final pieces = <(AudioSource, Duration)>[
+      (AudioSource.asset('assets/audio/bell.wav'), bell),
+    ];
+    for (var at = bell; at < length; at += quiet) {
+      final left = length - at;
+      pieces.add(
+        left >= quiet
+            ? (AudioSource.asset('assets/audio/quiet.wav'), quiet)
+            : (
+                ClippingAudioSource(
+                  child: AudioSource.asset('assets/audio/quiet.wav'),
+                  end: left,
+                ),
+                left,
+              ),
+      );
+    }
+    pieces.add((AudioSource.asset('assets/audio/bell.wav'), bell));
+    final offsets = <Duration>[];
+    var at = Duration.zero;
+    for (final (_, d) in pieces) {
+      offsets.add(at);
+      at += d;
+    }
+    _offsets = offsets;
+    _total = at;
+    await _player.setAudioSources([for (final (s, _) in pieces) s]);
+    mediaItem.add(MediaItem(id: id, title: title, duration: _total));
+    _emit();
+    return _total;
   }
 
   @override

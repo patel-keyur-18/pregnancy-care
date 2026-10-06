@@ -240,7 +240,7 @@ class LibraryItems extends Table with BaseColumns {
   DateTimeColumn get lastOpenedAt => dateTime().nullable()();
 }
 
-enum SessionType { reading, listening, walk, exercise, breathing }
+enum SessionType { reading, listening, walk, exercise, breathing, meditation }
 
 /// A logged session: reading, listening, a walk, a routine or breathing.
 @DataClassName('Session')

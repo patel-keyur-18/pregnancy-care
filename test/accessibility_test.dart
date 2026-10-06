@@ -405,6 +405,30 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pumpAndSettle();
     },
   ),
+  'meditation': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+    },
+  ),
+  'meditation, running': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Start');
+    },
+  ),
+  'meditation, screen off': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Start');
+      await _tapText(t, 'Screen off — keep meditating');
+    },
+  ),
   'contraction timer': (
     true,
     (t) async {
@@ -503,7 +527,7 @@ void main() {
     testWidgets(
       '$name has a heading for screen readers',
       // Screen off is one full-screen "wake" button.
-      skip: name == 'listen, screen off',
+      skip: name == 'listen, screen off' || name == 'meditation, screen off',
       (tester) async {
         final semantics = tester.ensureSemantics();
         await pumpApp(

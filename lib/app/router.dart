@@ -18,6 +18,7 @@ import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/exercise_screen.dart';
 import 'package:navmaas/features/sessions/presentation/letters_screen.dart';
 import 'package:navmaas/features/sessions/presentation/listen_screen.dart';
+import 'package:navmaas/features/sessions/presentation/meditation_screen.dart';
 import 'package:navmaas/features/sessions/presentation/reader_screen.dart';
 import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
 import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
@@ -83,10 +84,12 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(
         path: '/listen',
-        // `?screen=off` opens in screen-off mode (the wind-down reminder).
+        // `?screen=off` opens in screen-off mode (the wind-down reminder);
+        // `?as=meditation` plays her audio as meditation (M7b).
         builder: (_, state) => ListenScreen(
           itemId: state.extra! as String,
           screenOff: state.uri.queryParameters['screen'] == 'off',
+          meditation: state.uri.queryParameters['as'] == 'meditation',
         ),
       ),
       GoRoute(path: '/walk', builder: (_, _) => const WalkScreen()),
@@ -96,6 +99,7 @@ GoRouter router(Ref ref) {
             ExerciseScreen(routineKey: state.extra! as String),
       ),
       GoRoute(path: '/breathe', builder: (_, _) => const BreathingScreen()),
+      GoRoute(path: '/meditate', builder: (_, _) => const MeditationScreen()),
       GoRoute(path: '/kicks', builder: (_, _) => const KickCounterScreen()),
       GoRoute(
         path: '/screen-rest',

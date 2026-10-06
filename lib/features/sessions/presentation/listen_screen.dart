@@ -9,6 +9,7 @@ import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/listening_log.dart';
+import 'package:navmaas/features/sessions/presentation/screen_off.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -16,12 +17,23 @@ import 'package:navmaas/l10n/gen/app_localizations.dart';
 /// going with the screen off, with a sleep timer and a near-black "screen
 /// off" mode. No wakelock: the phone locks as usual.
 class ListenScreen extends ConsumerStatefulWidget {
-  const new({required this.itemId, this.screenOff = false, super.key});
+  const new({
+    required this.itemId,
+    this.screenOff = false,
+    this.meditation = false,
+    super.key,
+  });
 
   final String itemId;
 
   /// Opens already in screen-off mode.
   final bool screenOff;
+
+  /// Her own audio as meditation (M7b): logged as a meditation session.
+  final bool meditation;
+
+  /// The playback id: the library item, or the item as meditation.
+  String get playId => meditation ? meditationAudioId(itemId) : itemId;
 
   @override
   ConsumerState<ListenScreen> createState() => _ListenScreenState();
@@ -46,7 +58,7 @@ class _ListenScreenState extends ConsumerState<ListenScreen> {
       final item = await library.get(widget.itemId);
       if (item == null) throw StateError('missing');
       final duration = await audio.open(
-        itemId: item.id,
+        itemId: widget.playId,
         title: item.title,
         path: (await library.file(item)).path,
       );
@@ -72,7 +84,7 @@ class _ListenScreenState extends ConsumerState<ListenScreen> {
     final brand = context.navmaas;
     final item = _item;
     final p = ref.watch(playbackProvider).value ?? idlePlayback;
-    final mine = item != null && p.itemId == item.id;
+    final mine = item != null && p.itemId == widget.playId;
     final playing = mine && p.playing;
     final position = mine ? p.position : Duration.zero;
     final duration = mine ? p.duration : null;
@@ -118,7 +130,7 @@ class _ListenScreenState extends ConsumerState<ListenScreen> {
                 child: Semantics(
                   header: true,
                   child: Text(
-                    l10n.listening,
+                    widget.meditation ? l10n.meditationTitle : l10n.listening,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyLarge!.copyWith(
                       fontSize: 15,
@@ -347,50 +359,15 @@ class _ListenScreenState extends ConsumerState<ListenScreen> {
     );
 
     return Scaffold(
-      body: SafeArea(child: _asleep ? _sleepOverlay(l10n, brand) : player),
-    );
-  }
-
-  /// Near-black, so the screen rests; a tap brings the player back.
-  Widget _sleepOverlay(AppLocalizations l10n, NavmaasColors brand) {
-    final style = Theme.of(context).textTheme.bodyMedium!
-        .copyWith(fontWeight: FontWeight.w600, color: brand.sleepText);
-    return Semantics(
-      button: true,
-      label: l10n.wakeScreen,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => setState(() => _asleep = false),
-        child: ColoredBox(
-          color: brand.sleep,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 10,
-                children: [
-                  NmIcon(
-                    NavmaasIcon.moon,
-                    size: 28,
-                    strokeWidth: 1.6,
-                    color: brand.sleepText,
-                  ),
-                  Text(
-                    l10n.isPlaying(_item?.title ?? ''),
-                    textAlign: TextAlign.center,
-                    style: style.copyWith(fontSize: 15),
-                  ),
-                  Text(
-                    l10n.restEyes,
-                    textAlign: TextAlign.center,
-                    style: style,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      body: SafeArea(
+        child: _asleep
+            ? ScreenOff(
+                icon: NavmaasIcon.moon,
+                title: l10n.isPlaying(_item?.title ?? ''),
+                line: l10n.restEyes,
+                onWake: () => setState(() => _asleep = false),
+              )
+            : player,
       ),
     );
   }

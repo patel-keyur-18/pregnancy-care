@@ -71,4 +71,54 @@ void main() {
     expect(rows.single.libraryItemId, 'om');
     expect(rows.single.type, SessionType.listening);
   });
+
+  test('meditation is logged as meditation: the timer, or her audio', () async {
+    final db = AppDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final pregnancy = await db
+        .into(db.pregnancies)
+        .insertReturning(
+          PregnanciesCompanion.insert(
+            status: PregnancyStatus.active,
+            datingMethod: .lmp,
+            startDate: DateTime.utc(2026, 4, 15),
+            dueDate: DateTime.utc(2027, 1, 20),
+          ),
+        );
+    await db
+        .into(db.libraryItems)
+        .insert(
+          LibraryItemsCompanion.insert(
+            id: const Value('om'),
+            kind: LibraryKind.audio,
+            title: 'om',
+            fileName: 'om.mp3',
+          ),
+        );
+    var now = DateTime(2026, 10, 5, 7);
+    final logger = ListeningLogger(
+      SessionRepository(db),
+      pregnancyId: () => pregnancy.id,
+      clock: () => now,
+    );
+    for (final id in [meditationTimerId(10), meditationAudioId('om')]) {
+      await logger.onPlayback(_p(id, playing: true));
+      now = now.add(const Duration(minutes: 2));
+      await logger.onPlayback(_p(id, playing: false));
+    }
+    // Finished (back to the start), then the same timer again: two sessions.
+    for (var i = 0; i < 2; i++) {
+      await logger.onPlayback(_p(meditationTimerId(5), playing: true));
+      now = now.add(const Duration(minutes: 5));
+      await logger.onPlayback(_p(meditationTimerId(5), playing: false));
+    }
+    await logger.onPlayback(_p(null, playing: false));
+    final rows = await db.select(db.sessions).get();
+    expect(rows.map((r) => (r.type, r.libraryItemId, r.durationSec)), [
+      (SessionType.meditation, null, 120),
+      (SessionType.meditation, 'om', 120),
+      (SessionType.meditation, null, 300),
+      (SessionType.meditation, null, 300),
+    ]);
+  });
 }

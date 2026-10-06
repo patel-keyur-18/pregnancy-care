@@ -152,6 +152,27 @@ void main() {
         );
       });
 
+      testWidgets('meditation $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: _seed,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Sessions');
+        final tile = find.text('Meditation');
+        await tester.scrollUntilVisible(tile, 200);
+        await tester.ensureVisible(tile);
+        await tester.pumpAndSettle();
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/meditation_$name.png'),
+        );
+      });
+
       testWidgets('wellbeing $name', skip: _dir == null, (tester) async {
         await pumpApp(
           tester,

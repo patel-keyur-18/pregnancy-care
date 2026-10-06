@@ -743,5 +743,23 @@
   "waterRemindersNote": "Never during bedtime rest or meal times. They stop once you reach your goal, and give way to your other reminders when the daily limit is reached.",
   "reminderWaterTitle": "Water",
   "reminderWaterBody": "A glass of water, whenever you're ready.",
-  "hideForToday": "Hide for today"
+  "hideForToday": "Hide for today",
+
+  "meditationTitle": "Meditation",
+  "meditationTile": "5–20 min · soft bell, or your own audio",
+  "meditationLength": "Length",
+  "meditationMinutes": "{minutes} minutes",
+  "@meditationMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "meditationBell": "A soft bell at the start and the end",
+  "meditationOwnAudio": "Or use your own audio",
+  "meditationOwnNone": "Add audio in Sessions first",
+  "meditationYourAudio": "Your audio",
+  "meditationBreathe": "Breathe softly",
+  "meditationPaused": "Paused",
+  "meditationLeft": "{minutes, plural, =1{1 minute left} other{{minutes} minutes left}}",
+  "@meditationLeft": {"placeholders": {"minutes": {"type": "int"}}},
+  "meditationScreenOff": "Screen off — keep meditating",
+  "meditationAsleep": "Meditation · {minutes} min left",
+  "@meditationAsleep": {"placeholders": {"minutes": {"type": "int"}}},
+  "meditationBellAtEnd": "Rest your eyes. The bell will ring at the end."
 }
