@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–50; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock in progress, M8 and M9 deferred) |
+| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–50; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -113,8 +113,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 (M7) |
 | **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 (M8) |
 | **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 (M9) |
-| **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10a ✅ widgets 2026-10-06; app lock M10b) |
-| **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10) |
+| **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10 ✅ 2026-10-06) |
+| **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10b ✅ 2026-10-06) |
 | **Postpartum & baby mode** ★ | Her recovery, baby feeding and sleep, baby vaccine schedule and visits | P3 (M12–M14) |
 | **Family sharing** ★ | Would need a backend and accounts | **Out of scope** (decision 37) |
 
@@ -159,6 +159,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
-| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock (M10a widgets ✅ 2026-10-06; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release. The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
+| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release. The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
 | **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
 | Out of scope | Family sharing (decision 37) |

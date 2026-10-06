@@ -151,6 +151,7 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Word chip (M7) | Pill, 1.5 `border`, `surface`, label 14/800 (16/800 for mood and rested words); chosen = `primary` fill, `on-primary` label with a tick. A selection, never a verdict: no colour per word |
 | More chip (M7) | Dashed 1.5 `border` pill, `text-2` label "More · N" / "Fewer" with a chevron; folds the symptom chips to two rows |
 | Wellbeing tile (M7) | Card, 40 icon tile (mood `rose-soft` heart, symptoms `surface-2` notes, sleep `lavender-soft` bed, water `primary-soft` drop), label 13/700 `text-3`, value 16/800 |
+| App lock screen (M10) | `bg`; 88 `primary-soft` circle with the lock 36; "Navmaas is locked" 22/800 (heading); the way to unlock 15/600 `text-2`; full-width Unlock (`primary`, 56) |
 | Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: 28 `primary-soft` circle with the sprout, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
 
@@ -274,3 +275,7 @@ Deliberate, permanent differences:
 | Home-screen widget font | Nunito | The phone's system font: SF Rounded on iPhone, sans-serif on Android, same sizes and weights | Widgets are drawn by the home screen, outside the app, where its bundled fonts aren't loaded |
 | Home-screen widget, Android | (drawn for iPhone) | One resizable widget with the medium layout | One layout keeps the RemoteViews code small; it resizes down to about 3 × 2 cells |
 | Small widget's reminder line | "8:00 pm · Folic acid" | Shrinks to 85 % before it truncates | SF Rounded runs wider than Nunito |
+| App lock screen | Lock, title and line centred on the whole screen | Centred in the space above Unlock, and it scrolls at large text | No overflow at 2.0× |
+| Me → App lock subtitle | "Face ID or your passcode to open Navmaas" | Same on iPhone; "Fingerprint or screen lock to open Navmaas" on Android | Each phone's own words |
+| Turning on app lock without a phone screen lock | (not drawn) | The switch stays off and a snackbar says "Set a screen lock on your phone first, then turn on app lock." | Otherwise she could lock herself out |
+| App switcher cover | (described in a canvas note) | The sprout in an 88 `primary-soft` circle on `bg` | — |
