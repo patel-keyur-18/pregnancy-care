@@ -520,7 +520,7 @@ These rules apply to every milestone below, on top of its own "done when":
 
 | Milestone | Focus | Schema |
 |---|---|---|
-| **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #M7B) | v7 |
+| **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
 | **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan | v8 |
 | **M9** | Records vault, visit summary PDF, EPUB books | v9 |
 | **M10** | Home-screen widgets and app lock | No change (settings only) |
@@ -548,7 +548,7 @@ These rules apply to every milestone below, on top of its own "done when":
 
 **Owner's answers** (Plan decisions 39–45): ten common discomforts plus her own; Calm · Happy · Okay · Tired · Low; water goal 8 glasses by default (4–16), reminders every 2 or 3 hours; a generated bell played as one background-audio track; keys in the database, words in `app_en.arb`; split into M7a and M7b (ADR 044).
 
-**Status:** **M7a ✅ 2026-10-06 (PR #18)**: schema v7, Care → Wellbeing (today's four logs, the week and the weekly sleep average), mood check-in, symptom log (chips folded to two rows with More), sleep entry, water with its goal and reminders, Today's "How are you today?" card, water nudges through `ReminderSync`, backup and delete covering the new tables, goldens and accessibility for every new screen. **M7b ✅ 2026-10-06 (PR #M7B)**, stacked on M7a: Sessions → Meditation (5, 10, 15 or 20 minutes between two original bells from `tool/bell.dart`, played as one background-audio track), her own audio as meditation (Listen, logged as meditation), the screen-off overlay shared with Listen, the `meditation` session type.
+**Status:** **M7a ✅ 2026-10-06 (PR #18)**: schema v7, Care → Wellbeing (today's four logs, the week and the weekly sleep average), mood check-in, symptom log (chips folded to two rows with More), sleep entry, water with its goal and reminders, Today's "How are you today?" card, water nudges through `ReminderSync`, backup and delete covering the new tables, goldens and accessibility for every new screen. **M7b ✅ 2026-10-06 (PR #19)**, stacked on M7a: Sessions → Meditation (5, 10, 15 or 20 minutes between two original bells from `tool/bell.dart`, played as one background-audio track), her own audio as meditation (Listen, logged as meditation), the screen-off overlay shared with Listen, the `meditation` session type.
 
 #### M8 Body and birth prep
 
