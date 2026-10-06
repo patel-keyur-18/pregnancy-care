@@ -28,7 +28,7 @@ class $PregnanciesTable extends Pregnancies
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -40,7 +40,7 @@ class $PregnanciesTable extends Pregnancies
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -904,7 +904,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -916,7 +916,7 @@ class $SettingsTable extends Settings with TableInfo<$SettingsTable, Setting> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -1306,7 +1306,7 @@ class $ChecklistTicksTable extends ChecklistTicks
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -1318,7 +1318,7 @@ class $ChecklistTicksTable extends ChecklistTicks
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -1724,7 +1724,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -1736,7 +1736,7 @@ class $ProfilesTable extends Profiles with TableInfo<$ProfilesTable, Profile> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -2252,7 +2252,7 @@ class $SupplementsTable extends Supplements
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -2264,7 +2264,7 @@ class $SupplementsTable extends Supplements
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -2862,7 +2862,7 @@ class $SupplementSchedulesTable extends SupplementSchedules
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -2874,7 +2874,7 @@ class $SupplementSchedulesTable extends SupplementSchedules
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -3390,7 +3390,7 @@ class $DoseLogsTable extends DoseLogs with TableInfo<$DoseLogsTable, DoseLog> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -3402,7 +3402,7 @@ class $DoseLogsTable extends DoseLogs with TableInfo<$DoseLogsTable, DoseLog> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -3912,7 +3912,7 @@ class $CareItemsTable extends CareItems
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -3924,7 +3924,7 @@ class $CareItemsTable extends CareItems
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -4682,7 +4682,7 @@ class $AppointmentsTable extends Appointments
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -4694,7 +4694,7 @@ class $AppointmentsTable extends Appointments
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -5287,7 +5287,7 @@ class $VisitQuestionsTable extends VisitQuestions
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -5299,7 +5299,7 @@ class $VisitQuestionsTable extends VisitQuestions
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -5812,7 +5812,7 @@ class $AttachmentsTable extends Attachments
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -5824,7 +5824,7 @@ class $AttachmentsTable extends Attachments
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -6284,7 +6284,7 @@ class $VitalReadingsTable extends VitalReadings
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -6296,7 +6296,7 @@ class $VitalReadingsTable extends VitalReadings
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -6844,7 +6844,7 @@ class $LibraryItemsTable extends LibraryItems
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -6856,7 +6856,7 @@ class $LibraryItemsTable extends LibraryItems
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -7515,7 +7515,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -7527,7 +7527,7 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -8194,7 +8194,7 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -8206,7 +8206,7 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
-    clientDefault: DateTime.now,
+    clientDefault: clockNow,
   );
   static const VerificationMeta _deletedAtMeta = const VerificationMeta(
     'deletedAt',
@@ -8579,6 +8579,1458 @@ class LettersCompanion extends UpdateCompanion<Letter> {
   }
 }
 
+class $KickSessionsTable extends KickSessions
+    with TableInfo<$KickSessionsTable, KickSession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $KickSessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endedAt = GeneratedColumn<DateTime>(
+    'ended_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countMeta = const VerificationMeta('count');
+  @override
+  late final GeneratedColumn<int> count = GeneratedColumn<int>(
+    'count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    startedAt,
+    endedAt,
+    count,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'kick_session';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<KickSession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endedAtMeta);
+    }
+    if (data.containsKey('count')) {
+      context.handle(
+        _countMeta,
+        count.isAcceptableOrUnknown(data['count']!, _countMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_countMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  KickSession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return KickSession(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ended_at'],
+      )!,
+      count: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}count'],
+      )!,
+    );
+  }
+
+  @override
+  $KickSessionsTable createAlias(String alias) {
+    return $KickSessionsTable(attachedDatabase, alias);
+  }
+}
+
+class KickSession extends DataClass implements Insertable<KickSession> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+  final DateTime startedAt;
+  final DateTime endedAt;
+  final int count;
+  const KickSession({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    required this.startedAt,
+    required this.endedAt,
+    required this.count,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    map['ended_at'] = Variable<DateTime>(endedAt);
+    map['count'] = Variable<int>(count);
+    return map;
+  }
+
+  KickSessionsCompanion toCompanion(bool nullToAbsent) {
+    return KickSessionsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      startedAt: Value(startedAt),
+      endedAt: Value(endedAt),
+      count: Value(count),
+    );
+  }
+
+  factory KickSession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return KickSession(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      endedAt: serializer.fromJson<DateTime>(json['endedAt']),
+      count: serializer.fromJson<int>(json['count']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'endedAt': serializer.toJson<DateTime>(endedAt),
+      'count': serializer.toJson<int>(count),
+    };
+  }
+
+  KickSession copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    DateTime? startedAt,
+    DateTime? endedAt,
+    int? count,
+  }) => KickSession(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt ?? this.endedAt,
+    count: count ?? this.count,
+  );
+  KickSession copyWithCompanion(KickSessionsCompanion data) {
+    return KickSession(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+      count: data.count.present ? data.count.value : this.count,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KickSession(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('count: $count')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    startedAt,
+    endedAt,
+    count,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is KickSession &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.startedAt == this.startedAt &&
+          other.endedAt == this.endedAt &&
+          other.count == this.count);
+}
+
+class KickSessionsCompanion extends UpdateCompanion<KickSession> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<DateTime> startedAt;
+  final Value<DateTime> endedAt;
+  final Value<int> count;
+  final Value<int> rowid;
+  const KickSessionsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.count = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  KickSessionsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    required DateTime startedAt,
+    required DateTime endedAt,
+    required int count,
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       startedAt = Value(startedAt),
+       endedAt = Value(endedAt),
+       count = Value(count);
+  static Insertable<KickSession> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? endedAt,
+    Expression<int>? count,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (count != null) 'count': count,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  KickSessionsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<DateTime>? startedAt,
+    Value<DateTime>? endedAt,
+    Value<int>? count,
+    Value<int>? rowid,
+  }) {
+    return KickSessionsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      count: count ?? this.count,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<DateTime>(endedAt.value);
+    }
+    if (count.present) {
+      map['count'] = Variable<int>(count.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KickSessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('count: $count, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ContractionsTable extends Contractions
+    with TableInfo<$ContractionsTable, Contraction> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContractionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endedAtMeta = const VerificationMeta(
+    'endedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> endedAt = GeneratedColumn<DateTime>(
+    'ended_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    startedAt,
+    endedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'contraction';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Contraction> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ended_at')) {
+      context.handle(
+        _endedAtMeta,
+        endedAt.isAcceptableOrUnknown(data['ended_at']!, _endedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Contraction map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Contraction(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      endedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ended_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ContractionsTable createAlias(String alias) {
+    return $ContractionsTable(attachedDatabase, alias);
+  }
+}
+
+class Contraction extends DataClass implements Insertable<Contraction> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+  final DateTime startedAt;
+  final DateTime endedAt;
+  const Contraction({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    required this.startedAt,
+    required this.endedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    map['ended_at'] = Variable<DateTime>(endedAt);
+    return map;
+  }
+
+  ContractionsCompanion toCompanion(bool nullToAbsent) {
+    return ContractionsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      startedAt: Value(startedAt),
+      endedAt: Value(endedAt),
+    );
+  }
+
+  factory Contraction.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Contraction(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      endedAt: serializer.fromJson<DateTime>(json['endedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'endedAt': serializer.toJson<DateTime>(endedAt),
+    };
+  }
+
+  Contraction copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    DateTime? startedAt,
+    DateTime? endedAt,
+  }) => Contraction(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    startedAt: startedAt ?? this.startedAt,
+    endedAt: endedAt ?? this.endedAt,
+  );
+  Contraction copyWithCompanion(ContractionsCompanion data) {
+    return Contraction(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endedAt: data.endedAt.present ? data.endedAt.value : this.endedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Contraction(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    startedAt,
+    endedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Contraction &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.startedAt == this.startedAt &&
+          other.endedAt == this.endedAt);
+}
+
+class ContractionsCompanion extends UpdateCompanion<Contraction> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<DateTime> startedAt;
+  final Value<DateTime> endedAt;
+  final Value<int> rowid;
+  const ContractionsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContractionsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    required DateTime startedAt,
+    required DateTime endedAt,
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       startedAt = Value(startedAt),
+       endedAt = Value(endedAt);
+  static Insertable<Contraction> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? endedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endedAt != null) 'ended_at': endedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContractionsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<DateTime>? startedAt,
+    Value<DateTime>? endedAt,
+    Value<int>? rowid,
+  }) {
+    return ContractionsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      startedAt: startedAt ?? this.startedAt,
+      endedAt: endedAt ?? this.endedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (endedAt.present) {
+      map['ended_at'] = Variable<DateTime>(endedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContractionsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endedAt: $endedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BackupLogTable extends BackupLog
+    with TableInfo<$BackupLogTable, BackupLogEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BackupLogTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<BackupKind, String> kind =
+      GeneratedColumn<String>(
+        'kind',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<BackupKind>($BackupLogTable.$converterkind);
+  static const VerificationMeta _sizeBytesMeta = const VerificationMeta(
+    'sizeBytes',
+  );
+  @override
+  late final GeneratedColumn<int> sizeBytes = GeneratedColumn<int>(
+    'size_bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _includesLibraryMeta = const VerificationMeta(
+    'includesLibrary',
+  );
+  @override
+  late final GeneratedColumn<bool> includesLibrary = GeneratedColumn<bool>(
+    'includes_library',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("includes_library" IN (0, 1))',
+    ),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    kind,
+    sizeBytes,
+    includesLibrary,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'backup_log';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BackupLogEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('size_bytes')) {
+      context.handle(
+        _sizeBytesMeta,
+        sizeBytes.isAcceptableOrUnknown(data['size_bytes']!, _sizeBytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeBytesMeta);
+    }
+    if (data.containsKey('includes_library')) {
+      context.handle(
+        _includesLibraryMeta,
+        includesLibrary.isAcceptableOrUnknown(
+          data['includes_library']!,
+          _includesLibraryMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_includesLibraryMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BackupLogEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BackupLogEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      kind: $BackupLogTable.$converterkind.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}kind'],
+        )!,
+      ),
+      sizeBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}size_bytes'],
+      )!,
+      includesLibrary: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}includes_library'],
+      )!,
+    );
+  }
+
+  @override
+  $BackupLogTable createAlias(String alias) {
+    return $BackupLogTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<BackupKind, String, String> $converterkind =
+      const EnumNameConverter<BackupKind>(BackupKind.values);
+}
+
+class BackupLogEntry extends DataClass implements Insertable<BackupLogEntry> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final BackupKind kind;
+  final int sizeBytes;
+  final bool includesLibrary;
+  const BackupLogEntry({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.kind,
+    required this.sizeBytes,
+    required this.includesLibrary,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    {
+      map['kind'] = Variable<String>(
+        $BackupLogTable.$converterkind.toSql(kind),
+      );
+    }
+    map['size_bytes'] = Variable<int>(sizeBytes);
+    map['includes_library'] = Variable<bool>(includesLibrary);
+    return map;
+  }
+
+  BackupLogCompanion toCompanion(bool nullToAbsent) {
+    return BackupLogCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      kind: Value(kind),
+      sizeBytes: Value(sizeBytes),
+      includesLibrary: Value(includesLibrary),
+    );
+  }
+
+  factory BackupLogEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BackupLogEntry(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      kind: $BackupLogTable.$converterkind.fromJson(
+        serializer.fromJson<String>(json['kind']),
+      ),
+      sizeBytes: serializer.fromJson<int>(json['sizeBytes']),
+      includesLibrary: serializer.fromJson<bool>(json['includesLibrary']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'kind': serializer.toJson<String>(
+        $BackupLogTable.$converterkind.toJson(kind),
+      ),
+      'sizeBytes': serializer.toJson<int>(sizeBytes),
+      'includesLibrary': serializer.toJson<bool>(includesLibrary),
+    };
+  }
+
+  BackupLogEntry copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    BackupKind? kind,
+    int? sizeBytes,
+    bool? includesLibrary,
+  }) => BackupLogEntry(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    kind: kind ?? this.kind,
+    sizeBytes: sizeBytes ?? this.sizeBytes,
+    includesLibrary: includesLibrary ?? this.includesLibrary,
+  );
+  BackupLogEntry copyWithCompanion(BackupLogCompanion data) {
+    return BackupLogEntry(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      sizeBytes: data.sizeBytes.present ? data.sizeBytes.value : this.sizeBytes,
+      includesLibrary: data.includesLibrary.present
+          ? data.includesLibrary.value
+          : this.includesLibrary,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BackupLogEntry(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('kind: $kind, ')
+          ..write('sizeBytes: $sizeBytes, ')
+          ..write('includesLibrary: $includesLibrary')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    kind,
+    sizeBytes,
+    includesLibrary,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BackupLogEntry &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.kind == this.kind &&
+          other.sizeBytes == this.sizeBytes &&
+          other.includesLibrary == this.includesLibrary);
+}
+
+class BackupLogCompanion extends UpdateCompanion<BackupLogEntry> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<BackupKind> kind;
+  final Value<int> sizeBytes;
+  final Value<bool> includesLibrary;
+  final Value<int> rowid;
+  const BackupLogCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
+    this.includesLibrary = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BackupLogCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required BackupKind kind,
+    required int sizeBytes,
+    required bool includesLibrary,
+    this.rowid = const Value.absent(),
+  }) : kind = Value(kind),
+       sizeBytes = Value(sizeBytes),
+       includesLibrary = Value(includesLibrary);
+  static Insertable<BackupLogEntry> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? kind,
+    Expression<int>? sizeBytes,
+    Expression<bool>? includesLibrary,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (kind != null) 'kind': kind,
+      if (sizeBytes != null) 'size_bytes': sizeBytes,
+      if (includesLibrary != null) 'includes_library': includesLibrary,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BackupLogCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<BackupKind>? kind,
+    Value<int>? sizeBytes,
+    Value<bool>? includesLibrary,
+    Value<int>? rowid,
+  }) {
+    return BackupLogCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      kind: kind ?? this.kind,
+      sizeBytes: sizeBytes ?? this.sizeBytes,
+      includesLibrary: includesLibrary ?? this.includesLibrary,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(
+        $BackupLogTable.$converterkind.toSql(kind.value),
+      );
+    }
+    if (sizeBytes.present) {
+      map['size_bytes'] = Variable<int>(sizeBytes.value);
+    }
+    if (includesLibrary.present) {
+      map['includes_library'] = Variable<bool>(includesLibrary.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BackupLogCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('kind: $kind, ')
+          ..write('sizeBytes: $sizeBytes, ')
+          ..write('includesLibrary: $includesLibrary, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8598,6 +10050,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LibraryItemsTable libraryItems = $LibraryItemsTable(this);
   late final $SessionsTable sessions = $SessionsTable(this);
   late final $LettersTable letters = $LettersTable(this);
+  late final $KickSessionsTable kickSessions = $KickSessionsTable(this);
+  late final $ContractionsTable contractions = $ContractionsTable(this);
+  late final $BackupLogTable backupLog = $BackupLogTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8618,6 +10073,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     libraryItems,
     sessions,
     letters,
+    kickSessions,
+    contractions,
+    backupLog,
   ];
   @override
   DriftDatabaseOptions get options =>
@@ -8808,6 +10266,42 @@ final class $$PregnanciesTableReferences
     ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_lettersRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$KickSessionsTable, List<KickSession>>
+  _kickSessionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.kickSessions,
+    aliasName: 'pregnancy__id__kick_session__pregnancy_id',
+  );
+
+  $$KickSessionsTableProcessedTableManager get kickSessionsRefs {
+    final manager = $$KickSessionsTableTableManager(
+      $_db,
+      $_db.kickSessions,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_kickSessionsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ContractionsTable, List<Contraction>>
+  _contractionsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.contractions,
+    aliasName: 'pregnancy__id__contraction__pregnancy_id',
+  );
+
+  $$ContractionsTableProcessedTableManager get contractionsRefs {
+    final manager = $$ContractionsTableTableManager(
+      $_db,
+      $_db.contractions,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_contractionsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -9095,6 +10589,56 @@ class $$PregnanciesTableFilterComposer
           }) => $$LettersTableFilterComposer(
             $db: $db,
             $table: $db.letters,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> kickSessionsRefs(
+    Expression<bool> Function($$KickSessionsTableFilterComposer f) f,
+  ) {
+    final $$KickSessionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.kickSessions,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$KickSessionsTableFilterComposer(
+            $db: $db,
+            $table: $db.kickSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> contractionsRefs(
+    Expression<bool> Function($$ContractionsTableFilterComposer f) f,
+  ) {
+    final $$ContractionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contractions,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractionsTableFilterComposer(
+            $db: $db,
+            $table: $db.contractions,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -9453,6 +10997,56 @@ class $$PregnanciesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> kickSessionsRefs<T extends Object>(
+    Expression<T> Function($$KickSessionsTableAnnotationComposer a) f,
+  ) {
+    final $$KickSessionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.kickSessions,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$KickSessionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.kickSessions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> contractionsRefs<T extends Object>(
+    Expression<T> Function($$ContractionsTableAnnotationComposer a) f,
+  ) {
+    final $$ContractionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.contractions,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ContractionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.contractions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PregnanciesTableTableManager
@@ -9477,6 +11071,8 @@ class $$PregnanciesTableTableManager
             bool vitalReadingsRefs,
             bool sessionsRefs,
             bool lettersRefs,
+            bool kickSessionsRefs,
+            bool contractionsRefs,
           })
         > {
   $$PregnanciesTableTableManager(_$AppDatabase db, $PregnanciesTable table)
@@ -9580,6 +11176,8 @@ class $$PregnanciesTableTableManager
                 vitalReadingsRefs = false,
                 sessionsRefs = false,
                 lettersRefs = false,
+                kickSessionsRefs = false,
+                contractionsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -9592,6 +11190,8 @@ class $$PregnanciesTableTableManager
                     if (vitalReadingsRefs) db.vitalReadings,
                     if (sessionsRefs) db.sessions,
                     if (lettersRefs) db.letters,
+                    if (kickSessionsRefs) db.kickSessions,
+                    if (contractionsRefs) db.contractions,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -9764,6 +11364,48 @@ class $$PregnanciesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (kickSessionsRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          KickSession
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._kickSessionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).kickSessionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (contractionsRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          Contraction
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._contractionsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).contractionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -9793,6 +11435,8 @@ typedef $$PregnanciesTableProcessedTableManager =
         bool vitalReadingsRefs,
         bool sessionsRefs,
         bool lettersRefs,
+        bool kickSessionsRefs,
+        bool contractionsRefs,
       })
     >;
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
@@ -15561,6 +17205,979 @@ typedef $$LettersTableProcessedTableManager =
       Letter,
       PrefetchHooks Function({bool pregnancyId})
     >;
+typedef $$KickSessionsTableCreateCompanionBuilder =
+    KickSessionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String pregnancyId,
+      required DateTime startedAt,
+      required DateTime endedAt,
+      required int count,
+      Value<int> rowid,
+    });
+typedef $$KickSessionsTableUpdateCompanionBuilder =
+    KickSessionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> pregnancyId,
+      Value<DateTime> startedAt,
+      Value<DateTime> endedAt,
+      Value<int> count,
+      Value<int> rowid,
+    });
+
+final class $$KickSessionsTableReferences
+    extends BaseReferences<_$AppDatabase, $KickSessionsTable, KickSession> {
+  $$KickSessionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('kick_session__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$KickSessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $KickSessionsTable> {
+  $$KickSessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$KickSessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $KickSessionsTable> {
+  $$KickSessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get count => $composableBuilder(
+    column: $table.count,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$KickSessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $KickSessionsTable> {
+  $$KickSessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get count =>
+      $composableBuilder(column: $table.count, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$KickSessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $KickSessionsTable,
+          KickSession,
+          $$KickSessionsTableFilterComposer,
+          $$KickSessionsTableOrderingComposer,
+          $$KickSessionsTableAnnotationComposer,
+          $$KickSessionsTableCreateCompanionBuilder,
+          $$KickSessionsTableUpdateCompanionBuilder,
+          (KickSession, $$KickSessionsTableReferences),
+          KickSession,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$KickSessionsTableTableManager(_$AppDatabase db, $KickSessionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$KickSessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$KickSessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$KickSessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime> endedAt = const Value.absent(),
+                Value<int> count = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => KickSessionsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                count: count,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                required DateTime startedAt,
+                required DateTime endedAt,
+                required int count,
+                Value<int> rowid = const Value.absent(),
+              }) => KickSessionsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                count: count,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$KickSessionsTable, KickSession>(table),
+                  $$KickSessionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$KickSessionsTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$KickSessionsTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$KickSessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $KickSessionsTable,
+      KickSession,
+      $$KickSessionsTableFilterComposer,
+      $$KickSessionsTableOrderingComposer,
+      $$KickSessionsTableAnnotationComposer,
+      $$KickSessionsTableCreateCompanionBuilder,
+      $$KickSessionsTableUpdateCompanionBuilder,
+      (KickSession, $$KickSessionsTableReferences),
+      KickSession,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
+typedef $$ContractionsTableCreateCompanionBuilder =
+    ContractionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String pregnancyId,
+      required DateTime startedAt,
+      required DateTime endedAt,
+      Value<int> rowid,
+    });
+typedef $$ContractionsTableUpdateCompanionBuilder =
+    ContractionsCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> pregnancyId,
+      Value<DateTime> startedAt,
+      Value<DateTime> endedAt,
+      Value<int> rowid,
+    });
+
+final class $$ContractionsTableReferences
+    extends BaseReferences<_$AppDatabase, $ContractionsTable, Contraction> {
+  $$ContractionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('contraction__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ContractionsTableFilterComposer
+    extends Composer<_$AppDatabase, $ContractionsTable> {
+  $$ContractionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContractionsTable> {
+  $$ContractionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endedAt => $composableBuilder(
+    column: $table.endedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContractionsTable> {
+  $$ContractionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endedAt =>
+      $composableBuilder(column: $table.endedAt, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ContractionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContractionsTable,
+          Contraction,
+          $$ContractionsTableFilterComposer,
+          $$ContractionsTableOrderingComposer,
+          $$ContractionsTableAnnotationComposer,
+          $$ContractionsTableCreateCompanionBuilder,
+          $$ContractionsTableUpdateCompanionBuilder,
+          (Contraction, $$ContractionsTableReferences),
+          Contraction,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$ContractionsTableTableManager(_$AppDatabase db, $ContractionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContractionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContractionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContractionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime> endedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContractionsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                required DateTime startedAt,
+                required DateTime endedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ContractionsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                startedAt: startedAt,
+                endedAt: endedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ContractionsTable, Contraction>(table),
+                  $$ContractionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$ContractionsTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$ContractionsTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ContractionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContractionsTable,
+      Contraction,
+      $$ContractionsTableFilterComposer,
+      $$ContractionsTableOrderingComposer,
+      $$ContractionsTableAnnotationComposer,
+      $$ContractionsTableCreateCompanionBuilder,
+      $$ContractionsTableUpdateCompanionBuilder,
+      (Contraction, $$ContractionsTableReferences),
+      Contraction,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
+typedef $$BackupLogTableCreateCompanionBuilder = BackupLogCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required BackupKind kind,
+  required int sizeBytes,
+  required bool includesLibrary,
+  Value<int> rowid,
+});
+typedef $$BackupLogTableUpdateCompanionBuilder = BackupLogCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<BackupKind> kind,
+  Value<int> sizeBytes,
+  Value<bool> includesLibrary,
+  Value<int> rowid,
+});
+
+class $$BackupLogTableFilterComposer
+    extends Composer<_$AppDatabase, $BackupLogTable> {
+  $$BackupLogTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<BackupKind, BackupKind, String> get kind =>
+      $composableBuilder(
+        column: $table.kind,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get includesLibrary => $composableBuilder(
+    column: $table.includesLibrary,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BackupLogTableOrderingComposer
+    extends Composer<_$AppDatabase, $BackupLogTable> {
+  $$BackupLogTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get includesLibrary => $composableBuilder(
+    column: $table.includesLibrary,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BackupLogTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BackupLogTable> {
+  $$BackupLogTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<BackupKind, String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<int> get sizeBytes =>
+      $composableBuilder(column: $table.sizeBytes, builder: (column) => column);
+
+  GeneratedColumn<bool> get includesLibrary => $composableBuilder(
+    column: $table.includesLibrary,
+    builder: (column) => column,
+  );
+}
+
+class $$BackupLogTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BackupLogTable,
+          BackupLogEntry,
+          $$BackupLogTableFilterComposer,
+          $$BackupLogTableOrderingComposer,
+          $$BackupLogTableAnnotationComposer,
+          $$BackupLogTableCreateCompanionBuilder,
+          $$BackupLogTableUpdateCompanionBuilder,
+          (
+            BackupLogEntry,
+            BaseReferences<_$AppDatabase, $BackupLogTable, BackupLogEntry>,
+          ),
+          BackupLogEntry,
+          PrefetchHooks Function()
+        > {
+  $$BackupLogTableTableManager(_$AppDatabase db, $BackupLogTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BackupLogTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BackupLogTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BackupLogTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<BackupKind> kind = const Value.absent(),
+                Value<int> sizeBytes = const Value.absent(),
+                Value<bool> includesLibrary = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BackupLogCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                kind: kind,
+                sizeBytes: sizeBytes,
+                includesLibrary: includesLibrary,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required BackupKind kind,
+                required int sizeBytes,
+                required bool includesLibrary,
+                Value<int> rowid = const Value.absent(),
+              }) => BackupLogCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                kind: kind,
+                sizeBytes: sizeBytes,
+                includesLibrary: includesLibrary,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BackupLogTable, BackupLogEntry>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $BackupLogTable,
+                    BackupLogEntry
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BackupLogTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BackupLogTable,
+      BackupLogEntry,
+      $$BackupLogTableFilterComposer,
+      $$BackupLogTableOrderingComposer,
+      $$BackupLogTableAnnotationComposer,
+      $$BackupLogTableCreateCompanionBuilder,
+      $$BackupLogTableUpdateCompanionBuilder,
+      (
+        BackupLogEntry,
+        BaseReferences<_$AppDatabase, $BackupLogTable, BackupLogEntry>,
+      ),
+      BackupLogEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -15595,4 +18212,10 @@ class $AppDatabaseManager {
       $$SessionsTableTableManager(_db, _db.sessions);
   $$LettersTableTableManager get letters =>
       $$LettersTableTableManager(_db, _db.letters);
+  $$KickSessionsTableTableManager get kickSessions =>
+      $$KickSessionsTableTableManager(_db, _db.kickSessions);
+  $$ContractionsTableTableManager get contractions =>
+      $$ContractionsTableTableManager(_db, _db.contractions);
+  $$BackupLogTableTableManager get backupLog =>
+      $$BackupLogTableTableManager(_db, _db.backupLog);
 }

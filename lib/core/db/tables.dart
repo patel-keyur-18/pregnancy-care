@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/content/content_pack.dart' show CareKind;
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:uuid/uuid.dart';
 
 /// Time-ordered UUID v7, used as every row's id.
@@ -10,8 +11,8 @@ String newId() => const Uuid().v7();
 /// soft-delete marker.
 mixin BaseColumns on Table {
   TextColumn get id => text().clientDefault(newId)();
-  DateTimeColumn get createdAt => dateTime().clientDefault(DateTime.now)();
-  DateTimeColumn get updatedAt => dateTime().clientDefault(DateTime.now)();
+  DateTimeColumn get createdAt => dateTime().clientDefault(clockNow)();
+  DateTimeColumn get updatedAt => dateTime().clientDefault(clockNow)();
   DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
@@ -265,6 +266,42 @@ class Letters extends Table with BaseColumns {
 
   TextColumn get pregnancyId => text().references(Pregnancies, #id)();
   TextColumn get body => text()();
+}
+
+/// A kick-counter session: movements counted from the first tap to the last.
+@DataClassName('KickSession')
+class KickSessions extends Table with BaseColumns {
+  @override
+  String get tableName => 'kick_session';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  DateTimeColumn get startedAt => dateTime()();
+  DateTimeColumn get endedAt => dateTime()();
+  IntColumn get count => integer()();
+}
+
+/// One timed contraction, from start to end.
+@DataClassName('Contraction')
+class Contractions extends Table with BaseColumns {
+  @override
+  String get tableName => 'contraction';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  DateTimeColumn get startedAt => dateTime()();
+  DateTimeColumn get endedAt => dateTime()();
+}
+
+enum BackupKind { backup, restore }
+
+/// When a backup was made or restored. Never holds the password.
+@DataClassName('BackupLogEntry')
+class BackupLog extends Table with BaseColumns {
+  @override
+  String get tableName => 'backup_log';
+
+  TextColumn get kind => textEnum<BackupKind>()();
+  IntColumn get sizeBytes => integer()();
+  BoolColumn get includesLibrary => boolean()();
 }
 
 /// Key-value app settings (theme, first name, …).

@@ -8,6 +8,7 @@ import 'package:navmaas/core/db/app_database.steps.dart';
 import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -32,6 +33,9 @@ part 'app_database.g.dart';
     LibraryItems,
     Sessions,
     Letters,
+    KickSessions,
+    Contractions,
+    BackupLog,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -51,7 +55,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +82,12 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.libraryItem);
         await m.createTable(schema.session);
         await m.createTable(schema.letter);
+      },
+      // v6 (M5): kick counter, contractions and the backup log.
+      from5To6: (m, schema) async {
+        await m.createTable(schema.kickSession);
+        await m.createTable(schema.contraction);
+        await m.createTable(schema.backupLog);
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
