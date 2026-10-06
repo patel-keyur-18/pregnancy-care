@@ -531,7 +531,7 @@ These rules apply to every milestone below, on top of its own "done when":
 | **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan (deferred) | v9 |
 | **M9** | Records vault, visit summary PDF, EPUB books (deferred) | v10 |
 | **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
-| **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (limits); M11b 2026-10-06 (release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
+| **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (PR #24, limits); M11b 2026-10-06 (PR #25, release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
 
 #### M7 Wellbeing ✅
 
@@ -661,7 +661,7 @@ These rules apply to every milestone below, on top of its own "done when":
 
 **Owner's answers** (Plan decisions 51–54): "Time for a pause · {minutes} min on {app} today. Phone down, baby time."; 15 · 30 · 45 · 60 · 90 · 120 minutes, default 30; a rules snapshot written by Dart for the Kotlin check (ADR 050); split into M11a (limits) and M11b (the Phase 2 release).
 
-**Status:** **M11a ✅ 2026-10-06**: schema v8 (`app_limit`), Screen Rest's card and Limits for other apps (Usage access, the launcher's apps, 15–120 minutes, the notice preview, paused when access is off), `limitRules` and `AppLimitSync` (Dart), the `navmaas/usage` channel and `AppLimitCheck` (Kotlin, WorkManager every 15 minutes only while a limit is set). **M11b ✅ 2026-10-06**, stacked on M11a: the three deferred integration tests (`app_flow_test.dart`, passing on the iOS simulator), the accessibility pass (every Phase 2 screen and sheet in the accessibility map; no unlabelled icon buttons, no new motion), Navmaas **1.1.0 (build 2)** for both phones and the widget extension. Phase 2 ships without M8 and M9, which the owner deferred.
+**Status:** **M11a ✅ 2026-10-06 (PR #24)**: schema v8 (`app_limit`), Screen Rest's card and Limits for other apps (Usage access, the launcher's apps, 15–120 minutes, the notice preview, paused when access is off), `limitRules` and `AppLimitSync` (Dart), the `navmaas/usage` channel and `AppLimitCheck` (Kotlin, WorkManager every 15 minutes only while a limit is set). **M11b ✅ 2026-10-06 (PR #25)**, stacked on M11a: the three deferred integration tests (`app_flow_test.dart`, passing on the iOS simulator), the accessibility pass (every Phase 2 screen and sheet in the accessibility map; no unlabelled icon buttons, no new motion), Navmaas **1.1.0 (build 2)** for both phones and the widget extension. Phase 2 ships without M8 and M9, which the owner deferred.
 
 **Done when**
 - The notice arrives within about 15 minutes of passing a limit, never in quiet hours, and once per app per day (on-device check on Android).
