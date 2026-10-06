@@ -104,12 +104,15 @@ class _BreathingScreenState extends ConsumerState<BreathingScreen>
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      l10n.breathingTitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge!.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.breathingTitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),

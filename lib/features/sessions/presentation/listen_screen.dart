@@ -115,12 +115,15 @@ class _ListenScreenState extends ConsumerState<ListenScreen> {
                 ),
               ),
               Expanded(
-                child: Text(
-                  l10n.listening,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge!.copyWith(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    l10n.listening,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge!.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ),

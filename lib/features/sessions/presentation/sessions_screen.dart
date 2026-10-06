@@ -618,9 +618,12 @@ Future<void> showActivitySheet(BuildContext context, Activity activity) =>
                               color: scheme.outline,
                             ),
                           ),
-                          Text(
-                            activity.title,
-                            style: theme.textTheme.titleMedium,
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              activity.title,
+                              style: theme.textTheme.titleMedium,
+                            ),
                           ),
                         ],
                       ),

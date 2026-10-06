@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
@@ -221,6 +222,13 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pump(const Duration(minutes: 20));
     },
   ),
+  'delete all data': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, 'Delete all data');
+    },
+  ),
   'screen rest': (
     true,
     (t) async {
@@ -414,6 +422,24 @@ void main() {
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       });
     }
+    testWidgets(
+      '$name has a heading for screen readers',
+      // Screen off is one full-screen "wake" button.
+      skip: name == 'listen, screen off',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        await pumpApp(
+          tester,
+          seed: seeded ? _seed : null,
+          library: _library,
+          buildExpiry: _expiry,
+          pickFile: _pickBackup,
+        );
+        await open(tester);
+        expect(find.semantics.byFlag(SemanticsFlag.isHeader), findsAtLeast(1));
+        semantics.dispose();
+      },
+    );
     for (final brightness in Brightness.values) {
       testWidgets('$name text contrast (${brightness.name})', (tester) async {
         await pumpApp(

@@ -206,13 +206,16 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
                   Expanded(
                     child: Column(
                       children: [
-                        Text(
-                          item?.title ?? '',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyLarge!.copyWith(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w800,
-                            color: fg,
+                        Semantics(
+                          header: true,
+                          child: Text(
+                            item?.title ?? '',
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyLarge!.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: fg,
+                            ),
                           ),
                         ),
                         if (subtitle != null)
