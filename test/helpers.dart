@@ -13,6 +13,7 @@ import 'package:navmaas/core/db/delete_all_data.dart';
 import 'package:navmaas/core/platform/audio.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
+import 'package:navmaas/core/platform/home_widget.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -212,6 +213,18 @@ class FakeBackupService implements BackupService {
 }
 
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
+/// Records the home-screen widget's snapshots (no platform plugin).
+class FakeWidgetPublisher implements WidgetPublisher {
+  final snapshots = <String>[];
+  List<DateTime> updateTimes = const [];
+
+  @override
+  Future<void> publish(String snapshot, List<DateTime> updateTimes) async {
+    snapshots.add(snapshot);
+    this.updateTimes = updateTimes;
+  }
+}
+
 final testToday = DateTime.utc(2026, 10, 5);
 
 /// Pumps the whole app on a fresh in-memory database, like a first install.
@@ -221,6 +234,7 @@ Future<AppDatabase> pumpApp(
   FakeScheduler? scheduler,
   FakeAudio? audio,
   FakeSteps? steps,
+  FakeWidgetPublisher? widget,
   Directory? library,
   PickFile? pickFile,
   DateTime? buildExpiry,
@@ -276,6 +290,9 @@ Future<AppDatabase> pumpApp(
         ),
         audioPlaybackProvider.overrideWith((_) async => audio ?? FakeAudio()),
         stepSourceProvider.overrideWithValue(steps ?? FakeSteps()),
+        widgetPublisherProvider.overrideWithValue(
+          widget ?? FakeWidgetPublisher(),
+        ),
         libraryRepositoryProvider.overrideWith(
           (ref) => LibraryRepository(
             ref.watch(appDatabaseProvider),

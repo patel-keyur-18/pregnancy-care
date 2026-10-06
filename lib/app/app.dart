@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:navmaas/app/home_widget.dart';
 import 'package:navmaas/app/reminders.dart';
 import 'package:navmaas/app/router.dart';
 import 'package:navmaas/app/theme_mode.dart';
@@ -74,7 +75,9 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
         .platformDispatcher
         .accessibilityFeatures
         .disableAnimations;
-    ref.watch(reminderSyncProvider);
+    ref
+      ..listen(reminderSyncProvider, (_, _) {})
+      ..listen(widgetSyncProvider, (_, _) {});
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       theme: AppTheme.light,

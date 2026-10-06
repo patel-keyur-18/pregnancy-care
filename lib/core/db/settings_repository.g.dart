@@ -128,6 +128,47 @@ final class NightReadingProvider
 
 String _$nightReadingHash() => r'e2fb78068998232c10315df9286526204102de4a';
 
+/// "Hide details on widget" (Me → Your data); off unless switched on
+/// (Plan decision 47).
+
+@ProviderFor(widgetHideDetails)
+final widgetHideDetailsProvider = WidgetHideDetailsProvider._();
+
+/// "Hide details on widget" (Me → Your data); off unless switched on
+/// (Plan decision 47).
+
+final class WidgetHideDetailsProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// "Hide details on widget" (Me → Your data); off unless switched on
+  /// (Plan decision 47).
+  WidgetHideDetailsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'widgetHideDetailsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$widgetHideDetailsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return widgetHideDetails(ref);
+  }
+}
+
+String _$widgetHideDetailsHash() => r'749955c043735dd67ccbd84a6c40fe066dc40009';
+
 /// The daily step goal she set on the Walk screen.
 
 @ProviderFor(stepGoal)

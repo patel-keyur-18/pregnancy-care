@@ -122,13 +122,14 @@ Future<void> initReminders(ProviderContainer container) async {
 }
 
 /// Keeps the OS schedule in step with supplements, taken doses and the
-/// calm-notification settings. Re-plans on any change and on resume.
+/// calm-notification settings. Re-plans on any change and on resume. Its
+/// state is the plan, which the home-screen widget shows the next of.
 @Riverpod(keepAlive: true)
 class ReminderSync extends _$ReminderSync {
   var _queued = false;
 
   @override
-  void build() {
+  List<PlannedReminder> build() {
     ref
       ..listen(reminderSettingsProvider, (_, _) => refresh())
       ..listen(supplementPlansProvider, (_, _) => refresh())
@@ -141,6 +142,7 @@ class ReminderSync extends _$ReminderSync {
       ..listen(lastBackupProvider, (_, _) => refresh())
       ..listen(waterGoalReachedProvider, (_, _) => refresh());
     refresh();
+    return const [];
   }
 
   /// Coalesces bursts of changes into one re-plan.
@@ -206,6 +208,7 @@ class ReminderSync extends _$ReminderSync {
         ),
       ],
     );
+    state = planned;
     try {
       await ref.read(reminderSchedulerProvider).sync(planned, _l10n);
     } on Object catch (e) {

@@ -54,6 +54,10 @@ abstract final class SettingKeys {
   static const waterRemind = 'water_remind';
   static const waterEvery = 'water_every';
   static const wellbeingCardHidden = 'wellbeing_card_hidden';
+
+  /// Home-screen widget (M10): "Hide details on widget" in Me (Plan
+  /// decision 47; off unless set).
+  static const widgetHide = 'widget_hide';
 }
 
 class SettingsRepository {
@@ -119,6 +123,14 @@ Stream<bool> nightReading(Ref ref) => ref
     .watch(settingsRepositoryProvider)
     .watch(SettingKeys.nightReading)
     .map((v) => v != 'false');
+
+/// "Hide details on widget" (Me → Your data); off unless switched on
+/// (Plan decision 47).
+@Riverpod(keepAlive: true)
+Stream<bool> widgetHideDetails(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.widgetHide)
+    .map((v) => v == 'true');
 
 /// The daily step goal she set on the Walk screen.
 @riverpod

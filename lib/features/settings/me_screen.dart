@@ -249,6 +249,40 @@ class MeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                MergeSemantics(
+                  child: Row(
+                    spacing: 12,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.widgetHide,
+                              style: text.bodyLarge!.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              l10n.widgetHideSub,
+                              style: text.bodySmall!.copyWith(
+                                color: scheme.outline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Switch(
+                        value:
+                            ref.watch(widgetHideDetailsProvider).value ?? false,
+                        onChanged: (v) => ref
+                            .read(settingsRepositoryProvider)
+                            .put(SettingKeys.widgetHide, '$v'),
+                      ),
+                    ],
+                  ),
+                ),
                 const _BackupRow(),
                 if (pregnancy != null)
                   TextButton(
