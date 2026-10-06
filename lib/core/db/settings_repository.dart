@@ -58,6 +58,11 @@ abstract final class SettingKeys {
   /// Home-screen widget (M10): "Hide details on widget" in Me (Plan
   /// decision 47; off unless set).
   static const widgetHide = 'widget_hide';
+
+  /// App lock (M10b, Plan decision 48): on or off (default off), and the
+  /// minutes away before it locks again (1, 5 or 15; default 1).
+  static const appLock = 'app_lock';
+  static const appLockAfter = 'app_lock_after';
 }
 
 class SettingsRepository {
@@ -124,13 +129,37 @@ Stream<bool> nightReading(Ref ref) => ref
     .watch(SettingKeys.nightReading)
     .map((v) => v != 'false');
 
-/// "Hide details on widget" (Me → Your data); off unless switched on
-/// (Plan decision 47).
+/// "Hide details on widget" (Me → Your data). Unless she has set it, it
+/// follows app lock: off, or on while app lock is on (Plan decision 47).
 @Riverpod(keepAlive: true)
 Stream<bool> widgetHideDetails(Ref ref) => ref
     .watch(settingsRepositoryProvider)
-    .watch(SettingKeys.widgetHide)
-    .map((v) => v == 'true');
+    .watchAll()
+    .map(
+      (s) => switch (s[SettingKeys.widgetHide]) {
+        final v? => v == 'true',
+        null => s[SettingKeys.appLock] == 'true',
+      },
+    )
+    .distinct();
+
+/// App lock: on, and the minutes away before it locks again.
+typedef AppLockSettings = ({bool on, int after});
+
+/// App lock's choices of minutes away (Plan decision 48).
+const appLockMinutes = [1, 5, 15];
+
+@Riverpod(keepAlive: true)
+Stream<AppLockSettings> appLockSettings(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watchAll()
+    .map(
+      (s) => (
+        on: s[SettingKeys.appLock] == 'true',
+        after: int.tryParse(s[SettingKeys.appLockAfter] ?? '') ?? 1,
+      ),
+    )
+    .distinct();
 
 /// The daily step goal she set on the Walk screen.
 @riverpod

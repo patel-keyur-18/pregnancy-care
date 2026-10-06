@@ -11,6 +11,7 @@ import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/delete_all_data.dart';
 import 'package:navmaas/core/platform/audio.dart';
+import 'package:navmaas/core/platform/authenticator.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/platform/home_widget.dart';
@@ -213,6 +214,24 @@ class FakeBackupService implements BackupService {
 }
 
 /// Fixed "today" for widget tests: Monday, 5 October 2026.
+/// Face ID / fingerprint stand-in: [screenLock] says whether the phone has
+/// one; [succeed] whether she unlocks (until set, every attempt fails, as
+/// if she cancelled). Counts the attempts.
+class FakeAuthenticator implements Authenticator {
+  bool screenLock = true;
+  bool succeed = false;
+  int attempts = 0;
+
+  @override
+  Future<bool> canLock() async => screenLock;
+
+  @override
+  Future<bool> unlock(String reason) async {
+    attempts++;
+    return succeed;
+  }
+}
+
 /// Records the home-screen widget's snapshots (no platform plugin).
 class FakeWidgetPublisher implements WidgetPublisher {
   final snapshots = <String>[];
@@ -235,6 +254,7 @@ Future<AppDatabase> pumpApp(
   FakeAudio? audio,
   FakeSteps? steps,
   FakeWidgetPublisher? widget,
+  FakeAuthenticator? authenticator,
   Directory? library,
   PickFile? pickFile,
   DateTime? buildExpiry,
@@ -292,6 +312,9 @@ Future<AppDatabase> pumpApp(
         stepSourceProvider.overrideWithValue(steps ?? FakeSteps()),
         widgetPublisherProvider.overrideWithValue(
           widget ?? FakeWidgetPublisher(),
+        ),
+        authenticatorProvider.overrideWithValue(
+          authenticator ?? FakeAuthenticator(),
         ),
         libraryRepositoryProvider.overrideWith(
           (ref) => LibraryRepository(

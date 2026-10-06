@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:navmaas/app/theme_mode.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/platform/authenticator.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
@@ -249,6 +252,7 @@ class MeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const _AppLockRows(),
                 MergeSemantics(
                   child: Row(
                     spacing: 12,
@@ -515,6 +519,102 @@ class _CalmNotifications extends ConsumerWidget {
 
 /// "Doctor cleared me for exercise" and "High-risk pregnancy" (prototype Me
 /// → Exercise). Walking is always open (Plan decision 27).
+/// App lock (M10b, Plan decision 48): the switch and, while it's on, how
+/// long she may be away before it locks again. It turns on only when the
+/// phone has a screen lock; turning it on also hides the widget's details
+/// unless she shows them again.
+class _AppLockRows extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final text = theme.textTheme;
+    final lock = ref.watch(appLockSettingsProvider).value;
+    final on = lock?.on ?? false;
+    final settings = ref.read(settingsRepositoryProvider);
+
+    Future<void> toggle({required bool v}) async {
+      if (v && !await ref.read(authenticatorProvider).canLock()) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.appLockNoScreenLock)));
+        return;
+      }
+      if (v) await settings.remove(SettingKeys.widgetHide);
+      await settings.put(SettingKeys.appLock, '$v');
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 14,
+      children: [
+        MergeSemantics(
+          child: Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.appLock,
+                      style: text.bodyLarge!.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      theme.platform == TargetPlatform.iOS
+                          ? l10n.appLockSubIos
+                          : l10n.appLockSubAndroid,
+                      style: text.bodySmall!.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: on,
+                onChanged: (v) => unawaited(toggle(v: v)),
+              ),
+            ],
+          ),
+        ),
+        if (on)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Text(
+                l10n.appLockAfter,
+                style: text.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Semantics(
+                label: l10n.appLockAfter,
+                container: true,
+                child: PillSegmented<int>(
+                  segments: [
+                    for (final m in appLockMinutes)
+                      (value: m, label: l10n.minutesShort(m), caption: null),
+                  ],
+                  selected: lock!.after,
+                  onChanged: (m) =>
+                      settings.put(SettingKeys.appLockAfter, '$m'),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
 class _ExerciseSwitches extends ConsumerWidget {
   const new();
 

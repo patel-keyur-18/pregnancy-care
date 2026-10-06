@@ -142,6 +142,25 @@ Future<void> _tapText(
   await tester.pumpAndSettle();
 }
 
+/// Me → Your data → App lock on.
+Future<void> _appLockOn(WidgetTester t) async {
+  await _tab(t, 'Me');
+  await t.scrollUntilVisible(
+    find.text('App lock'),
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  final row = find.ancestor(
+    of: find.text('App lock'),
+    matching: find.byType(Row),
+  );
+  final toggle = find.descendant(of: row.first, matching: find.byType(Switch));
+  await t.ensureVisible(toggle);
+  await t.pumpAndSettle();
+  await t.tap(toggle);
+  await t.pumpAndSettle();
+}
+
 /// Each screen the app has, reached the way a user would.
 final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
   'onboarding 1': (false, (_) async {}),
@@ -180,6 +199,27 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
   'sessions': (true, (t) => _tab(t, 'Sessions')),
   'care': (true, (t) => _tab(t, 'Care')),
   'me': (true, (t) => _tab(t, 'Me')),
+  'me, app lock on': (true, _appLockOn),
+  'app lock': (
+    true,
+    (t) async {
+      await _appLockOn(t);
+      // Away for two minutes; the fake never unlocks.
+      [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+      ].forEach(t.binding.handleAppLifecycleStateChanged);
+      await t.pump(const Duration(minutes: 2));
+      [
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ].forEach(t.binding.handleAppLifecycleStateChanged);
+      await t.pumpAndSettle();
+      expect(find.text('Navmaas is locked'), findsOneWidget);
+    },
+  ),
   'supplements': (
     true,
     (t) async {

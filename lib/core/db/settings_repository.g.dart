@@ -128,20 +128,20 @@ final class NightReadingProvider
 
 String _$nightReadingHash() => r'e2fb78068998232c10315df9286526204102de4a';
 
-/// "Hide details on widget" (Me → Your data); off unless switched on
-/// (Plan decision 47).
+/// "Hide details on widget" (Me → Your data). Unless she has set it, it
+/// follows app lock: off, or on while app lock is on (Plan decision 47).
 
 @ProviderFor(widgetHideDetails)
 final widgetHideDetailsProvider = WidgetHideDetailsProvider._();
 
-/// "Hide details on widget" (Me → Your data); off unless switched on
-/// (Plan decision 47).
+/// "Hide details on widget" (Me → Your data). Unless she has set it, it
+/// follows app lock: off, or on while app lock is on (Plan decision 47).
 
 final class WidgetHideDetailsProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
     with $FutureModifier<bool>, $StreamProvider<bool> {
-  /// "Hide details on widget" (Me → Your data); off unless switched on
-  /// (Plan decision 47).
+  /// "Hide details on widget" (Me → Your data). Unless she has set it, it
+  /// follows app lock: off, or on while app lock is on (Plan decision 47).
   WidgetHideDetailsProvider._()
     : super(
         from: null,
@@ -167,7 +167,46 @@ final class WidgetHideDetailsProvider
   }
 }
 
-String _$widgetHideDetailsHash() => r'749955c043735dd67ccbd84a6c40fe066dc40009';
+String _$widgetHideDetailsHash() => r'cecc88cf0693916a178216367273eb38a0d7a1ed';
+
+@ProviderFor(appLockSettings)
+final appLockSettingsProvider = AppLockSettingsProvider._();
+
+final class AppLockSettingsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<AppLockSettings>,
+          AppLockSettings,
+          Stream<AppLockSettings>
+        >
+    with $FutureModifier<AppLockSettings>, $StreamProvider<AppLockSettings> {
+  AppLockSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appLockSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appLockSettingsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<AppLockSettings> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<AppLockSettings> create(Ref ref) {
+    return appLockSettings(ref);
+  }
+}
+
+String _$appLockSettingsHash() => r'ccd1eb6330aac8e8f89f1eed379398e3802fab8b';
 
 /// The daily step goal she set on the Walk screen.
 

@@ -152,6 +152,46 @@ void main() {
         );
       });
 
+      testWidgets('app lock $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            await SettingsRepository(db).put(SettingKeys.appLock, 'true');
+          },
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/app_lock_$name.png'),
+        );
+      });
+
+      testWidgets('me, your data $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            await SettingsRepository(db).put(SettingKeys.appLock, 'true');
+          },
+          authenticator: FakeAuthenticator()..succeed = true,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Me');
+        final section = find.text('Your data');
+        await tester.scrollUntilVisible(section, 200);
+        await tester.drag(find.byType(Scrollable).first, const Offset(0, -60));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/me_your_data_$name.png'),
+        );
+      });
+
       testWidgets('meditation $name', skip: _dir == null, (tester) async {
         await pumpApp(
           tester,

@@ -8,6 +8,9 @@
 	</array>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Show your steps on the Walk screen. Navmaas only reads them, and they stay on this phone.</string>
+	<!-- App lock (M10b): Face ID, falling back to the passcode. -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>Navmaas uses Face ID to unlock the app when app lock is on.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
