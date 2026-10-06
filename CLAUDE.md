@@ -27,7 +27,7 @@ dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
 dart run tool/bell.dart               # regenerates assets/audio/bell.wav and quiet.wav (a test checks they match)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
-flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test backs up, restores and deletes all data, so it runs only on an empty install)
+flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test backs up, restores and deletes all data, and app_flow_test runs onboarding, Taken and a PDF read then deletes all data, so both run only on an empty install)
 flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~66 MB, Arm only; what CI builds; CI fails it over 100 MB)
 flutter build apk --release           # universal APK (~103 MB, adds x86_64; emulators only; limit 150 MB); --split-per-abi ~30 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
@@ -119,3 +119,5 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Xcode:** Runner's "Embed Foundation Extensions" phase must stay before "Thin Binary", or the build reports a cycle. The widget extension uses Flutter's xcconfigs for its version and the same team.
 - **App lock** covers the app from `MaterialApp.builder`; never add per-screen lock checks or a lock route. Lifecycle in tests: step through every state (`inactive`, `hidden`, `paused` and back), as the engine does; the test binding doesn't fill them in, and `AppLifecycleListener` only calls `onHide` / `onShow` on those steps.
 - **App-limit notices** are decided in Dart (`limitRules`): the Kotlin check only follows the open windows, the day's room and the ready-made notice. Change a rule or a word in Dart, never in `AppLimitCheck.kt`.
+- **Integration tests that write from the background isolate** (`reminderActionInBackground`): the app's own drift streams don't see another connection's write until `markTablesUpdated` (the app does it on resume), so call it before checking.
+- **Version:** bump `version` in `pubspec.yaml` and `appVersion` in `backup_service.dart` together (a test checks they match); the widget extension takes the same version from Flutter's xcconfigs.

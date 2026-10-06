@@ -17,7 +17,9 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
-> **Next:** the rest of Phase 2 (M8–M11: body and birth prep; records vault, visit PDF and EPUB; widgets and app lock; limits for other apps on Android), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+> **Release 1.1.0** (Phase 2) has M7, M10 and M11. All of its on-phone flows (onboarding, Taken from a notification, reading a PDF) are checked by `integration_test/app_flow_test.dart`.
+>
+> **Next:** the deferred Phase 2 milestones (M8 body and birth prep; M9 records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
