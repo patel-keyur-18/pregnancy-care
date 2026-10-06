@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/content/content_pack.dart';
+import 'package:navmaas/core/db/tables.dart';
 
 import '../../../tool/content_md.dart';
 
@@ -186,6 +188,69 @@ void main() {
         renderRoutinesMarkdown(source),
         reason: 'run: dart run tool/content_md.dart',
       );
+    });
+  });
+
+  // Plan decisions 39–43: the symptom pick-list and the mood words are a log,
+  // never advice or a warning list, and Wellbeing has no good/bad wording.
+  group('wellbeing words (app_en.arb)', () {
+    final arb = (jsonDecode(
+      File('lib/l10n/app_en.arb').readAsStringSync(),
+    ) as Map<String, dynamic>).map((k, v) => MapEntry(k, v.toString()));
+    String cap(String s) => s[0].toUpperCase() + s.substring(1);
+    Map<String, String> labels(String prefix) => {
+      for (final MapEntry(:key, :value) in arb.entries)
+        if (key.startsWith(prefix)) key.substring(prefix.length): value,
+    };
+
+    test('every stored key has a word, and every word a key', () {
+      for (final (prefix, keys) in [
+        ('moodWord', MoodWord.values),
+        ('symptomPick', SymptomKind.values),
+        ('severity', Severity.values),
+        ('restedWord', Rested.values),
+      ]) {
+        expect(labels(prefix).keys.toSet(), {
+          for (final k in keys) cap(k.name),
+        }, reason: prefix);
+      }
+      expect(MoodWord.values, hasLength(5));
+      expect(labels('moodWord').values.toSet(), hasLength(5));
+    });
+
+    test('hard lines: no advice, warning, verdict or good/bad words', () {
+      const prefixes = [
+        'wellbeing',
+        'mood',
+        'symptom',
+        'severity',
+        'sleep',
+        'rested',
+        'water',
+        'nap',
+        'reminderWater',
+        'hideForToday',
+        'yourWeek',
+        'nothingLogged',
+        'weekSleep',
+        'weekWater',
+        'goal',
+        'noteOptional',
+      ];
+      final text = [
+        for (final MapEntry(:key, :value) in arb.entries)
+          if (!key.startsWith('@') && prefixes.any(key.startsWith)) value,
+      ].join('\n');
+      expect(text, contains('Heartburn'), reason: 'the words are checked');
+      final forbidden = RegExp(
+        r'\b(warn\w*|serious|severe|urgent\w*|abnormal|normal|risk\w*|'
+        'unsafe|safe|should|must|consult|contact|hospital|sign of|'
+        r'symptom of|good|bad|poor|better|worse|score\w*|healthy|unhealthy|'
+        r'enough|too (much|little|few|many)|emergency|danger\w*|sos|dose|'
+        r'doses|dosage|mg|ml|boy|girl|gender|sex|guarantee\w*)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(text).map((m) => m[0]), isEmpty);
     });
   });
 }
