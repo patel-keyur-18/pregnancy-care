@@ -18,6 +18,7 @@ import 'package:navmaas/core/widgets/notice_box.dart';
 import 'package:navmaas/features/today/next_visit_card.dart';
 import 'package:navmaas/features/today/screen_rest_card.dart';
 import 'package:navmaas/features/today/today_plan_card.dart';
+import 'package:navmaas/features/today/wellbeing_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today: header, the iPhone build-expiry banner when it's close, the week
@@ -56,6 +57,7 @@ class TodayScreen extends ConsumerWidget {
             ),
           const SizedBox(height: 16),
           const TodayPlanCard(),
+          const WellbeingCard(),
           const NextVisitCard(),
           const ScreenRestCard(),
         ],

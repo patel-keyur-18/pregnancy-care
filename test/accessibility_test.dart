@@ -8,8 +8,10 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/third_trimester/data/third_trimester_repository.dart';
+import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
 import 'helpers.dart';
 
@@ -49,6 +51,29 @@ Future<void> _seed(AppDatabase db) async {
       endedAt: start.add(const Duration(minutes: 18)),
       count: 10,
     );
+  }
+  // A few wellbeing logs, so the week and "Logged today" show.
+  final wellbeing = WellbeingRepository(db);
+  for (var ago = 0; ago < 3; ago++) {
+    final day = testToday.subtract(Duration(days: ago));
+    await wellbeing.setMood(pregnancyId: pregnancy.id, day: day, mood: .tired);
+    await wellbeing.saveSleep(
+      pregnancyId: pregnancy.id,
+      day: day,
+      bedAt: DateTime(day.year, day.month, day.day - 1, 22, 40),
+      wokeAt: DateTime(day.year, day.month, day.day, 6, 25),
+      napMinutes: 30,
+    );
+    await wellbeing.addWater(pregnancyId: pregnancy.id, day: day, delta: 5);
+    for (final kind in [SymptomKind.troubleSleeping, SymptomKind.swollenFeet]) {
+      await wellbeing.addSymptom(
+        pregnancyId: pregnancy.id,
+        kind: kind,
+        severity: .moderate,
+        note: 'After a long day on my feet.',
+        at: DateTime(day.year, day.month, day.day, 8),
+      );
+    }
   }
   for (final minute in [10, 18, 27]) {
     final start = DateTime(2026, 10, 5, 8, minute);
@@ -327,6 +352,83 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pump();
     },
   ),
+  'wellbeing': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Wellbeing');
+    },
+  ),
+  'mood check-in': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Wellbeing');
+      await _tapText(t, 'Mood');
+    },
+  ),
+  'symptom log, all chips and her own': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Wellbeing');
+      await _tapText(t, 'Symptoms');
+      await t.tap(find.textContaining('More · '));
+      await t.pumpAndSettle();
+      await _tapText(t, 'Add your own');
+    },
+  ),
+  'sleep entry': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Wellbeing');
+      await _tapText(t, 'Sleep');
+      await _tapText(t, 'A bit tired');
+    },
+  ),
+  'water, reminders on': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Wellbeing');
+      await _tapText(t, 'Water');
+      final toggle = find.byType(Switch);
+      await t.scrollUntilVisible(
+        toggle,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await t.ensureVisible(toggle);
+      await t.pumpAndSettle();
+      await t.tap(toggle);
+      await t.pumpAndSettle();
+    },
+  ),
+  'meditation': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+    },
+  ),
+  'meditation, running': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Start');
+    },
+  ),
+  'meditation, screen off': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Start');
+      await _tapText(t, 'Screen off — keep meditating');
+    },
+  ),
   'contraction timer': (
     true,
     (t) async {
@@ -425,7 +527,7 @@ void main() {
     testWidgets(
       '$name has a heading for screen readers',
       // Screen off is one full-screen "wake" button.
-      skip: name == 'listen, screen off',
+      skip: name == 'listen, screen off' || name == 'meditation, screen off',
       (tester) async {
         final semantics = tester.ensureSemantics();
         await pumpApp(

@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
+import 'package:navmaas/features/wellbeing/domain/water_reminders.dart';
+import 'package:navmaas/l10n/gen/app_localizations_en.dart';
 
 // Monday 5 October 2026, 08:00 local.
 final now = DateTime(2026, 10, 5, 8);
@@ -199,6 +201,116 @@ void main() {
           (t(6, 13, 45), 's13', false),
         ],
       );
+    });
+  });
+
+  group('water reminders (Plan decision 41)', () {
+    const water = ReminderSettings(on: true, waterOn: true);
+    List<ReminderCandidate> nudges({
+      ReminderSettings settings = water,
+      bool goalReached = false,
+    }) => waterCandidates(
+      now: now,
+      settings: settings,
+      goalReached: goalReached,
+      l10n: AppLocalizationsEn(),
+      days: 2,
+    );
+    List<DateTime> times(List<(DateTime, String, bool)> p) => [
+      for (final (at, _, _) in p) at,
+    ];
+
+    test('off by default: none', () {
+      expect(nudges(settings: on), isEmpty);
+    });
+
+    test('every 2 hours in the day; quiet hours and meal times drop them', () {
+      final today = plan(
+        nudges(),
+        settings: const ReminderSettings(
+          on: true,
+          waterOn: true,
+          dailyLimit: 8,
+        ),
+      ).where((p) => p.$1.day == 5);
+      // 9, 11, 13 (lunch: dropped), 15, 17, 19, 21 (quiet from 9:30 pm: the
+      // 9 pm one stays) ; 20:00 dinner never lands on a 2-hour step.
+      expect(times(today.toList()), [
+        t(5, 9),
+        t(5, 11),
+        t(5, 15),
+        t(5, 17),
+        t(5, 19),
+        t(5, 21),
+      ]);
+      expect(today.every((p) => p.$2.startsWith(waterKeyPrefix)), isTrue);
+    });
+
+    test('every 3 hours: 10, 1 (held by lunch, dropped), 4, 7', () {
+      final today = plan(
+        nudges(
+          settings: const ReminderSettings(
+            on: true,
+            waterOn: true,
+            waterEvery: 3,
+          ),
+        ),
+      ).where((p) => p.$1.day == 5);
+      expect(times(today.toList()), [t(5, 10), t(5, 16), t(5, 19)]);
+    });
+
+    test('nothing in quiet hours, even when they are moved', () {
+      final all = nudges(
+        settings: const ReminderSettings(
+          on: true,
+          waterOn: true,
+          quietStart: 18 * 60,
+          quietEnd: 9 * 60,
+          dailyLimit: 8,
+        ),
+      );
+      final today = plan(
+        all,
+        settings: const ReminderSettings(
+          on: true,
+          waterOn: true,
+          quietStart: 18 * 60,
+          quietEnd: 9 * 60,
+          dailyLimit: 8,
+        ),
+      ).where((p) => p.$1.day == 5);
+      expect(times(today.toList()), [t(5, 11), t(5, 15), t(5, 17)]);
+    });
+
+    test('they give way under the daily limit and never join the digest', () {
+      final p = plan([
+        c('s1', t(6, 8, 30)),
+        c('s2', t(6, 12)),
+        c('s3', t(6, 14, 30)),
+        c('s4', t(6, 18, 30)),
+        c('s5', t(6, 20, 50)),
+        ...nudges(),
+      ]).where((p) => p.$1.day == 6).toList();
+      // Within 30 minutes a nudge rides along with a supplement (bundling);
+      // on its own over the limit it drops, and the digest has none.
+      final digest = p.where((p) => p.$3).single;
+      expect(digest.$2.contains(waterKeyPrefix), isFalse);
+      expect(
+        p.where(
+          (p) =>
+              !p.$3 &&
+              p.$2.split(',').every((k) => k.startsWith(waterKeyPrefix)),
+        ),
+        isEmpty,
+        reason: 'no water-only notification over the limit',
+      );
+    });
+
+    test("once today's goal is reached, today's stop; tomorrow's stay", () {
+      final p = nudges(goalReached: true);
+      expect(p.where((c) => c.at.day == 5), isEmpty);
+      expect(p.where((c) => c.at.day == 6), isNotEmpty);
+      expect(p.first.title, 'Water');
     });
   });
 }

@@ -11,10 +11,13 @@ It combines:
 - walking and exercise sessions
 - third-trimester logs (kick counter, contraction timer)
 - password-protected backup and restore
+- wellbeing logs (mood, symptoms, sleep, water) and meditation
 
 > **Status:** the MVP (M1–M6) is built: M1–M4 on 2026-10-05, M5 and M6 on 2026-10-06: onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, Sessions with the Garbhasanskar path, your own books (PDF, text) and audio with a calm reader and screen-off listening, letters to baby, walks with steps from Apple Health / Health Connect, gentle exercise routines once the doctor has cleared you, slow breathing, a kick counter and contraction timer, pause or end tracking with one quiet page, the iPhone build-expiry reminder, password-protected backup and restore (with a weekly reminder), Screen Rest (bedtime and meal-time rest that keep reminders quiet, an eye rest while reading, a wind-down nudge and time in Navmaas today), and Me (with delete all data) — all on an encrypted on-device database.
 >
-> **Next:** Phase 2 (M7–M11: wellbeing; body and birth prep; records vault, visit PDF and EPUB; widgets and app lock; limits for other apps on Android), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+> **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio.
+>
+> **Next:** the rest of Phase 2 (M8–M11: body and birth prep; records vault, visit PDF and EPUB; widgets and app lock; limits for other apps on Android), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >

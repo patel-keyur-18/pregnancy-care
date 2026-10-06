@@ -36,6 +36,10 @@ part 'app_database.g.dart';
     KickSessions,
     Contractions,
     BackupLog,
+    MoodEntries,
+    SymptomEntries,
+    SleepLogs,
+    WaterLogs,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -57,7 +61,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -90,6 +94,13 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.kickSession);
         await m.createTable(schema.contraction);
         await m.createTable(schema.backupLog);
+      },
+      // v7 (M7a): wellbeing — mood, symptoms, sleep and water.
+      from6To7: (m, schema) async {
+        await m.createTable(schema.moodEntry);
+        await m.createTable(schema.symptomEntry);
+        await m.createTable(schema.sleepLog);
+        await m.createTable(schema.waterLog);
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

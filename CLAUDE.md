@@ -25,6 +25,7 @@ flutter test                          # unit + widget + accessibility tests
 dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dart); commit the output
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
+dart run tool/bell.dart               # regenerates assets/audio/bell.wav and quiet.wav (a test checks they match)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
 flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test backs up, restores and deletes all data, so it runs only on an empty install)
 flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~66 MB, Arm only; what CI builds; CI fails it over 100 MB)
@@ -43,14 +44,14 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - `lib/core/db/`: drift database, tables, key handling, repositories with their providers
 - `lib/core/pregnancy/`: the pregnancy engine. **Pure Dart, no Flutter imports.**
 - `lib/core/utils/`: date-only maths (UTC-midnight dates), `clockNow` (the one wall clock), `todayProvider` / `nowProvider`
-- `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing; the listening log turns playback into sessions; `SessionClock` is the shared once-a-second timer. `third_trimester/`: kick counter and contraction timer (`domain/patterns.dart`: her averages, never a verdict). `settings/`: Me, pause or end tracking and the quiet "tracking stopped" page. `screen_rest/`: Screen Rest (rules in `settings`, ADR 037), time in Navmaas (`ScreenUse`, saved when the app leaves the screen), rest windows and nudges (`domain/`, pure). `backup/`: the `.navmaas` file (`backup_file.dart`, pure Dart), `BackupService` (faked by `FakeBackupService` in `pumpApp`), the backup log and the Backup & restore screen
+- `lib/features/<feature>/`: screens and widgets per feature. `sessions/`: library (files in `db/library/`, never encrypted, never in the repo), reader, listen, letters, walk, exercise, breathing, meditation (`ScreenOff` is the shared overlay); the listening log turns playback into sessions (playback ids starting `meditation:` are logged as meditation); `SessionClock` is the shared once-a-second timer. `third_trimester/`: kick counter and contraction timer (`domain/patterns.dart`: her averages, never a verdict). `settings/`: Me, pause or end tracking and the quiet "tracking stopped" page. `screen_rest/`: Screen Rest (rules in `settings`, ADR 037), time in Navmaas (`ScreenUse`, saved when the app leaves the screen), rest windows and nudges (`domain/`, pure). `backup/`: the `.navmaas` file (`backup_file.dart`, pure Dart), `BackupService` (faked by `FakeBackupService` in `pumpApp`), the backup log and the Backup & restore screen. `wellbeing/`: mood, symptom, sleep and water logs (keys in the DB, words in `app_en.arb` via `WellbeingWords`), the week and water nudges (`domain/`, pure), Wellbeing and its entry screens; Today's card is `today/wellbeing_card.dart`
 - `lib/l10n/app_en.arb`: every user-facing string. No literals in widgets.
 - `test/`: mirrors `lib/`; `test/helpers.dart` has `pumpApp` (in-memory DB, fixed today 2026-10-05 with `clockNow` pinned to 9:00, fake scheduler, fake audio, fake steps, a temp library folder, a fake file picker, an optional build expiry, `FakeBackupService`, a fake share sheet and a delete-all-data that empties the in-memory DB); `test/goldens/` holds the golden screenshots (`failures/` is git-ignored)
 
 ## Hard lines
 
 - **No network calls** of any kind: no analytics, crash reporting, ads or remote fonts. Release Android builds have no `INTERNET` permission.
-- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction. No symptom or danger-sign lists: Walk and Exercise show one general line (Plan decision 26).
+- **No SOS or emergency features**, no medical interpretation, no dose suggestions, no sex prediction. No warning or danger-sign lists anywhere: nothing tells her a symptom is serious, normal, or a reason to act. The only symptom list is Wellbeing's log of common discomforts (Plan decision 39): she records what she felt; nothing is advised, rated or flagged. Walk and Exercise show one general line (Plan decision 26).
 - **No copyrighted text or audio** in the repo. Only original or public-domain content.
 - **Red (`error`) only for destructive actions and errors.** Notices use amber.
 - **Accessibility:**
@@ -107,3 +108,9 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **Reminder settings compare by value** (`ReminderSettings ==`, `.distinct()`): writing an unrelated setting (time in Navmaas, saved on every hide) must not re-plan reminders. Add new rule fields to `_fields`.
 - **Notification taps** go through `openReminder` (`ReminderPayload.open`); a tap that launched the app comes from `ReminderScheduler.launchResponse()` after the first frame.
 - **Buttons that change colour with state:** give each state its own `key`, or the label fades through the fill (the contraction button failed the contrast test mid-tween).
+- **Screens that start from saved data** (mood, sleep): seed with `ref.listenManual(…, fireImmediately: true)` in `initState`, without `setState` on the first call, and stop once she has touched a field. A `ref.read` there sees nothing when the stream hasn't loaded yet.
+- **Wellbeing words:** the DB stores enum keys; add a word to `app_en.arb` (`moodWord*`, `symptomPick*`, `severity*`, `restedWord*`) and `WellbeingWords` together, or the content test fails. No good/bad, advice or warning words anywhere in Wellbeing.
+- **Nudges bundle:** a nudge within 30 minutes of another reminder rides in that notification (generic title, "Folic acid · Water"); on its own over the daily limit it drops, and the digest never holds one.
+- **`FakeAudio` doesn't move position by itself:** `seek` in the test where real playback would have moved on (Meditation's countdown and "running" state read the position).
+- **Meditation's timer is audio:** the countdown comes from the track's position, not a Dart timer, so it keeps time with the phone locked. Change the bell only through `tool/bell.dart`.
+

@@ -100,6 +100,12 @@ void main() {
         await SettingsRepository(db).put(SettingKeys.remindersOn, 'true');
       },
     );
+    // Below the plan and the wellbeing card.
+    await tester.scrollUntilVisible(
+      find.text('Phone down, baby time.'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Phone down, baby time.'), findsOneWidget);
     await _openScreenRest(tester);
     expect(find.text('Screen Rest'), findsOneWidget);

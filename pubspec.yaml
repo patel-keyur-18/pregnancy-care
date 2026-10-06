@@ -61,6 +61,9 @@ flutter:
     - assets/content/care_template_in.json
     - assets/content/activities.json
     - assets/content/routines.json
+    # Meditation's original bell and quiet clip (tool/bell.dart).
+    - assets/audio/bell.wav
+    - assets/audio/quiet.wav
   # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
   fonts:
     - family: Nunito

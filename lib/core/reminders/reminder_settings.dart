@@ -20,6 +20,8 @@ class ReminderSettings {
     this.mealDinner = 20 * 60,
     this.windDownOn = false,
     this.windDownAt = 21 * 60,
+    this.waterOn = false,
+    this.waterEvery = 2,
   });
 
   factory fromSettings(Map<String, String> s) {
@@ -36,6 +38,8 @@ class ReminderSettings {
       mealDinner: minutes(SettingKeys.mealDinner, 20 * 60),
       windDownOn: s[SettingKeys.windDown] == 'true',
       windDownAt: minutes(SettingKeys.windDownAt, 21 * 60),
+      waterOn: s[SettingKeys.waterRemind] == 'true',
+      waterEvery: s[SettingKeys.waterEvery] == '3' ? 3 : 2,
     );
   }
 
@@ -62,7 +66,17 @@ class ReminderSettings {
   final bool windDownOn;
   final int windDownAt;
 
+  /// Wellbeing → Water reminders (default off): a nudge every [waterEvery]
+  /// hours (2 or 3) in the day (Plan decision 41).
+  final bool waterOn;
+  final int waterEvery;
+
   List<int> get mealStarts => [mealLunch, mealDinner];
+
+  /// Water nudges run from the end of quiet hours to their start (7:00 am to
+  /// 9:30 pm when bedtime rest is off).
+  int get waterFrom => quietOn ? quietEnd : 7 * 60;
+  int get waterUntil => quietOn ? quietStart : 21 * 60 + 30;
 
   /// Whether [minute] (after midnight) falls inside quiet hours.
   bool isQuiet(int minute) =>
@@ -93,6 +107,8 @@ class ReminderSettings {
     mealDinner,
     windDownOn,
     windDownAt,
+    waterOn,
+    waterEvery,
   );
 
   // Equal values don't re-plan reminders when an unrelated setting changes.

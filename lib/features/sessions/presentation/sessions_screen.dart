@@ -444,7 +444,8 @@ class _LibraryRow extends ConsumerWidget {
 }
 
 /// Walk (always open), the routines for this trimester (locked until
-/// "doctor cleared me"), and slow breathing (prototype "Move & breathe").
+/// "doctor cleared me"), slow breathing and meditation (prototype "Move &
+/// breathe").
 class _MoveAndBreathe extends ConsumerWidget {
   const new();
 
@@ -509,6 +510,14 @@ class _MoveAndBreathe extends ConsumerWidget {
         title: l10n.breathingTitle,
         subtitle: l10n.breathingSub(breathingMinutes),
         onTap: () => context.push('/breathe'),
+      ),
+      _MoveTile(
+        icon: NavmaasIcon.bowl,
+        background: scheme.tertiaryContainer,
+        foreground: scheme.onTertiaryContainer,
+        title: l10n.meditationTitle,
+        subtitle: l10n.meditationTile,
+        onTap: () => context.push('/meditate'),
       ),
     ];
     return Column(

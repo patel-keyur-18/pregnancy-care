@@ -92,6 +92,24 @@ class FakeAudio implements AudioPlayback {
   }
 
   @override
+  Future<Duration?> openMeditation({
+    required int minutes,
+    required String title,
+  }) async {
+    final id = meditationTimerId(minutes);
+    opened.add(id);
+    final length = Duration(minutes: minutes, seconds: 4);
+    _set((
+      itemId: id,
+      playing: false,
+      completed: false,
+      position: Duration.zero,
+      duration: length,
+    ));
+    return length;
+  }
+
+  @override
   Future<void> play() async => _set((
     itemId: _current.itemId,
     playing: true,

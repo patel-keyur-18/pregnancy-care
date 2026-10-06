@@ -15,7 +15,9 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
 import '../helpers.dart';
 
@@ -33,6 +35,57 @@ Future<void> _seed(AppDatabase db) async {
   await library.setProgress(book!.id, position: 420, total: 1000);
   final audio = await library.import('om_chanting.mp3', Stream.value([0]));
   await library.setDuration(audio!.id, 600);
+}
+
+/// A week of wellbeing logs, like the prototype's Wellbeing board.
+Future<void> _seedWellbeing(AppDatabase db) async {
+  await _seed(db);
+  final id = (await db.select(db.pregnancies).getSingle()).id;
+  final repo = WellbeingRepository(db);
+  final days = [
+    (0, MoodWord.calm, 7 * 60 + 45, 5),
+    (1, MoodWord.happy, 8 * 60 + 10, 8),
+    (2, MoodWord.tired, 6 * 60 + 20, 6),
+    (3, MoodWord.okay, 7 * 60 + 30, 7),
+    (5, MoodWord.low, 6 * 60 + 50, 4),
+    (6, MoodWord.calm, 7 * 60 + 55, 8),
+  ];
+  for (final (ago, mood, minutes, glasses) in days) {
+    final day = testToday.subtract(Duration(days: ago));
+    final woke = DateTime(day.year, day.month, day.day, 6, 25);
+    await repo.setMood(pregnancyId: id, day: day, mood: mood);
+    await repo.saveSleep(
+      pregnancyId: id,
+      day: day,
+      bedAt: woke.subtract(Duration(minutes: minutes)),
+      wokeAt: woke,
+    );
+    await repo.addWater(pregnancyId: id, day: day, delta: glasses);
+  }
+  await repo.addSymptom(
+    pregnancyId: id,
+    kind: .backache,
+    severity: .mild,
+    note: 'After sitting at my desk all afternoon.',
+    at: DateTime(2026, 10, 5, 8, 15),
+  );
+  for (final (kind, severity) in [
+    (SymptomKind.heartburn, Severity.moderate),
+    (SymptomKind.legCramps, Severity.mild),
+  ]) {
+    await repo.addSymptom(
+      pregnancyId: id,
+      kind: kind,
+      severity: severity,
+      at: DateTime(2026, 10, 3, 21),
+    );
+  }
+  await repo.addSymptom(
+    pregnancyId: id,
+    kind: .tiredness,
+    severity: .strong,
+    at: DateTime(2026, 9, 30, 18),
+  );
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -97,6 +150,70 @@ void main() {
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/screen_rest_$name.png'),
         );
+      });
+
+      testWidgets('meditation $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: _seed,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Sessions');
+        final tile = find.text('Meditation');
+        await tester.scrollUntilVisible(tile, 200);
+        await tester.ensureVisible(tile);
+        await tester.pumpAndSettle();
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/meditation_$name.png'),
+        );
+      });
+
+      testWidgets('wellbeing $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: _seedWellbeing,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        Future<void> open(Finder f) async {
+          await tester.ensureVisible(f);
+          await tester.pumpAndSettle();
+          await tester.tap(f);
+          await tester.pumpAndSettle();
+        }
+
+        Future<void> back() => open(find.byTooltip('Back'));
+
+        await _tab(tester, 'Care');
+        await open(find.text('Wellbeing'));
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/wellbeing_$name.png'),
+        );
+        for (final (tile, file) in [
+          ('Mood', 'mood'),
+          ('Symptoms', 'symptoms'),
+          ('Sleep', 'sleep'),
+          ('Water', 'water'),
+        ]) {
+          await tester.scrollUntilVisible(
+            find.text(tile).first,
+            -200,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await open(find.text(tile).first);
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('$_dir/${file}_$name.png'),
+          );
+          await back();
+        }
       });
     }
   }

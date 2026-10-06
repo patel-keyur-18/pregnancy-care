@@ -46,6 +46,14 @@ abstract final class SettingKeys {
   /// Time in Navmaas today: the day (`yyyy-MM-dd`) and its seconds.
   static const useDay = 'use_day';
   static const useSeconds = 'use_seconds';
+
+  /// Wellbeing (M7): daily water goal in glasses (default 8), water
+  /// reminders (default off) every `water_every` hours (2 or 3, default 2),
+  /// and the day (`yyyy-MM-dd`) Today's "How are you today?" card was hidden.
+  static const waterGoal = 'water_goal';
+  static const waterRemind = 'water_remind';
+  static const waterEvery = 'water_every';
+  static const wellbeingCardHidden = 'wellbeing_card_hidden';
 }
 
 class SettingsRepository {

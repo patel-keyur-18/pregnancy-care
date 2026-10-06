@@ -21,6 +21,8 @@ import 'package:navmaas/features/care/domain/care_reminders.dart';
 import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/features/screen_rest/domain/rest_reminders.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
+import 'package:navmaas/features/wellbeing/domain/water_reminders.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -136,7 +138,8 @@ class ReminderSync extends _$ReminderSync {
       ..listen(visitQuestionsProvider, (_, _) => refresh())
       ..listen(buildExpiryProvider, (_, _) => refresh())
       ..listen(backupDayProvider, (_, _) => refresh())
-      ..listen(lastBackupProvider, (_, _) => refresh());
+      ..listen(lastBackupProvider, (_, _) => refresh())
+      ..listen(waterGoalReachedProvider, (_, _) => refresh());
     refresh();
   }
 
@@ -186,6 +189,13 @@ class ReminderSync extends _$ReminderSync {
         // Screen Rest's nudges speak of baby time: active pregnancy only.
         if (pregnancy != null)
           ...restCandidates(now: now, settings: settings, l10n: _l10n),
+        if (pregnancy != null)
+          ...waterCandidates(
+            now: now,
+            settings: settings,
+            goalReached: ref.read(waterGoalReachedProvider),
+            l10n: _l10n,
+          ),
         ...buildExpiryCandidates(expiry: expiry, l10n: _l10n),
         ...backupCandidates(
           now: now,

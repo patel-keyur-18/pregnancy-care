@@ -6,6 +6,7 @@ import 'package:navmaas/core/db/app_database.dart';
 
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
+import 'generated/schema_v6.dart' as v6;
 
 // After changing tables: bump `schemaVersion`, write the migration, then run
 // `dart run drift_dev make-migrations` to dump the new schema and helpers.
@@ -63,6 +64,47 @@ void main() {
     final p = await db.select(db.pregnancies).getSingle();
     expect((p.id, p.dueDate), ('p1', DateTime.utc(2027, 1, 20)));
     expect(await db.select(db.checklistTicks).get(), isEmpty);
+    await db.close();
+  });
+  test('v6 → v7 keeps her logs and adds empty wellbeing tables', () async {
+    final schema = await verifier.schemaAt(6);
+    final old = v6.DatabaseAtV6(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.pregnancy)
+        .insert(
+          v6.PregnancyCompanion.insert(
+            id: 'p1',
+            createdAt: at,
+            updatedAt: at,
+            status: 'active',
+            datingMethod: 'lmp',
+            startDate: '2026-04-15',
+            dueDate: '2027-01-20',
+          ),
+        );
+    await old
+        .into(old.kickSession)
+        .insert(
+          v6.KickSessionCompanion.insert(
+            id: 'k1',
+            createdAt: at,
+            updatedAt: at,
+            pregnancyId: 'p1',
+            startedAt: at,
+            endedAt: at,
+            count: 10,
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 7);
+    expect((await db.select(db.kickSessions).getSingle()).count, 10);
+    expect(await db.select(db.moodEntries).get(), isEmpty);
+    expect(await db.select(db.symptomEntries).get(), isEmpty);
+    expect(await db.select(db.sleepLogs).get(), isEmpty);
+    expect(await db.select(db.waterLogs).get(), isEmpty);
     await db.close();
   });
 }

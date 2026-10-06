@@ -13,6 +13,7 @@ import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3/sqlite3.dart';
 
@@ -115,6 +116,22 @@ void main() {
     );
     await visits.addAttachment(a.attachments, visit, photo, 'image/jpeg');
     await a.library.import('stories.txt', Stream.value(utf8.encode('Once')));
+    // … and a day of wellbeing logs (M7).
+    final wellbeing = WellbeingRepository(a.db);
+    final day = DateTime.utc(2026, 10, 5);
+    await wellbeing.setMood(pregnancyId: id, day: day, mood: .calm);
+    await wellbeing.addSymptom(
+      pregnancyId: id,
+      kind: .backache,
+      severity: .mild,
+    );
+    await wellbeing.saveSleep(
+      pregnancyId: id,
+      day: day,
+      bedAt: DateTime(2026, 10, 4, 22, 40),
+      wokeAt: DateTime(2026, 10, 5, 6, 25),
+    );
+    await wellbeing.addWater(pregnancyId: id, day: day);
     // Phone B: a different pregnancy and its own book.
     b = await _Phone.create('b', 'bb' * 32);
     await _pregnancy(b.db, DateTime.utc(2026, 6, 2));
@@ -142,7 +159,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 6));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 7));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -162,6 +179,17 @@ void main() {
     final items = await b.library.watchItems().first;
     expect(items.single.title, 'stories');
     expect(await (await b.library.file(items.single)).readAsString(), 'Once');
+    // … and its wellbeing logs.
+    expect(
+      (await b.db.select(b.db.moodEntries).getSingle()).mood,
+      MoodWord.calm,
+    );
+    expect(
+      (await b.db.select(b.db.symptomEntries).getSingle()).symptomKey,
+      SymptomKind.backache,
+    );
+    expect(await b.db.select(b.db.sleepLogs).get(), hasLength(1));
+    expect((await b.db.select(b.db.waterLogs).getSingle()).glasses, 1);
     // The database is under B's own key, not A's.
     final raw = sqlite3.open(b.dbFile.path);
     addTearDown(raw.close);
@@ -243,35 +271,51 @@ void main() {
     expect(await b.db.select(b.db.pregnancies).get(), hasLength(1));
   });
 
-  test('an older backup is migrated when it opens', () async {
-    // Make A's database look like schema 5 (before M5's tables).
-    for (final t in ['kick_session', 'contraction', 'backup_log']) {
-      await a.db.customStatement('DROP TABLE $t');
-    }
-    await a.db.customStatement('PRAGMA user_version = 5');
-    final file = File(p.join(a.root.path, 'old.navmaas'));
-    final snapshot = File(p.join(a.root.path, 'old.db'));
-    await a.db.customStatement("VACUUM INTO '${snapshot.path}'");
-    await writeBackup(
-      out: file,
-      header: BackupHeader(
-        createdAt: DateTime.utc(2026, 10),
-        appVersion: '0.9.0',
-        schemaVersion: 5,
-        includesLibrary: false,
-        kdf: _kdf,
-      ),
-      password: 'correct horse',
-      files: [(name: 'navmaas.db', file: snapshot)],
-      manifest: {'dbKey': a.dbKey, 'attachmentKey': base64.encode(a.attachKey)},
-    );
-    await b.service.restore(file, 'correct horse');
-    expect(
-      (await b.db.select(b.db.pregnancies).getSingle()).lmp,
-      DateTime.utc(2026, 4, 15),
-    );
-    expect(await b.db.select(b.db.kickSessions).get(), isEmpty);
-  });
+  // A backup from before M5 (schema 5) and from before M7 (schema 6).
+  const wellbeingTables = [
+    'mood_entry',
+    'symptom_entry',
+    'sleep_log',
+    'water_log',
+  ];
+  for (final (version, dropped) in [
+    (5, ['kick_session', 'contraction', 'backup_log', ...wellbeingTables]),
+    (6, wellbeingTables),
+  ]) {
+    test('a schema $version backup is migrated when it opens', () async {
+      for (final t in dropped) {
+        await a.db.customStatement('DROP TABLE $t');
+      }
+      await a.db.customStatement('PRAGMA user_version = $version');
+      final file = File(p.join(a.root.path, 'old.navmaas'));
+      final snapshot = File(p.join(a.root.path, 'old.db'));
+      await a.db.customStatement("VACUUM INTO '${snapshot.path}'");
+      await writeBackup(
+        out: file,
+        header: BackupHeader(
+          createdAt: DateTime.utc(2026, 10),
+          appVersion: '0.9.0',
+          schemaVersion: version,
+          includesLibrary: false,
+          kdf: _kdf,
+        ),
+        password: 'correct horse',
+        files: [(name: 'navmaas.db', file: snapshot)],
+        manifest: {
+          'dbKey': a.dbKey,
+          'attachmentKey': base64.encode(a.attachKey),
+        },
+      );
+      await b.service.restore(file, 'correct horse');
+      expect(
+        (await b.db.select(b.db.pregnancies).getSingle()).lmp,
+        DateTime.utc(2026, 4, 15),
+      );
+      expect(await b.db.select(b.db.kickSessions).get(), isEmpty);
+      expect(await b.db.select(b.db.moodEntries).get(), isEmpty);
+      expect(await b.db.select(b.db.waterLogs).get(), isEmpty);
+    });
+  }
 
   test('if the new data fails to open, the old data comes back', () async {
     final made = await a.service.create(
