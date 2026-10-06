@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v11 — updated 2026-10-06 (MVP complete. M5a schema v6, kick counter, contraction timer, pause or end tracking, iPhone build expiry, the one wall clock `clockNow`; M5b backup and restore; M6a Screen Rest; M6b delete all data, accessibility pass, release builds) |
+| **Status** | v12 — updated 2026-10-06 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -87,10 +87,11 @@ flowchart TB
 | Import / export | `file_picker` (open), `image_picker`, `share_plus` | Books and audio (`file_picker`, M4a); backup files are opened with `file_picker` and saved through the share sheet (`share_plus`, M5b), because `file_picker`'s save dialog needs the whole file in memory; `image_picker` (M3b) takes or chooses prescription photos through the system camera and photo picker, so no camera permission is declared |
 | Backup | `cryptography` (Argon2id, ChaCha20-Poly1305) | See §11. The body is a simple stream of files, so `archive` isn't needed (Plan decision 33). `cryptography` also encrypts attachments with AES-256-GCM (M3b, §13) |
 | Device | `url_launcher` | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps on iPhone and the maps app on Android (ADR 024) |
-| Security | `local_auth` (optional app lock) | |
+| Security | `local_auth` (optional app lock) | Arrives in M10; not added yet |
 | Utilities | `intl`, `uuid` (v7), `collection` | |
 | Lints & tests | `very_good_analysis`, `flutter_test`, `mocktail` (when a fake needs it), `integration_test` | Golden tests for light/dark |
 | Native | Swift platform channel `navmaas/files` (M1, keeps the database out of iOS backups); `home_widget` + Kotlin Screen Rest channel (P2) | The build expiry (M5a) is read in Dart from the app bundle, so it needs no channel (ADR 033) |
+| Planned (Phases 2–3) | `pdf` (M9 visit summary), an unzip + XHTML parser such as `archive` + `html` (M9 EPUB), `home_widget` (M10), `local_auth` (M10) | Candidates only. Each is added only after the owner approves it at its milestone's start, then recorded here and in an ADR (§15). All must work offline |
 
 Versions are pinned in `pubspec.lock`. M1 started on Flutter 3.47.3 / Dart 3.13.3 with the latest stable packages; upgrades are deliberate.
 
@@ -451,7 +452,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 - **Database:** encrypted with SQLCipher. A random 256-bit raw key is generated on first run and kept in Keychain / Android Keystore. The app refuses to open the database on a build without SQLCipher. The database and its key are excluded from OS backups on both platforms (§12).
 - **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key (`navmaas.attachments_key.v1`), as nonce + ciphertext + tag, in `db/attachments/` inside the folder OS backups skip. Photos are only decrypted in memory to show them. Imported books and audio stay as plain files in `db/library/`, skipped by OS backups; they are the owner's own media, not health data, and audio must stream to the player.
 - **Backups:** encrypted with a key derived from the owner's password (§11). The password is never stored.
-- **Optional app lock** with biometrics or PIN (`local_auth`).
+- **Optional app lock** with biometrics or the device passcode (`local_auth`), off by default (M10).
 - **Deletion** (M6b): Me → Your data → "Delete all data" (red) opens a dialog that says what goes, shows when she last backed up with "Back up first", and a red "Delete everything". It cancels every reminder (snoozed ones too) and pauses audio, moves `db/` aside to `db-deleted/`, deletes both keys from Keychain / Keystore, opens a new, empty database under a new key (so the app starts again at onboarding), then deletes `db-deleted/`, any restore rollback, the backup work folders and the file picker's copies in the cache. If the app stops part-way, the next open deletes `db-deleted/`. It does not touch backup files saved elsewhere (ADR 040).
 - **Repository hygiene:**
   - No keystores, provisioning profiles, `google-services` files or personal content in git.
@@ -470,6 +471,10 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 ## 15. Delivery milestones
 
+Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope.
+
+### Phase 1 — MVP ✅ 2026-10-06
+
 | Milestone | Scope | Done when |
 |---|---|---|
 | **M1 Foundation** ✅ 2026-10-05 (PR #2) | Flutter project, lints, CI, theme + fonts, router with 5 tabs, Drift + SQLCipher, pregnancy engine, onboarding, settings, release install on a free-Apple-ID iPhone | Onboarding stores a pregnancy; Today shows the correct week in light and dark on both phones |
@@ -482,6 +487,239 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | **M5b Backup & restore** ✅ 2026-10-06 | Backup & restore (§11) from Me, onboarding and the quiet page, weekly backup reminder, re-import for books and audio left out of a backup | A backup made on one phone restores on another; a wrong password changes nothing (unit tests with two "phones"; on the simulator: `integration_test/backup_test.dart`) |
 | **M6a Screen Rest** ✅ 2026-10-06 | Screen Rest screen and Today card, rest rules (bedtime, meal times, eye rest, wind-down) in the planner, time in Navmaas today, digest polish (no nudges in the digest, "and N more", taps open Today or her audio) | Meal windows and quiet hours hold reminders in tests; wind-down opens her audio with the screen off (widget test) |
 | **M6b Delete all data & release** ✅ 2026-10-06 | Delete all data (§13), accessibility pass (every screen has a heading; reader, listen, walk, breathing, sheets and dialogs fixed), release builds (README install steps, CI size check, universal limit 150 MB) | Signed APK installed; iPhone renewed through one 7-day cycle without data loss (owner checks on the phones) |
+
+### How every Phase 2 and 3 milestone runs
+
+These rules apply to every milestone below, on top of its own "done when":
+
+1. **Design first.** The milestone's new screens are added to the prototype canvas, in light and dark, and approved by the owner before any code. The prototype is the exact visual spec (Plan decision 15, ADR 043).
+2. **Owner decisions first.** Each milestone lists what the owner decides at its start. The answers go into the Plan's decision table.
+3. **Packages.** Anything beyond §3 is approved by the owner at the milestone's start, then recorded in §3 and an ADR. Nothing may make network calls, and release builds keep no `INTERNET`.
+4. **Content.** New content packs are original, drafted by Claude and approved by the owner. Each gets a review copy in `docs/content/`, and the content hard-line test is extended to it.
+5. **Schema.** A milestone that adds tables or columns bumps `schemaVersion` once and adds migration tests for every version pair. The backup round-trip covers the new data, and a backup from an older version restores and migrates.
+6. **Reminders** go only through `ReminderSync` and follow §7's calm rules.
+7. **Quality bar:**
+   - `dart format`, `flutter analyze` (zero issues) and every test green in CI.
+   - Goldens for new screens in light and dark (macOS and Linux sets).
+   - Every new screen added to `test/accessibility_test.dart`.
+   - The phone APK stays under 100 MB.
+8. **Docs in sync** in the same PR. Split a milestone into a/b PRs when it is too big to review in one, as in Phase 1.
+
+### Phase 2 — Enhancements (M7–M11)
+
+| Milestone | Focus | Schema |
+|---|---|---|
+| **M7** | Wellbeing: mood, symptoms, sleep, water, meditation | v7 |
+| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan | v8 |
+| **M9** | Records vault, visit summary PDF, EPUB books | v9 |
+| **M10** | Home-screen widgets and app lock | No change (settings only) |
+| **M11** | Limits for other apps (Android) and the Phase 2 release | v10 |
+
+#### M7 Wellbeing
+
+**Scope**
+- Schema v7: `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, and a `meditation` session type.
+- Care → **Wellbeing** screen with a 7-day view of everything below.
+- **Mood:** one check-in a day from five words (no emoji), with an optional note. No scores, screening or advice.
+- **Symptoms:** pick from common pregnancy discomforts or add her own; mild / moderate / strong; a note. It is a log for her and her doctor: never advice, never a warning list.
+- **Sleep:** bedtime, wake time, naps and how rested she feels (in words); weekly average.
+- **Water:** tap to add a glass toward a goal she sets. Optional reminders are nudges, off by default.
+- **Meditation** (Sessions → Move & breathe): a 5, 10, 15 or 20-minute timer with a soft start and end bell (an original, generated sound), or her own imported audio. Works with screen-off; logged from one minute.
+- **Today:** an optional, dismissible "How are you today?" card with water taps.
+
+**Owner decides at the start:** the symptom pick-list, the five mood words, and whether water has a default goal.
+
+**Done when**
+- Mood, symptom, sleep and water entries are saved and shown in the 7-day view (widget tests, light and dark).
+- Meditation logs a session from one minute, with and without screen-off (widget test).
+- Water reminders respect quiet hours, meal windows and the daily limit, and never join the digest (planner tests).
+- The content test rejects advice and warning wording in the symptom list and the mood words.
+
+#### M8 Body and birth prep
+
+**Scope**
+- Schema v8: a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
+- **Blood sugar** in Vitals:
+  - Each reading has mg/dL, a context (fasting, before a meal, 1 h or 2 h after, bedtime), a time and a note.
+  - Readings are listed by day, with no ranges, colours or labels such as "high".
+- **Nutrition notes** (Care):
+  - Meal notes by day.
+  - "Foods I avoid": her own list, with an optional reason such as "doctor's advice".
+  - The app gives no food guidance of its own.
+- **Hospital bag** (a Care tile from week 28, always reachable from Care):
+  - An original template, `hospital_bag.json`, with items for her, for the baby and documents.
+  - She can add her own items and tick each one as packed.
+  - An optional reminder she sets.
+- **Birth plan** (Care):
+  - Original prompts in `birth_plan.json`: who will be with you, comfort preferences, after the birth, feeding wishes, anything else.
+  - She answers in her own words, under the line "Talk this through with your doctor".
+
+**Owner decides at the start:** the hospital bag template and the birth-plan prompts.
+
+**Done when**
+- Blood-sugar readings are saved and listed with their context, and no screen judges a value (widget tests; the content test covers the labels).
+- Hospital bag ticks persist per pregnancy and survive template edits (stable keys, like `weeks.json`).
+- Birth plan answers are saved and editable.
+- Both content packs have generated review copies and pass the hard-line test.
+
+#### M9 Records vault, visit summary PDF and EPUB
+
+**Scope**
+- Schema v9: `attachment` gains `category` (report / scan / prescription / other), `title`, `taken_on` and `size_bytes`, and its visit link becomes optional.
+- **Records** (Care):
+  - Add from the camera, photos or files (images or PDF), up to 25 MB each.
+  - Encrypted through `AttachmentStore` like prescription photos, which now appear under Prescriptions.
+  - Viewed in memory only; PDFs open through `pdfrx` from bytes.
+  - Sharing a record hands a decrypted copy to the share sheet, says that copy isn't encrypted, and deletes it afterwards.
+- **Visit summary PDF** (from a visit or from Me):
+  - She chooses the sections and dates: pregnancy summary, supplements taken, vitals (weight, BP, blood sugar), questions, kick and contraction averages, wellbeing log, birth plan, list of records.
+  - Made on the phone with `pdf` and the bundled fonts, showing values only.
+  - Shared through the share sheet; the temporary file is deleted afterwards.
+- **EPUB books:**
+  - Import DRM-free `.epub` files.
+  - Chapters become text in the existing reader, with Paper / Night, eye rest and her place kept.
+  - Images and complex layout are skipped.
+
+**Owner decides at the start:** the packages (`pdf`; for EPUB, e.g. `archive` + `html`), and the PDF's sections and default date range.
+
+**Done when**
+- Records on disk carry no image or PDF signature, and no plaintext copy is left anywhere after viewing or sharing (unit tests).
+- The PDF contains only the chosen sections, and its text has no interpretation words (text-extraction test).
+- A small EPUB built in the test opens with its chapters and reopens at the same place (widget test).
+- Records are in backups, and the v9 migration shows existing prescription photos under Prescriptions.
+
+#### M10 Home-screen widgets and app lock
+
+**Scope**
+- **Widgets** (`home_widget`):
+  - An iOS WidgetKit extension (`com.patelkeyur.navmaas.widget`, App Group `group.com.patelkeyur.navmaas`; both are available to a free Apple ID, §12) and an Android app widget.
+  - They show the week and day, the baby-size line and the next reminder. Tapping opens Today.
+- **Widget privacy:**
+  - The widget reads only a small snapshot the app writes whenever Today or the reminders change, never the database.
+  - "Hide details on widget" (Me) leaves only the brand mark and the next reminder's time.
+  - While tracking is stopped, the widget shows only the brand mark.
+- **App lock** (Me → Your data, off by default, `local_auth`):
+  - Face ID, Touch ID or fingerprint, falling back to the device passcode.
+  - Locks on open, and after 1, 5 or 15 minutes away.
+  - Notification actions keep working while locked.
+  - With app lock on, the widget hides details by default.
+
+**Owner decides at the start:** the default for "Hide details", and the lock-timeout choices.
+
+**Done when**
+- The widget updates within a minute of logging, on both phones (on-device check).
+- The iPhone widget keeps working through one 7-day renewal (one Xcode run signs both targets).
+- The hidden-details snapshot contains no week, size or baby text (unit test).
+- A notification tap or widget tap can't open a screen without unlocking, and failed biometrics fall back to the passcode (widget tests with a fake authenticator).
+
+#### M11 Limits for other apps (Android) and the Phase 2 release
+
+**Scope**
+- **Android only.** The card stays hidden on iPhone, because Family Controls needs a paid membership (§12, ADR 012).
+- Screen Rest → **Limits for other apps** (the prototype's Phase 2 card):
+  - She grants Usage access, picks launchable apps (via a launcher `<queries>` entry, no `QUERY_ALL_PACKAGES`) and sets daily minutes for each.
+  - Today's minutes for each chosen app show on Screen Rest.
+- **The notice:**
+  - Once an app passes its limit, she gets one gentle notice per app per day. Nothing is blocked.
+  - The notice counts as a nudge, so it follows quiet hours, meal windows and the daily limit.
+- Schema v10: `app_limit` (package, label, minutes).
+- **How it checks:**
+  - Kotlin `UsageStatsManager` + WorkManager every 15 minutes, only while a limit is set.
+  - How the native check hands the notice to the planner's rules is decided and recorded as an ADR at the start.
+- **Phase 2 release:**
+  - The integration tests deferred from Phase 1: onboarding → Today; Taken from a notification action; import a PDF and log a reading session.
+  - An accessibility pass over all Phase 2 screens.
+  - Release builds on both phones.
+
+**Owner decides at the start:** the wording of the notice, and the minute steps for limits.
+
+**Done when**
+- The notice arrives within about 15 minutes of passing a limit, never in quiet hours, and once per app per day (on-device check on Android).
+- Revoking Usage access shows a calm "turned off" state. With no limits set, no worker runs.
+- The only new permission is `PACKAGE_USAGE_STATS`, and there is still no `INTERNET`.
+- The deferred integration tests pass on both phones, and the Phase 2 release builds are installed (owner checks on the phones).
+
+### Phase 3 — Postpartum and baby (M12–M14)
+
+| Milestone | Focus | Schema |
+|---|---|---|
+| **M12** | Postpartum mode and her recovery | v11 |
+| **M13** | Baby feeding and sleep | v12 |
+| **M14** | Baby vaccines and visits, and the Phase 3 release | v13 |
+
+#### M12 Postpartum mode and her recovery
+
+**Scope**
+- Schema v11: `baby` (pregnancy, optional name, birth date and time, birth weight and length as recorded).
+- **"Baby has arrived"** now leads to **postpartum mode**, after a short baby-details step (twins get two babies), instead of the quiet page.
+  - Pause and End still show the quiet page.
+  - This changes Plan decision 31 for "Baby has arrived" only.
+- **Postpartum tabs and Today** (designed first) show her recovery week by week and the baby's age in weeks and days.
+- **Content:** `postpartum_weeks.json` covers weeks 0–12. It is original text about her body, rest and recovery, with nothing that needs a doctor's judgement, plus checklists such as booking her postnatal check-up.
+- **What carries on:** her supplements, visits, records, wellbeing and letters continue from the pregnancy. Pregnancy-only content and reminders (week ring, Journey, pregnancy tests and scans) stop.
+- **Ending it:** "End postpartum tracking" goes to the quiet page; "Start a new pregnancy" still works.
+
+**Owner decides at the start:**
+- The data model. Proposed: the delivered pregnancy stays the anchor and babies link to it, recorded as an ADR.
+- The postpartum tabs.
+- The content pack.
+
+**Done when**
+- Baby has arrived → baby details → postpartum Today shows the right ages, in light and dark (widget test).
+- Twins get two babies, and Pause and End still show the quiet page (widget tests).
+- In postpartum mode the week ring, Journey and pregnancy test reminders are gone, while supplement and visit reminders continue (widget and planner tests).
+- The content pack's review copy and hard-line test pass.
+
+#### M13 Baby feeding and sleep
+
+**Scope**
+- Schema v12:
+  - `feed`: baby, kind (breast / bottle / pumping), side, start, end, amount in ml, milk type, note.
+  - `baby_sleep`: baby, start, end, note.
+- **Feeding:**
+  - A breastfeeding timer with left / right, switch side and pause.
+  - Bottle and pumping entries.
+  - The last feed and which side; today's count and totals.
+- **Baby sleep:** a start/stop timer or an entry added afterwards; naps; today's total.
+- **Patterns:** her own averages, never a verdict, like the kick counter.
+- **Night-friendly:** big one-handed targets, dark at night, and timers that keep running with the screen off or the app in the background.
+- **Feeding reminders:** optional, at an interval she sets (never a suggested one), with her choice whether they ring during quiet hours.
+- **Twins:** every log belongs to one baby.
+
+**Owner decides at the start:** whether feeding reminders may ring in quiet hours (a planner rule change, recorded as an ADR), and the amount units.
+
+**Done when**
+- A feed and a sleep keep running in the background and are logged correctly (widget tests with fake time).
+- Patterns match hand-computed averages and show no judgement (unit tests).
+- Feeding reminders follow the chosen quiet-hours rule (planner tests).
+- The new screens pass the accessibility test at 2.0× text in the dark theme.
+
+#### M14 Baby vaccines and visits, and the Phase 3 release
+
+**Scope**
+- Schema v13: `care_item` and `appointment` gain an optional `baby_id`, and the pediatrician's details sit beside her doctor's in `profile`.
+- **Baby vaccines:**
+  - An India schedule by age, `baby_vaccines_in.json`: original wording that follows India's public national schedule, with every item deferring to the pediatrician.
+  - Dates are worked out from the birth date.
+  - Book, mark done, and calm reminders.
+- **Baby visits:** questions, notes and records for the baby, using the existing visit screens with a "for me / for baby" choice.
+- **Baby across the app:**
+  - A baby filter in the records vault.
+  - A baby section in the visit summary PDF (feeds, sleep, vaccines given).
+  - In postpartum mode, the widget shows the last feed and the next vaccine.
+- **Phase 3 release:** accessibility pass, release builds on both phones, and one iPhone 7-day renewal.
+
+**Owner decides at the start:** the vaccine template (Claude drafts, the owner approves), and what the postpartum widget shows.
+
+**Done when**
+- Vaccine dates are right for any birth date, including month ends and leap years. Table-driven tests check them against independently computed dates, as for the pregnancy engine.
+- Booked and due vaccines remind under §7's rules.
+- A baby visit and its records show under the baby, and the PDF's baby section has only the chosen data.
+- The Phase 3 release builds are installed and survive a renewal without data loss (owner checks on the phones).
+
+### Out of scope
+
+- **Family sharing** (Plan decision 37, ADR 042). It would need a backend and accounts; Navmaas stays local-only, with no network calls.
 
 ## 16. Testing and CI
 
@@ -549,3 +787,5 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | 039 | M6 split into M6a (Screen Rest) and M6b (delete all data, accessibility, release) | Two reviewable PRs, like M3–M5 |
 | 040 | Delete all data moves the database aside, deletes the keys, opens a new database, then deletes the old files | The open database keeps working until the swap, like a restore; a new key means nothing old could be read even if a file survived; an interrupted delete finishes on the next open |
 | 041 | Universal APK limit 150 MB; phone APK stays at 100 MB | Owner decision 2026-10-06 (Plan 36); the universal APK is for emulators and passed 100 MB with Health Connect |
+| 042 | Family sharing is out of scope for Phases 2 and 3 | Owner decision 2026-10-06 (Plan 37). It was the only feature needing a backend and accounts, so Navmaas stays local-only with no network calls |
+| 043 | Phase 2 and 3 milestones are design-first: new screens join the prototype canvas and are approved before code | The prototype is the exact visual spec (Plan 15), and none of the Phase 2–3 screens were drawn in Phase 0 |

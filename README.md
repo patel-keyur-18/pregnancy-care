@@ -14,6 +14,8 @@ It combines:
 
 > **Status:** the MVP (M1–M6) is built: M1–M4 on 2026-10-05, M5 and M6 on 2026-10-06: onboarding, Today with its gentle plan and next visit, a trimester-wise Journey with original week-by-week notes, supplements with on-time reminders (even when the phone is locked), tests and vaccines from an India template, doctor visits with questions and encrypted prescription photos, vitals, Sessions with the Garbhasanskar path, your own books (PDF, text) and audio with a calm reader and screen-off listening, letters to baby, walks with steps from Apple Health / Health Connect, gentle exercise routines once the doctor has cleared you, slow breathing, a kick counter and contraction timer, pause or end tracking with one quiet page, the iPhone build-expiry reminder, password-protected backup and restore (with a weekly reminder), Screen Rest (bedtime and meal-time rest that keep reminders quiet, an eye rest while reading, a wind-down nudge and time in Navmaas today), and Me (with delete all data) — all on an encrypted on-device database.
 >
+> **Next:** Phase 2 (M7–M11: wellbeing; body and birth prep; records vault, visit PDF and EPUB; widgets and app lock; limits for other apps on Android), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+>
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
 > The iPhone build is signed with a free Apple ID and renewed from Xcode every 7 days ([how](docs/ARCHITECTURE.md#12-iphone-with-a-free-apple-id)).
