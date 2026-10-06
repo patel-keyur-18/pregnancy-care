@@ -1,14 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/platform/app_usage.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
+import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
+import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/screen_rest/data/screen_use.dart';
 import 'package:navmaas/features/screen_rest/domain/rest_windows.dart';
+import 'package:navmaas/features/screen_rest/presentation/app_limits_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Screen Rest (prototype "Screen Rest"): the next screen-free window, time
@@ -41,7 +47,9 @@ class ScreenRestScreen extends ConsumerWidget {
                 children: [
                   IconButton(
                     tooltip: l10n.backTooltip,
-                    onPressed: () => context.pop(),
+                    // A limit notice opens Screen Rest on its own.
+                    onPressed: () =>
+                        context.canPop() ? context.pop() : context.go('/today'),
                     icon: const NmIcon(
                       NavmaasIcon.chevronLeft,
                       size: 22,
@@ -150,12 +158,133 @@ class ScreenRestScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (ref.watch(appUsageProvider).supported) ...[
+                    const SizedBox(height: 16),
+                    const _AppLimitsCard(),
+                  ],
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Limits for other apps (M11, Android only; prototype "Screen Rest · app
+/// limits card"): today's minutes for each app, or how to start.
+class _AppLimitsCard extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final limits = ref.watch(appLimitsProvider).value;
+    if (limits == null) return const SizedBox.shrink();
+    void open() => unawaited(context.push('/app-limits'));
+    final heading = Semantics(
+      header: true,
+      child: Text(l10n.appLimitsTitle, style: theme.textTheme.titleMedium),
+    );
+    if (limits.isEmpty) {
+      return Card(
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 10,
+            children: [
+              heading,
+              Text(
+                l10n.appLimitsCardIntro,
+                style: theme.textTheme.bodyMedium!.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              OutlinedButton(onPressed: open, child: Text(l10n.appLimitsSetUp)),
+            ],
+          ),
+        ),
+      );
+    }
+    final access = ref.watch(usageAccessProvider).value ?? false;
+    final minutes = ref.watch(limitMinutesTodayProvider).value ?? const {};
+    final icons = ref.watch(installedAppsProvider).value ?? const {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 10,
+      children: [
+        heading,
+        Card(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (!access)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+                  child: Text(
+                    l10n.appLimitsCardPaused,
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: theme.extension<NavmaasColors>()!.onAmberSoft,
+                    ),
+                  ),
+                )
+              else
+                for (final limit in limits)
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: scheme.outlineVariant),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      child: Row(
+                        spacing: 12,
+                        children: [
+                          AppIcon(
+                            label: limit.label,
+                            icon: icons[limit.package]?.icon,
+                          ),
+                          Expanded(
+                            child: LimitProgress(
+                              limit: limit,
+                              used: minutes[limit.package] ?? 0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(48, 52),
+                  shape: const RoundedRectangleBorder(),
+                ),
+                onPressed: open,
+                child: Text(l10n.appLimitsManage),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          l10n.appLimitsFootnote,
+          style: theme.textTheme.bodySmall!.copyWith(
+            fontWeight: FontWeight.w600,
+            color: scheme.outline,
+          ),
+        ),
+      ],
     );
   }
 }

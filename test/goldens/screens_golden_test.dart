@@ -16,6 +16,7 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
@@ -149,6 +150,70 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/screen_rest_$name.png'),
+        );
+      });
+
+      testWidgets('app limits $name', skip: _dir == null, (tester) async {
+        final usage = FakeAppUsage(access: true)
+          ..minutes.addAll({
+            'com.google.android.youtube': 18,
+            'com.instagram.android': 32,
+          });
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            final limits = AppLimitsRepository(db);
+            await limits.save(
+              package: 'com.google.android.youtube',
+              label: 'YouTube',
+              minutes: 30,
+            );
+            await limits.save(
+              package: 'com.instagram.android',
+              label: 'Instagram',
+              minutes: 30,
+            );
+          },
+          appUsage: usage,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        final rest = find.text('Screen-free from 9:30 pm');
+        await tester.scrollUntilVisible(rest, 200);
+        await tester.ensureVisible(rest);
+        await tester.pumpAndSettle();
+        await tester.tap(rest);
+        await tester.pumpAndSettle();
+        final manage = find.text('Manage limits');
+        await tester.scrollUntilVisible(
+          manage,
+          200,
+          scrollable: find.byType(Scrollable).last,
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/screen_rest_limits_$name.png'),
+        );
+        await tester.tap(manage);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/app_limits_$name.png'),
+        );
+        usage.access = false;
+        [
+          AppLifecycleState.inactive,
+          AppLifecycleState.hidden,
+          AppLifecycleState.inactive,
+          AppLifecycleState.resumed,
+        ].forEach(tester.binding.handleAppLifecycleStateChanged);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/app_limits_paused_$name.png'),
         );
       });
 

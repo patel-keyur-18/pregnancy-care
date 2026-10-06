@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/platform/app_usage.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -64,3 +65,26 @@ Stream<List<AppLimit>> appLimits(Ref ref) =>
 /// The minutes a day she can pick per app (Plan decision 52).
 const appLimitMinutes = [15, 30, 45, 60, 90, 120];
 const defaultAppLimit = 30;
+
+/// Whether she has given Usage access (re-read when she comes back from
+/// Settings).
+@riverpod
+Future<bool> usageAccess(Ref ref) => ref.watch(appUsageProvider).hasAccess();
+
+/// The apps on her launcher, by package.
+@riverpod
+Future<Map<String, InstalledApp>> installedApps(Ref ref) async => {
+  for (final a in await ref.watch(appUsageProvider).apps()) a.package: a,
+};
+
+/// Today's minutes for each app she set a limit on.
+@riverpod
+Future<Map<String, int>> limitMinutesToday(Ref ref) async {
+  final limits = await ref.watch(appLimitsProvider.future);
+  if (limits.isEmpty || !await ref.watch(usageAccessProvider.future)) {
+    return const {};
+  }
+  return await ref.watch(appUsageProvider).minutesToday([
+    for (final l in limits) l.package,
+  ]);
+}
