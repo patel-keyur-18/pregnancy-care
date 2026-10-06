@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.12 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M10 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 25 screens in light and dark (M7 Wellbeing and M10 widgets, lock screen and Me → Your data boards added 2026-10-06) |
+| **Status** | v1.12 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M11 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -151,6 +151,7 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Word chip (M7) | Pill, 1.5 `border`, `surface`, label 14/800 (16/800 for mood and rested words); chosen = `primary` fill, `on-primary` label with a tick. A selection, never a verdict: no colour per word |
 | More chip (M7) | Dashed 1.5 `border` pill, `text-2` label "More · N" / "Fewer" with a chevron; folds the symptom chips to two rows |
 | Wellbeing tile (M7) | Card, 40 icon tile (mood `rose-soft` heart, symptoms `surface-2` notes, sleep `lavender-soft` bed, water `primary-soft` drop), label 13/700 `text-3`, value 16/800 |
+| App limit row (M11) | 40 app icon (her launcher's, or its first letter on `surface-2`), name 16/800, "18 of 30 min today" 13/600 `text-3`, a 6 px `primary` bar on `track`; past the limit "32 min today · past your 30 min", same colours. On the Limits screen the limit 14/800 `text-2` and a chevron |
 | App lock screen (M10) | `bg`; 88 `primary-soft` circle with the lock 36; "Navmaas is locked" 22/800 (heading); the way to unlock 15/600 `text-2`; full-width Unlock (`primary`, 56) |
 | Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: 28 `primary-soft` circle with the sprout, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
@@ -214,7 +215,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M10)
+## 8. Implementation status (M11)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -279,3 +280,6 @@ Deliberate, permanent differences:
 | Me → App lock subtitle | "Face ID or your passcode to open Navmaas" | Same on iPhone; "Fingerprint or screen lock to open Navmaas" on Android | Each phone's own words |
 | Turning on app lock without a phone screen lock | (not drawn) | The switch stays off and a snackbar says "Set a screen lock on your phone first, then turn on app lock." | Otherwise she could lock herself out |
 | App switcher cover | (described in a canvas note) | The sprout in an 88 `primary-soft` circle on `bg` | — |
+| Screen Rest's limits card while Usage access is off | (not drawn) | "Paused: Usage access is off" in `on-amber-soft` instead of the app rows, then Manage limits | A calm notice in amber (§2) |
+| Daily limit sheet | Minute chips in a three-column grid, 48 px | The same six choices as chips that wrap, 48 dp | They wrap at large text |
+| Limits for other apps, the notice preview | Always shown | Shown once she has a limit, for her first one | It previews her own notice |

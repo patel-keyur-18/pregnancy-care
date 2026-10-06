@@ -12,6 +12,7 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
+import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:path/path.dart' as p;
@@ -132,6 +133,11 @@ void main() {
       wokeAt: DateTime(2026, 10, 5, 6, 25),
     );
     await wellbeing.addWater(pregnancyId: id, day: day);
+    await AppLimitsRepository(a.db).save(
+      package: 'com.google.android.youtube',
+      label: 'YouTube',
+      minutes: 30,
+    );
     // Phone B: a different pregnancy and its own book.
     b = await _Phone.create('b', 'bb' * 32);
     await _pregnancy(b.db, DateTime.utc(2026, 6, 2));
@@ -159,7 +165,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 7));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 8));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -190,6 +196,8 @@ void main() {
     );
     expect(await b.db.select(b.db.sleepLogs).get(), hasLength(1));
     expect((await b.db.select(b.db.waterLogs).getSingle()).glasses, 1);
+    // … and its app limits.
+    expect((await b.db.select(b.db.appLimits).getSingle()).minutes, 30);
     // The database is under B's own key, not A's.
     final raw = sqlite3.open(b.dbFile.path);
     addTearDown(raw.close);
@@ -271,7 +279,7 @@ void main() {
     expect(await b.db.select(b.db.pregnancies).get(), hasLength(1));
   });
 
-  // A backup from before M5 (schema 5) and from before M7 (schema 6).
+  // Backups from before M5 (schema 5), M7 (schema 6) and M11 (schema 7).
   const wellbeingTables = [
     'mood_entry',
     'symptom_entry',
@@ -279,8 +287,18 @@ void main() {
     'water_log',
   ];
   for (final (version, dropped) in [
-    (5, ['kick_session', 'contraction', 'backup_log', ...wellbeingTables]),
-    (6, wellbeingTables),
+    (
+      5,
+      [
+        'kick_session',
+        'contraction',
+        'backup_log',
+        ...wellbeingTables,
+        'app_limit',
+      ],
+    ),
+    (6, [...wellbeingTables, 'app_limit']),
+    (7, ['app_limit']),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -311,9 +329,14 @@ void main() {
         (await b.db.select(b.db.pregnancies).getSingle()).lmp,
         DateTime.utc(2026, 4, 15),
       );
-      expect(await b.db.select(b.db.kickSessions).get(), isEmpty);
-      expect(await b.db.select(b.db.moodEntries).get(), isEmpty);
-      expect(await b.db.select(b.db.waterLogs).get(), isEmpty);
+      // The tables it didn't have are there, and empty (the backup log
+      // already holds this restore).
+      for (final t in dropped.where((t) => t != 'backup_log')) {
+        final n = await b.db
+            .customSelect('SELECT count(*) AS n FROM $t')
+            .getSingle();
+        expect(n.read<int>('n'), 0, reason: t);
+      }
     });
   }
 

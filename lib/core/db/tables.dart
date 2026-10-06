@@ -379,6 +379,26 @@ class WaterLogs extends Table with BaseColumns {
   ];
 }
 
+/// A daily limit she set on another app (M11, Android only): one notice
+/// when she passes it, nothing blocked. Not tied to a pregnancy.
+@DataClassName('AppLimit')
+class AppLimits extends Table with BaseColumns {
+  @override
+  String get tableName => 'app_limit';
+
+  /// Android package name, e.g. `com.google.android.youtube`.
+  TextColumn get package => text()();
+
+  /// The app's name as the launcher showed it when she chose it.
+  TextColumn get label => text()();
+  IntColumn get minutes => integer()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {package},
+  ];
+}
+
 enum BackupKind { backup, restore }
 
 /// When a backup was made or restored. Never holds the password.

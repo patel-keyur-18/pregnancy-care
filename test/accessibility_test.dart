@@ -37,6 +37,9 @@ Future<void> _seed(AppDatabase db) async {
     'evening_stories.txt',
     Stream.value(utf8.encode('# The little lamp\n\nIn a quiet village.')),
   );
+  // Two audio files, so Meditation offers the "Your audio" sheet
+  // (om chanting, added last, stays first in the library).
+  await library.import('rain_sounds.mp3', Stream.value([0]));
   await library.import('om_chanting.mp3', Stream.value([0]));
   // Routines unlocked, so the exercise screen is reachable.
   final pregnancy = await db.select(db.pregnancies).getSingle();
@@ -140,6 +143,39 @@ Future<void> _tapText(
   await tester.pumpAndSettle();
   await tester.tap(finder);
   await tester.pumpAndSettle();
+}
+
+/// The Android app-usage stand-in for the screen under test.
+late FakeAppUsage _usage;
+
+/// Navmaas comes back to the foreground (from Settings).
+Future<void> _comeBack(WidgetTester t) async {
+  [
+    AppLifecycleState.inactive,
+    AppLifecycleState.hidden,
+    AppLifecycleState.inactive,
+    AppLifecycleState.resumed,
+  ].forEach(t.binding.handleAppLifecycleStateChanged);
+  await t.pumpAndSettle();
+}
+
+/// Screen Rest → Set up limits, with Usage access, YouTube at 30 minutes;
+/// or stopped at the app list ([choose]) or the minutes sheet ([minutes]).
+Future<void> _appLimits(
+  WidgetTester t, {
+  bool choose = false,
+  bool minutes = false,
+}) async {
+  _usage.access = true;
+  await _tapText(t, 'Screen-free from 9:30 pm');
+  await _tapText(t, 'Set up limits');
+  await _tapText(t, 'Add an app');
+  if (choose) return;
+  await t.tap(find.text('YouTube'));
+  await t.pumpAndSettle();
+  if (minutes) return;
+  await t.tap(find.text('Save'));
+  await t.pumpAndSettle();
 }
 
 /// Me → Your data → App lock on.
@@ -300,6 +336,25 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'Screen-free from 9:30 pm');
     },
   ),
+  // Android: limits for other apps (M11a).
+  'app limits, usage access': (
+    true,
+    (t) async {
+      await _tapText(t, 'Screen-free from 9:30 pm');
+      await _tapText(t, 'Set up limits');
+    },
+  ),
+  'app limits, choose an app': (true, (t) => _appLimits(t, choose: true)),
+  'app limits, daily limit': (true, (t) => _appLimits(t, minutes: true)),
+  'app limits': (true, _appLimits),
+  'app limits, paused': (
+    true,
+    (t) async {
+      await _appLimits(t);
+      _usage.access = false;
+      await _comeBack(t);
+    },
+  ),
   'listen': (
     true,
     (t) async {
@@ -452,6 +507,14 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'Meditation');
     },
   ),
+  'meditation, your audio': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Or use your own audio');
+    },
+  ),
   'meditation, running': (
     true,
     (t) async {
@@ -549,6 +612,7 @@ void main() {
           library: _library,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
+          appUsage: _usage = FakeAppUsage(),
           textScale: scale,
           size: _small,
         );
@@ -576,6 +640,7 @@ void main() {
           library: _library,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
+          appUsage: _usage = FakeAppUsage(),
         );
         await open(tester);
         expect(find.semantics.byFlag(SemanticsFlag.isHeader), findsAtLeast(1));
@@ -590,6 +655,7 @@ void main() {
           library: _library,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
+          appUsage: _usage = FakeAppUsage(),
           platformBrightness: brightness,
         );
         await open(tester);

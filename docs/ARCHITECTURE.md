@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v14 — updated 2026-10-06 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner) |
+| **Status** | v14 — updated 2026-10-06 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b)) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -91,7 +91,7 @@ flowchart TB
 | Security | `local_auth` (optional app lock) | M10b. Face ID, Touch ID or fingerprint, not biometric-only, so a failure falls back to the phone's passcode (ADR 049) |
 | Utilities | `intl`, `uuid` (v7), `collection` | |
 | Lints & tests | `very_good_analysis`, `flutter_test`, `mocktail` (when a fake needs it), `integration_test` | Golden tests for light/dark |
-| Native | Swift platform channel `navmaas/files` (M1, keeps the database out of iOS backups); the home-screen widget (M10a: a Swift WidgetKit extension and a Kotlin app widget, both fed by `home_widget`); a Kotlin Screen Rest channel (M11) | The build expiry (M5a) is read in Dart from the app bundle, so it needs no channel (ADR 033) |
+| Native | Swift platform channel `navmaas/files` (M1, keeps the database out of iOS backups); the home-screen widget (M10a: a Swift WidgetKit extension and a Kotlin app widget, both fed by `home_widget`); the Kotlin `navmaas/usage` channel and WorkManager check for app limits (M11a, ADR 050; `androidx.work`, already in the app through `home_widget`, is declared directly) | The build expiry (M5a) is read in Dart from the app bundle, so it needs no channel (ADR 033) |
 | Planned (Phases 2–3) | `pdf` (M9 visit summary), an unzip + XHTML parser such as `archive` + `html` (M9 EPUB) | Candidates only. Each is added only after the owner approves it at its milestone's start, then recorded here and in an ADR (§15). All must work offline |
 
 Versions are pinned in `pubspec.lock`. M1 started on Flutter 3.47.3 / Dart 3.13.3 with the latest stable packages; upgrades are deliberate.
@@ -104,7 +104,7 @@ Feature-first. Screens and widgets live in `lib/features/<feature>/`. A feature 
 pregnancy-care/
 ├─ lib/
 │  ├─ main.dart
-│  ├─ app/                 # NavmaasApp, router, tab bar, theme mode, reminder sync + actions, widget sync (M10a)
+│  ├─ app/                 # NavmaasApp, router, tab bar, theme mode, reminder sync + actions, widget sync (M10a), app-limit sync (M11a)
 │  ├─ core/
 │  │  ├─ theme/            # AppTheme (tokens → ThemeData light/dark), NavmaasColors, brand mark, prototype icons
 │  │  ├─ db/               # drift database, tables, key handling, attachment store, shared repositories, delete all data
@@ -112,7 +112,7 @@ pregnancy-care/
 │  │  ├─ reminders/        # planner (pure), scheduler adapter, calm-notification settings, data reminders (build expiry)
 │  │  ├─ content/          # content-pack loaders (weeks, India care template, daily activities)
 │  │  ├─ widgets/          # shared widgets: pill segmented control, step button, icon motion, amber notice
-│  │  ├─ platform/         # audio playback (M4a), steps (M4b), iPhone build expiry (M5a), widget publisher (M10a), authenticator (M10b); later screen-rest channel
+│  │  ├─ platform/         # audio playback (M4a), steps (M4b), iPhone build expiry (M5a), widget publisher (M10a), authenticator (M10b), app usage (M11a)
 │  │  └─ utils/            # clockNow, todayProvider / nowProvider (clock), date-only maths and formatting
 │  ├─ features/
 │  │  ├─ onboarding/
@@ -122,7 +122,7 @@ pregnancy-care/
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
 │  │  ├─ third_trimester/  # data/ domain/ presentation/: kick counter, contraction timer, her patterns (M5a)
 │  │  ├─ backup/           # data/: the .navmaas file format, the backup service, the backup log; presentation/: Backup & restore
-│  │  ├─ screen_rest/      # data/ time in Navmaas, eye-rest setting; domain/ rest windows and nudges (pure); presentation/ Screen Rest (M6a)
+│  │  ├─ screen_rest/      # data/ time in Navmaas, eye-rest setting, app limits (M11a); domain/ rest windows and nudges, the app-limit rules (pure); presentation/ Screen Rest (M6a), Limits for other apps (M11a)
 │  │  ├─ wellbeing/        # data/ mood, symptom, sleep and water logs; domain/ the week, water nudges, chip folding (pure); presentation/ Wellbeing, mood, symptoms, sleep, water (M7a)
 │  │  ├─ app_lock/         # the lock state (lifecycle and timeout), the lock screen and the app-switcher cover (M10b)
 │  │  ├─ home_widget/      # domain/ the home-screen widget snapshot (pure) (M10a)
@@ -135,7 +135,7 @@ pregnancy-care/
 ├─ test/                   # unit, widget, accessibility; drift/ migrations; goldens/
 ├─ integration_test/      # on-device checks (reminders scheduled by the OS, the iPhone build expiry)
 ├─ drift_schemas/          # schema snapshots per schemaVersion
-├─ android/  ios/          # ios/NavmaasWidget/: the WidgetKit extension; android NavmaasWidget.kt + res/layout/navmaas_widget.xml (M10a)
+├─ android/  ios/          # ios/NavmaasWidget/: the WidgetKit extension; android NavmaasWidget.kt + res/layout/navmaas_widget.xml (M10a); android AppUsage.kt + AppLimitCheck.kt (M11a)
 ├─ design/                 # navmaas-tokens.css (prototype tokens)
 ├─ docs/                  # content/*.md are the generated review copies of the content packs
 ├─ tool/                  # content_md.dart regenerates the content review copies; bell.dart generates Meditation's bell and quiet clip
@@ -317,10 +317,11 @@ Tables not shown in detail:
 | `symptom_entry` | M7a. `logged_at`, `symptom_key` (a pick-list key such as `backache` or `swollenFeet`) or her own `custom_name`, `severity` (`mild` / `moderate` / `strong`) and a `note`. Removing one soft-deletes it |
 | `sleep_log` | M7a. One night per wake-up `day` (unique with the pregnancy): `bed_at`, `woke_at`, `nap_minutes` and `rested` (`rested` / `bitTired` / `veryTired`, optional) |
 | `water_log` | M7a. Glasses on a `day` (unique with the pregnancy); + / − change the count, never below zero |
+| `app_limit` | M11a (Android). A daily limit on another app: `package` (unique), `label` (its name when she chose it), `minutes` (15–120). Not tied to a pregnancy; removing one soft-deletes it, and choosing the app again brings the row back. Backed up like everything else; on another phone only installed apps show their icon |
 | `backup_log` | M5a (written from M5b). `kind` (`backup` / `restore`), `size_bytes`, `includes_library`; the row's `created_at` is when. Never the password |
 | `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). M4b: `step_goal` (default 6,000). M5b: `backup_day` (weekly backup reminder, 1–7 for Monday–Sunday or 0 for off; default 7, Sunday). M6a (Screen Rest, ADR 037): `quiet_on` (bedtime rest, default on), `meal_rest` (default on), `meal_lunch` / `meal_dinner` (window starts, default 780 / 1200), `eye_rest` (default on), `wind_down` (default off), `wind_down_at` (default 1260), and `use_day` / `use_seconds` (time in Navmaas on that day, saved when the app leaves the screen). M7a: `water_goal` (glasses, 4–16, default 8), `water_remind` (default off), `water_every` (2 or 3 hours, default 2) and `wellbeing_card_hidden` (the day Today's "How are you today?" card was closed). M10a: `widget_hide` ("Hide details on widget"; unset, it follows app lock: off, or on while app lock is on; Plan decision 47). M10b: `app_lock` (default off) and `app_lock_after` (1, 5 or 15 minutes, default 1; Plan decision 48) |
 
-Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
+Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, 8 in M11a: adds `app_limit`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
 
 ## 9. Content
 
@@ -351,7 +352,7 @@ Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `c
 | Home-screen widget (M10a) | Small and medium on iPhone, one resizable widget on Android: the week and day, the baby-size line and the next notification (Plan decision 49). Hidden details: the brand mark and the next reminder's time; tracking stopped: the mark only. A tap opens Today. The widget never opens the database: `WidgetSync` (`app/home_widget.dart`) writes a JSON snapshot whenever the plan, the pregnancy or "Hide details" changes, with 28 days of week text and up to 20 reminders, every word from `app_en.arb` (ADR 047) | iOS: WidgetKit extension `com.patelkeyur.navmaas.widget` in the App Group `group.com.patelkeyur.navmaas` (free Apple ID, §12), timeline entries after each reminder in the next two days and at each midnight for a week. Android: `NavmaasWidget` (an `AppWidgetProvider` on `home_widget`'s), redrawn by `home_widget`'s scheduled updates at each reminder and midnight (re-armed after a reboot; `USE_EXACT_ALARM` was already held), no periodic update. Taps open `navmaas://widget/today`, which Flutter's deep linking hands to the router as `/today` (ADR 048). Both use the phone's system font |
 | App lock (M10b) | Off by default; Me → Your data turns it on only when the phone has a screen lock. A fresh open is locked, and so is a return after 1, 5 or 15 minutes away (`AppLifecycleListener`: hidden to shown). The lock screen asks the phone as soon as it shows and again from Unlock. It sits above the router in `MaterialApp.builder` with what is underneath kept `Offstage`, so a notification or widget tap navigates behind it and nothing shows or is read out until she unlocks. While she is away (inactive or hidden), a plain cover hides her data from the app switcher. Taken / Snooze run in the background isolate and don't need unlocking (ADR 049) | iOS: `NSFaceIDUsageDescription`. Android: `USE_BIOMETRIC` (and `USE_FINGERPRINT` for old phones) from `local_auth`; `MainActivity` was already a `FlutterFragmentActivity` (audio_service's), as `local_auth` needs |
 | Screen Rest (M6a) | In-app only: rest windows that hold reminders (§7), time in Navmaas today (`AppLifecycleListener`: counted while on screen, saved when it leaves), a 20-second eye rest every 20 minutes of reading, the wind-down nudge | No special permissions |
-| Screen Rest (P2) | Gentle limits on apps she picks — **Android only** | `UsageStatsManager` + WorkManager (Kotlin). Not possible on iOS with a free Apple ID: Family Controls needs a paid membership |
+| Limits for other apps (M11a) | **Android only.** She gives Usage access in Settings, picks apps from her launcher and sets 15–120 minutes a day for each; Screen Rest shows today's minutes. Once an app passes its limit she gets one notice that day ("Time for a pause"), as a nudge: only outside quiet hours and meal windows (it waits for a window to end, the same day), only while the day has room under the daily limit, only while tracking. Nothing is blocked. Tapping it opens Screen Rest. Without Usage access the limits are paused, not lost | The `navmaas/usage` channel (`AppUsage.kt`): Usage access (`AppOpsManager`), launcher apps with 96 px icons (a launcher `<queries>` entry, no `QUERY_ALL_PACKAGES`), today's minutes from `UsageStatsManager` events. `AppLimitCheck.kt`: a WorkManager job every 15 minutes, enqueued only while a limit is set, follows the rules Dart writes (`limitRules`, ADR 050) and posts on the Reminders channel. Permission `PACKAGE_USAGE_STATS`, granted by her in Settings. Not possible on iPhone with a free Apple ID: Family Controls needs a paid membership |
 
 ## 11. Backup and restore
 
@@ -464,7 +465,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 ## 13. Security and privacy
 
 - **Network:** the app makes no network calls. Release Android builds omit the `INTERNET` permission (the main manifest removes it with `tools:node="remove"`, which also strips it from plugins), so the app itself cannot send data anywhere; debug and profile builds keep it for hot reload. Fonts are bundled.
-- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin); `WAKE_LOCK`, `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` for background audio (M4a); `health.READ_STEPS` for walks (M4b); `USE_BIOMETRIC` and `USE_FINGERPRINT` for app lock (M10b). Never `INTERNET`; `ACCESS_NETWORK_STATE`, which a plugin asks for, is removed the same way.
+- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin); `WAKE_LOCK`, `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` for background audio (M4a); `health.READ_STEPS` for walks (M4b); `USE_BIOMETRIC` and `USE_FINGERPRINT` for app lock (M10b); `PACKAGE_USAGE_STATS` for app limits (M11a; she turns it on in Settings, and only today's minutes for her chosen apps are read). Never `INTERNET`; `ACCESS_NETWORK_STATE`, which a plugin asks for, is removed the same way.
 - **Database:** encrypted with SQLCipher. A random 256-bit raw key is generated on first run and kept in Keychain / Android Keystore. The app refuses to open the database on a build without SQLCipher. The database and its key are excluded from OS backups on both platforms (§12).
 - **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key (`navmaas.attachments_key.v1`), as nonce + ciphertext + tag, in `db/attachments/` inside the folder OS backups skip. Photos are only decrypted in memory to show them. Imported books and audio stay as plain files in `db/library/`, skipped by OS backups; they are the owner's own media, not health data, and audio must stream to the player.
 - **Backups:** encrypted with a key derived from the owner's password (§11). The password is never stored.
@@ -488,7 +489,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 ## 15. Delivery milestones
 
-Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope.
+Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements; its release, 1.1.0, has M7, M10 and M11, with M8 and M9 deferred by the owner and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope.
 
 ### Phase 1 — MVP ✅ 2026-10-06
 
@@ -527,10 +528,10 @@ These rules apply to every milestone below, on top of its own "done when":
 | Milestone | Focus | Schema |
 |---|---|---|
 | **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
-| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan | v8 |
-| **M9** | Records vault, visit summary PDF, EPUB books | v9 |
+| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan (deferred) | v9 |
+| **M9** | Records vault, visit summary PDF, EPUB books (deferred) | v10 |
 | **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
-| **M11** | Limits for other apps (Android) and the Phase 2 release | v10 |
+| **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (PR #24, limits); M11b 2026-10-06 (PR #25, release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
 
 #### M7 Wellbeing ✅
 
@@ -559,7 +560,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M8 Body and birth prep
 
 **Scope**
-- Schema v8: a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
+- Schema v9 (v8 went to M11a, built first): a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
 - **Blood sugar** in Vitals:
   - Each reading has mg/dL, a context (fasting, before a meal, 1 h or 2 h after, bedtime), a time and a note.
   - Readings are listed by day, with no ranges, colours or labels such as "high".
@@ -586,7 +587,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M9 Records vault, visit summary PDF and EPUB
 
 **Scope**
-- Schema v9: `attachment` gains `category` (report / scan / prescription / other), `title`, `taken_on` and `size_bytes`, and its visit link becomes optional.
+- Schema v10: `attachment` gains `category` (report / scan / prescription / other), `title`, `taken_on` and `size_bytes`, and its visit link becomes optional.
 - **Records** (Care):
   - Add from the camera, photos or files (images or PDF), up to 25 MB each.
   - Encrypted through `AttachmentStore` like prescription photos, which now appear under Prescriptions.
@@ -637,7 +638,7 @@ These rules apply to every milestone below, on top of its own "done when":
 - The hidden-details snapshot contains no week, size or baby text (unit test).
 - A notification tap or widget tap can't open a screen without unlocking, and failed biometrics fall back to the passcode (widget tests with a fake authenticator).
 
-#### M11 Limits for other apps (Android) and the Phase 2 release
+#### M11 Limits for other apps (Android) and the Phase 2 release ✅
 
 **Scope**
 - **Android only.** The card stays hidden on iPhone, because Family Controls needs a paid membership (§12, ADR 012).
@@ -647,7 +648,7 @@ These rules apply to every milestone below, on top of its own "done when":
 - **The notice:**
   - Once an app passes its limit, she gets one gentle notice per app per day. Nothing is blocked.
   - The notice counts as a nudge, so it follows quiet hours, meal windows and the daily limit.
-- Schema v10: `app_limit` (package, label, minutes).
+- Schema v8 (M8 and M9 were deferred, so M11a took it): `app_limit` (package, label, minutes).
 - **How it checks:**
   - Kotlin `UsageStatsManager` + WorkManager every 15 minutes, only while a limit is set.
   - How the native check hands the notice to the planner's rules is decided and recorded as an ADR at the start.
@@ -657,6 +658,10 @@ These rules apply to every milestone below, on top of its own "done when":
   - Release builds on both phones.
 
 **Owner decides at the start:** the wording of the notice, and the minute steps for limits.
+
+**Owner's answers** (Plan decisions 51–54): "Time for a pause · {minutes} min on {app} today. Phone down, baby time."; 15 · 30 · 45 · 60 · 90 · 120 minutes, default 30; a rules snapshot written by Dart for the Kotlin check (ADR 050); split into M11a (limits) and M11b (the Phase 2 release).
+
+**Status:** **M11a ✅ 2026-10-06 (PR #24)**: schema v8 (`app_limit`), Screen Rest's card and Limits for other apps (Usage access, the launcher's apps, 15–120 minutes, the notice preview, paused when access is off), `limitRules` and `AppLimitSync` (Dart), the `navmaas/usage` channel and `AppLimitCheck` (Kotlin, WorkManager every 15 minutes only while a limit is set). **M11b ✅ 2026-10-06 (PR #25)**, stacked on M11a: the three deferred integration tests (`app_flow_test.dart`, passing on the iOS simulator), the accessibility pass (every Phase 2 screen and sheet in the accessibility map; no unlabelled icon buttons, no new motion), Navmaas **1.1.0 (build 2)** for both phones and the widget extension. Phase 2 ships without M8 and M9, which the owner deferred.
 
 **Done when**
 - The notice arrives within about 15 minutes of passing a limit, never in quiet hours, and once per app per day (on-device check on Android).
@@ -748,17 +753,17 @@ These rules apply to every milestone below, on top of its own "done when":
 
 ## 16. Testing and CI
 
-- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); delete all data (only a new, empty database is left; the keys go before it opens; an interrupted delete finishes); reminder planner (window, quiet hours, meal windows and their notices, bundling, daily limit and digest, nudges never in the digest, water nudges in the day only and none once today's goal is reached, stable ids, cap); rest windows and time in Navmaas; notification text and tap targets; supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item; meditation logged as meditation and ended at Finish or the end bell); the committed bell and quiet clip match `tool/bell.dart`; repositories on in-memory Drift (wellbeing: one mood a day, symptoms by key or her own name, one night per wake-up day, water never below zero, the week and the sleep average); build-expiry parser on sample profiles; kick and contraction patterns (most active window, last-hour averages). M10a: the home-screen widget snapshot (a day per entry and the reminders ahead; hidden holds no week, size, baby or reminder text; stopped holds nothing; Android redraw times).
+- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); delete all data (only a new, empty database is left; the keys go before it opens; an interrupted delete finishes); reminder planner (window, quiet hours, meal windows and their notices, bundling, daily limit and digest, nudges never in the digest, water nudges in the day only and none once today's goal is reached, stable ids, cap); rest windows and time in Navmaas; notification text and tap targets; supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item; meditation logged as meditation and ended at Finish or the end bell); the committed bell and quiet clip match `tool/bell.dart`; repositories on in-memory Drift (wellbeing: one mood a day, symptoms by key or her own name, one night per wake-up day, water never below zero, the week and the sleep average); build-expiry parser on sample profiles; kick and contraction patterns (most active window, last-hour averages). M10a: the home-screen widget snapshot (a day per entry and the reminders ahead; hidden holds no week, size, baby or reminder text; stopped holds nothing; Android redraw times). M11a: the app-limit rules (the notice in the owner's words, open windows outside quiet hours and meal times, the whole day with rest rules off, room under the daily limit after planned reminders, nothing when reminders are off or tracking stopped).
 - **Backup tests:**
   - Round-trip with and without the library.
   - Wrong password.
   - Truncated, reordered or tampered chunks.
-  - Restoring an older schema (schema 5 and the pre-M7 schema 6 migrate) and rejecting a newer one; the round trip carries the wellbeing tables.
+  - Restoring an older schema (schema 5, the pre-M7 schema 6 and the pre-M11 schema 7 migrate) and rejecting a newer one; the round trip carries the wellbeing tables and app limits.
   - Interrupted swap (rollback works).
   - A 500 MB library needs about the memory of a 50 MB one (under 48 MB more; under 128 MB in all).
-- **Widget and golden tests:** onboarding, Today, Journey, Sessions, Me, Screen Rest and (M7a) Wellbeing, mood, symptoms, sleep, water and (M7b) Meditation in light and dark; meditation logged from one minute with and without screen off, and her own audio logged as meditation; wellbeing entries saved and shown in the week, the symptom chips folding to two rows, Today's card (mood and water taps, hidden for the day, gone at the goal) and water nudges re-planned at the goal; the widget snapshot published with the week and next reminder, and hidden from Me (M10a); app lock (a fresh open locked, a failed try stays locked, locked again after the chosen minutes away, a notification or widget tap only navigates behind the lock, the app-switcher cover, no screen lock keeps it off) and goldens of the lock screen and Me → Your data (M10b); the 15-min reading and 20-min walk logged end to end; kick counter and contraction timer logged; delete all data (explains, Back up first, starts again at onboarding, a failure says so); Screen Rest rules change what is planned and shown, time in Navmaas is counted and saved, the eye rest shows every 20 minutes of reading, and wind-down opens her audio with the screen off; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
+- **Widget and golden tests:** onboarding, Today, Journey, Sessions, Me, Screen Rest and (M7a) Wellbeing, mood, symptoms, sleep, water and (M7b) Meditation in light and dark; meditation logged from one minute with and without screen off, and her own audio logged as meditation; wellbeing entries saved and shown in the week, the symptom chips folding to two rows, Today's card (mood and water taps, hidden for the day, gone at the goal) and water nudges re-planned at the goal; the widget snapshot published with the week and next reminder, and hidden from Me (M10a); app lock (a fresh open locked, a failed try stays locked, locked again after the chosen minutes away, a notification or widget tap only navigates behind the lock, the app-switcher cover, no screen lock keeps it off) and goldens of the lock screen and Me → Your data (M10b); app limits: hidden on iPhone, Usage access then an app and its minutes, removing the last limit stops the check, minutes past the limit said calmly, paused when access is off, and goldens of Screen Rest's card, the Limits screen and the paused state (M11a); the 15-min reading and 20-min walk logged end to end; kick counter and contraction timer logged; delete all data (explains, Back up first, starts again at onboarding, a failure says so); Screen Rest rules change what is planned and shown, time in Navmaas is counted and saved, the eye rest shows every 20 minutes of reading, and wind-down opens her audio with the screen off; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
 - **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent (weeks, care template, activities, routines, and Wellbeing's words and strings: no advice, warning or good/bad wording), every wellbeing key has its word, routines for every trimester even when high-risk, no lying on the back, review copies in sync.
-- **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); `integration_test/build_expiry_test.dart` reads the iPhone build's expiry; `integration_test/backup_test.dart` backs up, restores, deletes all data and restores again under new keys, with the real keychain and files (empty installs only, since it replaces data); later: onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session.
+- **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); `integration_test/build_expiry_test.dart` reads the iPhone build's expiry; `integration_test/backup_test.dart` backs up, restores, deletes all data and restores again under new keys, with the real keychain and files (empty installs only, since it replaces data); `integration_test/app_flow_test.dart` (M11b) runs the app on the real encrypted database: fresh install → onboarding → Today shows the week; "Taken" through the background isolate's action entry point logs the dose; a PDF imported through the picker, read for a minute and logged (empty installs only; each deletes all data at the end; all pass on the iOS simulator).
 - **GitHub Actions** (free for public repos), on every pull request, every push to `main` and on demand. Ubuntu, Flutter pinned (3.47.3), Java 17:
   - `dart format --set-exit-if-changed`
   - `flutter analyze`
@@ -820,3 +825,4 @@ These rules apply to every milestone below, on top of its own "done when":
 | 047 | The home-screen widget shows a JSON snapshot the app writes (28 days of week text, the next 20 reminders, every word from `app_en.arb`), not the database | The widget runs outside the app and can't open the encrypted database or read its key; pre-rendered text keeps all wording in the arb file and the hidden-details check in one Dart unit test, and 28 days keep it right when she doesn't open the app |
 | 048 | Widget taps open `navmaas://widget/today` through Flutter's deep linking, not `home_widget`'s click API | The router already owns navigation (and, in M10b, the lock); `home_widget` claims URLs with a `homeWidget` query and would stop Flutter from routing them, so the URL has none |
 | 049 | App lock is an overlay above the router (`MaterialApp.builder`, the app `Offstage` underneath), not a route or a redirect | Every route, dialog and sheet is covered at once and keeps its state; notification and widget taps keep navigating as before, behind the lock; nothing underneath is painted, tapped or read out until she unlocks |
+| 050 | The Android app-limit check follows a rules snapshot written by Dart instead of running Dart in the background | Dart already knows the plan and the calm rules; it writes, for the week ahead, when a notice may go out (outside quiet hours and meal windows), each day's room under the daily limit and each app's ready-made notice, and a small Kotlin WorkManager job only follows it. No new pub package (`workmanager` would open the encrypted database in a background isolate every 15 minutes), the rules stay tested in Dart, and every word stays in `app_en.arb` (Plan decision 53) |

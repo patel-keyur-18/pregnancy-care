@@ -13,6 +13,7 @@ import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
+import 'package:navmaas/features/screen_rest/presentation/app_limits_screen.dart';
 import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart';
 import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/exercise_screen.dart';
@@ -105,6 +106,7 @@ GoRouter router(Ref ref) {
         path: '/screen-rest',
         builder: (_, _) => const ScreenRestScreen(),
       ),
+      GoRoute(path: '/app-limits', builder: (_, _) => const AppLimitsScreen()),
       GoRoute(
         path: '/backup',
         builder: (_, state) => BackupScreen(restore: state.extra == true),
