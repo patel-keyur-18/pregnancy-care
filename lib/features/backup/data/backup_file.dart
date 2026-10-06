@@ -374,7 +374,7 @@ class _ChunkReader {
     this._size,
     this._position,
     this._end,
-  );
+  ) : _buffer = Uint8List(_size + _nonceLength + _tagLength);
 
   final RandomAccessFile _raf;
   final SecretKey _key;
@@ -382,6 +382,9 @@ class _ChunkReader {
   final int _size;
   int _position;
   final int _end;
+
+  /// Reused for every piece read from disk.
+  final Uint8List _buffer;
   var _index = 0;
   var _done = false;
 
@@ -394,7 +397,10 @@ class _ChunkReader {
     final length = last ? remaining : _size + overhead;
     if (length <= overhead) throw const BackupException(BackupError.damaged);
     await _raf.setPosition(_position);
-    final bytes = await _raf.read(length);
+    if (await _raf.readInto(_buffer, 0, length) != length) {
+      throw const BackupException(BackupError.damaged);
+    }
+    final bytes = Uint8List.sublistView(_buffer, 0, length);
     _position += length;
     try {
       final plain = await _cipher.decrypt(
@@ -408,7 +414,7 @@ class _ChunkReader {
       );
       _index++;
       _done = last;
-      return Uint8List.fromList(plain);
+      return plain is Uint8List ? plain : Uint8List.fromList(plain);
     } on SecretBoxAuthenticationError {
       // The first piece failing almost always means the wrong password.
       throw BackupException(
