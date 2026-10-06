@@ -41,8 +41,11 @@ Future<void> _settleIo(WidgetTester tester) async {
 }
 
 Future<void> _openScreenRest(WidgetTester tester) async {
-  await tester.scrollUntilVisible(find.text('Screen-free from 9:30 pm'), 200);
-  await tester.tap(find.text('Screen-free from 9:30 pm'));
+  final card = find.text('Screen-free from 9:30 pm');
+  await tester.scrollUntilVisible(card, 200);
+  await tester.ensureVisible(card);
+  await tester.pumpAndSettle();
+  await tester.tap(card);
   await tester.pumpAndSettle();
 }
 
