@@ -47,6 +47,7 @@ class AppDatabase extends _$AppDatabase {
       final dir = Directory(
         p.join((await getApplicationSupportDirectory()).path, 'db'),
       );
+      await recoverInterruptedRestore(dir);
       await dir.create(recursive: true);
       await _excludeFromBackup(dir);
       final key = await readOrCreateDbKey(secureStorage);
@@ -112,6 +113,21 @@ QueryExecutor encryptedExecutor(File file, String keyHex) =>
           ..select('SELECT count(*) FROM sqlite_master');
       },
     );
+
+/// Where a restore keeps the data it replaces until the new data opens
+/// (ARCHITECTURE §11).
+Directory rollbackDirFor(Directory dbDir) =>
+    Directory('${dbDir.path}-before-restore');
+
+/// If the app stopped in the middle of a restore's swap, the old data is
+/// still in the rollback folder: put it back before opening.
+Future<void> recoverInterruptedRestore(Directory dbDir) async {
+  final rollback = rollbackDirFor(dbDir);
+  if (!rollback.existsSync()) return;
+  if (File(p.join(dbDir.path, 'navmaas.db')).existsSync()) return;
+  if (dbDir.existsSync()) await dbDir.delete(recursive: true);
+  await rollback.rename(dbDir.path);
+}
 
 /// Keeps the database out of iCloud / device backups on iOS. Android does the
 /// same through `res/xml` backup rules. The `.navmaas` backup file (M5) is
