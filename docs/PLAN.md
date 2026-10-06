@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v10 — approved 2026-10-04, updated 2026-10-06 (M1–M5 built; owner decisions 12–33) |
+| **Status** | v11 — approved 2026-10-04, updated 2026-10-06 (M1–M5 and M6a built; owner decisions 12–34) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -52,6 +52,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 31 | While tracking is stopped | **One quiet page** instead of the tabs: Resume, or Start a new pregnancy, and Backup & restore. No baby content, no week numbers. Everything she logged stays on the phone. Pregnancy reminders stop; build-expiry and backup reminders keep running |
 | 32 | Weekly backup reminder | On by default, **Sundays at 10:00**, day changeable (or off) on the Backup screen; skipped when she backed up in the last 6 days |
 | 33 | M5 technical changes | Backups use **ChaCha20-Poly1305** (as strong as AES-256-GCM, twice as fast in pure Dart) and a simple list of files inside the encrypted body instead of ZIP, so `archive` isn't needed. The iPhone build expiry is read in Dart (no Swift channel). Backups are saved through the share sheet, since the save dialog needs the whole file in memory |
+| 34 | Screen Rest rules | Four rules, as drawn: **Bedtime rest** (the quiet hours), **Meal times** (hold reminders until each 45-minute window ends, and send one gentle notice as it starts), **Eye-rest nudge** (a 20-second rest every 20 minutes of reading, in the reader only) and **Wind-down audio** (off by default; a 9:00 pm nudge that opens the audio she played last with the screen off, or Sessions if she has none). Time in Navmaas today is counted on the phone. The prototype's Phase 2 "Limits for other apps" card is left out until P2 |
 
 ### What these decisions change
 
@@ -140,6 +141,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6a Screen Rest ✅ 2026-10-06 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |
