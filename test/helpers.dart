@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/delete_all_data.dart';
+import 'package:navmaas/core/platform/app_usage.dart';
 import 'package:navmaas/core/platform/audio.dart';
 import 'package:navmaas/core/platform/authenticator.dart';
 import 'package:navmaas/core/platform/build_info.dart';
@@ -232,6 +233,46 @@ class FakeAuthenticator implements Authenticator {
   }
 }
 
+/// Android's Usage access stand-in: [supported] is the phone being
+/// Android, [access] whether she allowed it; [minutes] is today's use per
+/// package; [rules] the last rules handed to the check.
+class FakeAppUsage implements AppUsage {
+  new({this.supported = true, this.access = false});
+
+  @override
+  final bool supported;
+  bool access;
+  int settingsOpened = 0;
+  final minutes = <String, int>{};
+  String? rules;
+  int limits = 0;
+  List<InstalledApp> installed = const [
+    (package: 'com.google.android.youtube', label: 'YouTube', icon: null),
+    (package: 'com.instagram.android', label: 'Instagram', icon: null),
+    (package: 'com.netflix.mediaclient', label: 'Netflix', icon: null),
+  ];
+
+  @override
+  Future<bool> hasAccess() async => access;
+
+  @override
+  Future<void> openAccessSettings() async => settingsOpened++;
+
+  @override
+  Future<List<InstalledApp>> apps() async => installed;
+
+  @override
+  Future<Map<String, int>> minutesToday(List<String> packages) async => {
+    for (final p in packages) p: minutes[p] ?? 0,
+  };
+
+  @override
+  Future<void> setRules(String rules, {required int limits}) async {
+    this.rules = rules;
+    this.limits = limits;
+  }
+}
+
 /// Records the home-screen widget's snapshots (no platform plugin).
 class FakeWidgetPublisher implements WidgetPublisher {
   final snapshots = <String>[];
@@ -255,6 +296,7 @@ Future<AppDatabase> pumpApp(
   FakeSteps? steps,
   FakeWidgetPublisher? widget,
   FakeAuthenticator? authenticator,
+  FakeAppUsage? appUsage,
   Directory? library,
   PickFile? pickFile,
   DateTime? buildExpiry,
@@ -315,6 +357,10 @@ Future<AppDatabase> pumpApp(
         ),
         authenticatorProvider.overrideWithValue(
           authenticator ?? FakeAuthenticator(),
+        ),
+        // iPhone by default: no app limits (the card is hidden).
+        appUsageProvider.overrideWithValue(
+          appUsage ?? FakeAppUsage(supported: false),
         ),
         libraryRepositoryProvider.overrideWith(
           (ref) => LibraryRepository(

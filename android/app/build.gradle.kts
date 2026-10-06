@@ -94,4 +94,6 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    // App-limit check (M11a, ADR 050); the same version home_widget brings.
+    implementation("androidx.work:work-runtime-ktx:2.11.2")
 }

@@ -16,6 +16,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- App limits (M11a, Android only): today's minutes in the apps she
+         chose. She grants it herself in Settings → Usage access. -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
     <!-- Walk: read steps from Health Connect (read only, never written). -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
 
@@ -128,6 +132,12 @@
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="geo" />
+        </intent>
+        <!-- App limits: the apps on her launcher, to choose from (no
+             QUERY_ALL_PACKAGES). -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
         </intent>
         <!-- Walk: is Health Connect installed? -->
         <package android:name="com.google.android.apps.healthdata" />
