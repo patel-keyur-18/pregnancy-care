@@ -20,7 +20,7 @@ part 'backup_service.g.dart';
 
 /// Shown in a backup's header ("Navmaas 1.0"). A test keeps it equal to
 /// the version in pubspec.yaml.
-const appVersion = '1.0.0';
+const appVersion = '1.1.0';
 
 /// The keys a backup carries inside its encrypted body.
 typedef BackupKeys = ({

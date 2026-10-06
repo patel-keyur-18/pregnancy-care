@@ -37,6 +37,9 @@ Future<void> _seed(AppDatabase db) async {
     'evening_stories.txt',
     Stream.value(utf8.encode('# The little lamp\n\nIn a quiet village.')),
   );
+  // Two audio files, so Meditation offers the "Your audio" sheet
+  // (om chanting, added last, stays first in the library).
+  await library.import('rain_sounds.mp3', Stream.value([0]));
   await library.import('om_chanting.mp3', Stream.value([0]));
   // Routines unlocked, so the exercise screen is reachable.
   final pregnancy = await db.select(db.pregnancies).getSingle();
@@ -502,6 +505,14 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
     (t) async {
       await _tab(t, 'Sessions');
       await _tapText(t, 'Meditation');
+    },
+  ),
+  'meditation, your audio': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Meditation');
+      await _tapText(t, 'Or use your own audio');
     },
   ),
   'meditation, running': (
