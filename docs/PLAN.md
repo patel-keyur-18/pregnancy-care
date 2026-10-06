@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v9 — approved 2026-10-04, updated 2026-10-06 (M1–M4 built, M5a built; owner decisions 12–33) |
+| **Status** | v10 — approved 2026-10-04, updated 2026-10-06 (M1–M5 built; owner decisions 12–33) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -49,9 +49,9 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 28 | Slow breathing and Activity | Breathing is a quiet 5-minute paced timer (no audio in the repo). The path's Activity tile shows one of about 30 original calm activities a day, drafted by Claude for the owner's review |
 | 29 | Audio package dependencies | Accept `audio_service`'s download cache (`flutter_cache_manager`, which brings `http` and `sqflite`). Navmaas never calls it, and release builds have no `INTERNET` (ADR 026) |
 | 30 | Pause or end tracking | Three choices in Me: **Pause tracking**, **Baby has arrived** (a short, gentle congratulation) and **End tracking**. The app never asks why. Any of them can be undone with Resume |
-| 31 | While tracking is stopped | **One quiet page** instead of the tabs: Resume, or Start a new pregnancy (and Backup & restore from M5b). No baby content, no week numbers. Everything she logged stays on the phone. Pregnancy reminders stop; build-expiry and backup reminders keep running |
-| 32 | Weekly backup reminder | On by default, **Sundays at 10:00**, day changeable; skipped when she backed up in the last 6 days (M5b) |
-| 33 | M5 technical changes | Backups use **ChaCha20-Poly1305** (as strong as AES-256-GCM, twice as fast in pure Dart) and a simple list of files inside the encrypted body instead of ZIP, so `archive` isn't needed (M5b). The iPhone build expiry is read in Dart (no Swift channel). Backups are saved through the share sheet, since the save dialog needs the whole file in memory |
+| 31 | While tracking is stopped | **One quiet page** instead of the tabs: Resume, or Start a new pregnancy, and Backup & restore. No baby content, no week numbers. Everything she logged stays on the phone. Pregnancy reminders stop; build-expiry and backup reminders keep running |
+| 32 | Weekly backup reminder | On by default, **Sundays at 10:00**, day changeable (or off) on the Backup screen; skipped when she backed up in the last 6 days |
+| 33 | M5 technical changes | Backups use **ChaCha20-Poly1305** (as strong as AES-256-GCM, twice as fast in pure Dart) and a simple list of files inside the encrypted body instead of ZIP, so `archive` isn't needed. The iPhone build expiry is read in Dart (no Swift channel). Backups are saved through the share sheet, since the save dialog needs the whole file in memory |
 
 ### What these decisions change
 
@@ -140,6 +140,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | Phase | Scope |
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
-| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5a third trimester and build expiry ✅ 2026-10-06 |
+| **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06 |
 | **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
 | **3** | Postpartum & baby mode, optional family sharing |
