@@ -99,3 +99,46 @@ final class ActivePregnancyProvider
 }
 
 String _$activePregnancyHash() => r'8c3eefc20aee8b3c43e34d30da1bb89d3e86f23f';
+
+/// The newest pregnancy in any status. Kept alive for the router.
+
+@ProviderFor(latestPregnancy)
+final latestPregnancyProvider = LatestPregnancyProvider._();
+
+/// The newest pregnancy in any status. Kept alive for the router.
+
+final class LatestPregnancyProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Pregnancy?>,
+          Pregnancy?,
+          Stream<Pregnancy?>
+        >
+    with $FutureModifier<Pregnancy?>, $StreamProvider<Pregnancy?> {
+  /// The newest pregnancy in any status. Kept alive for the router.
+  LatestPregnancyProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'latestPregnancyProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$latestPregnancyHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Pregnancy?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Pregnancy?> create(Ref ref) {
+    return latestPregnancy(ref);
+  }
+}
+
+String _$latestPregnancyHash() => r'569ea0e08fa7cf554901277bffd345c7ab366bd3';

@@ -5,6 +5,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/platform/build_info.dart';
+import 'package:navmaas/core/reminders/data_reminders.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
@@ -94,7 +96,8 @@ class ReminderSync extends _$ReminderSync {
       ..listen(_upcomingTakenProvider, (_, _) => refresh())
       ..listen(appointmentsProvider, (_, _) => refresh())
       ..listen(careItemsProvider, (_, _) => refresh())
-      ..listen(visitQuestionsProvider, (_, _) => refresh());
+      ..listen(visitQuestionsProvider, (_, _) => refresh())
+      ..listen(buildExpiryProvider, (_, _) => refresh());
     refresh();
   }
 
@@ -140,6 +143,10 @@ class ReminderSync extends _$ReminderSync {
             pregnancyStart: pregnancy.startDate,
             l10n: _l10n,
           ),
+        ...buildExpiryCandidates(
+          expiry: ref.read(buildExpiryProvider).value,
+          l10n: _l10n,
+        ),
       ],
     );
     try {

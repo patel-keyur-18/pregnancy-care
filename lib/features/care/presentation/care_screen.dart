@@ -20,8 +20,8 @@ import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Care tab (prototype "Care"): supplements today, coming up (visits,
-/// tests, scans, vaccines) and vitals. Kick counter and contraction timer
-/// tiles join in M5.
+/// tests, scans, vaccines) and vitals, under the kick counter and
+/// contraction timer tiles.
 class CareScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -51,6 +51,33 @@ class CareScreen extends ConsumerWidget {
           Semantics(
             header: true,
             child: Text(l10n.tabCare, style: text.headlineSmall),
+          ),
+          const SizedBox(height: 18),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 10,
+              children: [
+                Expanded(
+                  child: _ToolTile(
+                    icon: NavmaasIcon.kick,
+                    background: scheme.secondaryContainer,
+                    foreground: scheme.onSecondaryContainer,
+                    label: l10n.kickTitle,
+                    onTap: () => context.push('/kicks'),
+                  ),
+                ),
+                Expanded(
+                  child: _ToolTile(
+                    icon: NavmaasIcon.contraction,
+                    background: scheme.tertiaryContainer,
+                    foreground: scheme.onTertiaryContainer,
+                    label: l10n.contractionTitle,
+                    onTap: () => context.push('/contractions'),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 18),
           Row(
@@ -97,6 +124,68 @@ class CareScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// A third-trimester tool at the top of Care (prototype: kick counter,
+/// contraction timer).
+class _ToolTile extends StatelessWidget {
+  const new({
+    required this.icon,
+    required this.background,
+    required this.foreground,
+    required this.label,
+    required this.onTap,
+  });
+
+  final NavmaasIcon icon;
+  final Color background;
+  final Color foreground;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    clipBehavior: Clip.antiAlias,
+    child: Semantics(
+      container: true,
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 64),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              spacing: 10,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: NmIcon(icon, size: 20, color: foreground),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                      fontSize: 15,
+                      height: 20 / 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// Today's doses with Take / Taken, or a gentle prompt to add supplements.
@@ -214,7 +303,7 @@ class _ComingUpCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final now = DateTime.now();
+    final now = clockNow();
     final week = currentWeek(ref);
     final notes = careNotes(ref);
     final visit = (ref.watch(appointmentsProvider).value ?? const [])

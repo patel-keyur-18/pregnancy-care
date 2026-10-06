@@ -83,10 +83,7 @@ class LibraryRepository {
 
   /// Soft-deletes the row and deletes the copied file.
   Future<void> remove(LibraryItem item) async {
-    await _write(
-      item.id,
-      LibraryItemsCompanion(deletedAt: Value(clockNow())),
-    );
+    await _write(item.id, LibraryItemsCompanion(deletedAt: Value(clockNow())));
     final f = await file(item);
     if (f.existsSync()) await f.delete();
   }

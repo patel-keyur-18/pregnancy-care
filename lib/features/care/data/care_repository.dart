@@ -45,10 +45,8 @@ class CareRepository {
   Future<void> book(String id, DateTime? at) =>
       _update(id, CareItemsCompanion(scheduledAt: Value(at)));
 
-  Future<void> markDone(String id, {required bool done}) => _update(
-    id,
-    CareItemsCompanion(doneAt: Value(done ? clockNow() : null)),
-  );
+  Future<void> markDone(String id, {required bool done}) =>
+      _update(id, CareItemsCompanion(doneAt: Value(done ? clockNow() : null)));
 
   Future<void> setNotes(String id, String notes) => _update(
     id,

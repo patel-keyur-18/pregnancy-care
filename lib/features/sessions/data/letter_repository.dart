@@ -35,10 +35,7 @@ class LetterRepository {
       return;
     }
     await (_db.update(_db.letters)..where((t) => t.id.equals(id))).write(
-      LettersCompanion(
-        body: Value(body.trim()),
-        updatedAt: Value(clockNow()),
-      ),
+      LettersCompanion(body: Value(body.trim()), updatedAt: Value(clockNow())),
     );
   }
 

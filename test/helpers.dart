@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/platform/audio.dart';
+import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
@@ -143,6 +144,7 @@ Future<AppDatabase> pumpApp(
   FakeSteps? steps,
   Directory? library,
   PickFile? pickFile,
+  DateTime? buildExpiry,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
   double textScale = 1,
@@ -200,6 +202,7 @@ Future<AppDatabase> pumpApp(
           ),
         ),
         pickFileProvider.overrideWithValue(pickFile ?? (_) async => null),
+        buildExpiryProvider.overrideWith((_) async => buildExpiry),
       ],
       child: const NavmaasApp(),
     ),

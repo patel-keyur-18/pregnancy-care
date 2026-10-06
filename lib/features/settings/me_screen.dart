@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:navmaas/app/theme_mode.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
+import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/core/widgets/step_button.dart';
+import 'package:navmaas/features/settings/tracking_stopped_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Me, M1 subset: profile + pregnancy dates, appearance, disclaimer.
+/// Me (prototype "Me & settings"): profile and dates, doctor, appearance,
+/// calm notifications, exercise, your data, this iPhone build.
 class MeScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -207,6 +213,53 @@ class MeScreen extends ConsumerWidget {
           const SizedBox(height: 18),
           section(l10n.exerciseSection, const _ExerciseSwitches()),
           const SizedBox(height: 18),
+          section(
+            l10n.yourData,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 10,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      spacing: 10,
+                      children: [
+                        NmIcon(NavmaasIcon.lock, size: 18, color: on),
+                        Expanded(
+                          child: Text(
+                            l10n.dataPrivacy,
+                            style: text.bodySmall!.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: on,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (pregnancy != null)
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(48, 48),
+                      foregroundColor: scheme.onSurfaceVariant,
+                    ),
+                    onPressed: () => showPauseOrEnd(context, ref, pregnancy.id),
+                    child: Text(l10n.pauseOrEnd, textAlign: TextAlign.center),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          const BuildExpirySection(),
           Text(
             l10n.disclaimer,
             style: text.bodySmall!.copyWith(
@@ -495,6 +548,88 @@ class _ExerciseSwitches extends ConsumerWidget {
           value: pregnancy.highRisk,
           set: (v) => repo.setFlags(pregnancy.id, highRisk: v),
         ),
+      ],
+    );
+  }
+}
+
+/// "This iPhone build" (ARCHITECTURE §12): when a free-Apple-ID build stops
+/// opening. Nothing on Android or the simulator.
+class BuildExpirySection extends ConsumerWidget {
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final expiry = ref.watch(buildExpiryProvider).value;
+    if (expiry == null) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final brand = context.navmaas;
+    final local = expiry.toLocal();
+    final days = daysBetween(ref.watch(todayProvider), dateOnly(local));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 10,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            l10n.thisBuild,
+            style: theme.textTheme.labelLarge!.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: brand.amberSoft,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 12,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: NmIcon(
+                    NavmaasIcon.clock,
+                    size: 20,
+                    color: brand.onAmberSoft,
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        l10n.buildExpires(
+                          DateFormat('EEE d MMM').format(local),
+                          l10n.inDays(days < 0 ? 0 : days),
+                        ),
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: brand.onAmberSoft,
+                        ),
+                      ),
+                      Text(
+                        l10n.buildExpiresBody,
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: brand.onAmberSoft,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
       ],
     );
   }

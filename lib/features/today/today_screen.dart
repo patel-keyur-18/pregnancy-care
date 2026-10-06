@@ -6,6 +6,7 @@ import 'package:navmaas/app/theme_mode.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
@@ -13,12 +14,13 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
+import 'package:navmaas/core/widgets/notice_box.dart';
 import 'package:navmaas/features/today/next_visit_card.dart';
 import 'package:navmaas/features/today/today_plan_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Today, M1 subset: header and the week hero card. The plan, visit and
-/// Screen Rest cards arrive in M2/M3.
+/// Today: header, the iPhone build-expiry banner when it's close, the week
+/// hero card, today's plan and the next visit. Screen Rest joins in M6.
 class TodayScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -43,6 +45,7 @@ class TodayScreen extends ConsumerWidget {
         children: [
           _Header(today: today, name: ref.watch(firstNameProvider).value),
           const SizedBox(height: 16),
+          const _BuildExpiryBanner(),
           if (snapshot.needsReview)
             const _CheckDatesCard()
           else
@@ -256,6 +259,31 @@ class _HeroCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A quiet banner when this iPhone build stops opening within a day
+/// (ARCHITECTURE §12).
+class _BuildExpiryBanner extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final expiry = ref.watch(buildExpiryProvider).value;
+    if (expiry == null) return const SizedBox.shrink();
+    final days = daysBetween(
+      ref.watch(todayProvider),
+      dateOnly(expiry.toLocal()),
+    );
+    if (days > 1) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: NoticeBox(
+        icon: NavmaasIcon.clock,
+        text: l10n.buildBanner(l10n.inDays(days < 0 ? 0 : days)),
       ),
     );
   }

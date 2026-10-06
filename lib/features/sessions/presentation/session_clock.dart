@@ -27,9 +27,7 @@ mixin SessionClock<T extends StatefulWidget> on State<T> {
         final hiddenAt = _hiddenAt;
         _hiddenAt = null;
         if (countWhileHidden && hiddenAt != null && !paused && mounted) {
-          setState(
-            () => seconds += clockNow().difference(hiddenAt).inSeconds,
-          );
+          setState(() => seconds += clockNow().difference(hiddenAt).inSeconds);
         }
       },
     );
