@@ -126,7 +126,16 @@ enum NavmaasIcon {
     'M12 10v3.5l2.5 2M9.5 2.5h5',
   ]),
   download(['M12 4v11M7 10.5l5 5 5-5M5 20h14']),
-  upload(['M12 20V9M7 13.5l5-5 5 5M5 4h14']);
+  upload(['M12 20V9M7 13.5l5-5 5 5M5 4h14']),
+  drop(['M12 3.5c3.2 4.2 6 7.4 6 10.6a6 6 0 0 1-12 0c0-3.2 2.8-6.4 6-10.6z']),
+  notes([
+    'M7.5 3.5h9A2.5 2.5 0 0 1 19 6v12a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 5 18V6a2.5 2.5 0 0 1 2.5-2.5z',
+    'M9 8.5h6M9 12h6M9 15.5h3.5',
+  ]),
+  bed([
+    'M3 19V6M3 15h18v4M21 15v-2.5a3 3 0 0 0-3-3h-7.5V15',
+    'M8.6 11.8a1.8 1.8 0 1 1-3.6 0 1.8 1.8 0 1 1 3.6 0z',
+  ]);
 
   new(this.svg, {this.fill = false});
 
@@ -179,12 +188,16 @@ class NmIcon extends StatelessWidget {
     this.color,
     this.strokeWidth = 1.8,
     this.progress = 1,
+    this.fillColor,
     super.key,
   });
 
   final NavmaasIcon icon;
   final double size;
   final Color? color;
+
+  /// Fills the shape under its line (Water's glasses).
+  final Color? fillColor;
 
   /// In 24-grid units, like the prototype's SVG `stroke-width`.
   final double strokeWidth;
@@ -199,23 +212,34 @@ class NmIcon extends StatelessWidget {
         color ?? IconTheme.of(context).color ?? const Color(0xFF000000),
         strokeWidth,
         progress,
+        fillColor,
       ),
     ),
   );
 }
 
 class _IconPainter extends CustomPainter {
-  const new(this.icon, this.color, this.strokeWidth, this.progress);
+  const new(
+    this.icon,
+    this.color,
+    this.strokeWidth,
+    this.progress, [
+    this.fillColor,
+  ]);
 
   final NavmaasIcon icon;
   final Color color;
   final double strokeWidth;
   final double progress;
+  final Color? fillColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (progress <= 0) return;
     canvas.scale(size.width / 24);
+    if (fillColor case final fill?) {
+      canvas.drawPath(icon.path, Paint()..color = fill);
+    }
     final paint = Paint()
       ..color = color
       ..style = icon.fill ? PaintingStyle.fill : PaintingStyle.stroke
@@ -237,5 +261,6 @@ class _IconPainter extends CustomPainter {
       old.icon != icon ||
       old.color != color ||
       old.strokeWidth != strokeWidth ||
-      old.progress != progress;
+      old.progress != progress ||
+      old.fillColor != fillColor;
 }

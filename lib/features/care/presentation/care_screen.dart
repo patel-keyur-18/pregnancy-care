@@ -17,6 +17,8 @@ import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
+import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
+import 'package:navmaas/features/wellbeing/presentation/wellbeing_widgets.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Care tab (prototype "Care"): supplements today, coming up (visits,
@@ -79,6 +81,8 @@ class CareScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 10),
+          const _WellbeingTile(),
           const SizedBox(height: 18),
           Row(
             children: [
@@ -135,6 +139,7 @@ class _ToolTile extends StatelessWidget {
     required this.foreground,
     required this.label,
     required this.onTap,
+    this.subtitle,
   });
 
   final NavmaasIcon icon;
@@ -142,6 +147,10 @@ class _ToolTile extends StatelessWidget {
   final Color foreground;
   final String label;
   final VoidCallback onTap;
+
+  /// With a subtitle the tile is a full-width row with a chevron
+  /// (Wellbeing).
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -170,15 +179,36 @@ class _ToolTile extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Text(
-                    label,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                      fontSize: 15,
-                      height: 20 / 15,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontSize: 15,
+                          height: 20 / 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      if (subtitle case final sub?)
+                        Text(
+                          sub,
+                          style: Theme.of(context).textTheme.bodySmall!
+                              .copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                        ),
+                    ],
                   ),
                 ),
+                if (subtitle != null)
+                  NmIcon(
+                    NavmaasIcon.chevronRight,
+                    size: 20,
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
               ],
             ),
           ),
@@ -186,6 +216,30 @@ class _ToolTile extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Care → Wellbeing, with today's mood and water (prototype Care).
+class _WellbeingTile extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final today = ref.watch(wellbeingWeekProvider).first;
+    final goal = ref.watch(waterGoalProvider).value ?? defaultWaterGoal;
+    return _ToolTile(
+      icon: NavmaasIcon.heart,
+      background: scheme.secondaryContainer,
+      foreground: scheme.onSecondaryContainer,
+      label: l10n.wellbeingTitle,
+      subtitle: [
+        if (today.mood case final m?) l10n.wellbeingToday(l10n.mood(m.mood)),
+        l10n.waterOfGoal(today.glasses, goal),
+      ].join(' · '),
+      onTap: () => context.push('/wellbeing'),
+    );
+  }
 }
 
 /// Today's doses with Take / Taken, or a gentle prompt to add supplements.

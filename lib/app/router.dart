@@ -28,6 +28,11 @@ import 'package:navmaas/features/settings/tracking_stopped_screen.dart';
 import 'package:navmaas/features/third_trimester/presentation/contraction_screen.dart';
 import 'package:navmaas/features/third_trimester/presentation/kick_counter_screen.dart';
 import 'package:navmaas/features/today/today_screen.dart';
+import 'package:navmaas/features/wellbeing/presentation/mood_screen.dart';
+import 'package:navmaas/features/wellbeing/presentation/sleep_screen.dart';
+import 'package:navmaas/features/wellbeing/presentation/symptoms_screen.dart';
+import 'package:navmaas/features/wellbeing/presentation/water_screen.dart';
+import 'package:navmaas/features/wellbeing/presentation/wellbeing_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -103,6 +108,16 @@ GoRouter router(Ref ref) {
       GoRoute(
         path: '/contractions',
         builder: (_, _) => const ContractionScreen(),
+      ),
+      GoRoute(
+        path: '/wellbeing',
+        builder: (_, _) => const WellbeingScreen(),
+        routes: [
+          GoRoute(path: 'mood', builder: (_, _) => const MoodScreen()),
+          GoRoute(path: 'symptoms', builder: (_, _) => const SymptomsScreen()),
+          GoRoute(path: 'sleep', builder: (_, _) => const SleepScreen()),
+          GoRoute(path: 'water', builder: (_, _) => const WaterScreen()),
+        ],
       ),
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => _Shell(shell),
