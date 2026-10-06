@@ -1,19 +1,26 @@
-// Backs up and restores on a real phone: the keychain, files and the
-// database swap underneath the app. A restore replaces data, so it only
-// runs on an empty install (the simulator, or before onboarding):
+// Backs up, restores, deletes all data and restores again on a real phone:
+// the keychain, files and the database swap underneath the app. It replaces
+// data, so it only runs on an empty install (the simulator, or before
+// onboarding):
 //   flutter test integration_test/backup_test.dart -d <device>
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/delete_all_data.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('back up, wrong password, restore', (_) async {
+  testWidgets('back up, wrong password, restore, delete all, restore', (
+    _,
+  ) async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     AppDatabase db() => container.read(appDatabaseProvider);
@@ -51,8 +58,26 @@ void main() {
       DateTime.utc(2026, 4, 15),
     );
 
+    // Delete all data wipes the backup folder too: keep the file's bytes.
+    final kept = await made.file.readAsBytes();
+    await container.read(reminderSchedulerProvider).init();
+    await container.read(deleteAllDataProvider)();
+    final wiped = db();
+    expect(wiped, isNot(same(after)));
+    expect(await wiped.select(wiped.pregnancies).get(), isEmpty);
+    expect(made.file.existsSync(), isFalse);
+
+    // New keys; the backup still opens with its password.
+    final file = File('${Directory.systemTemp.path}/kept.navmaas');
+    await file.writeAsBytes(kept);
+    await service.restore(file, 'correct horse');
+    final again = db();
+    expect(
+      (await again.select(again.pregnancies).getSingle()).lmp,
+      DateTime.utc(2026, 4, 15),
+    );
+
     // Leave the install empty again.
-    await after.delete(after.backupLog).go();
-    await after.delete(after.pregnancies).go();
+    await container.read(deleteAllDataProvider)();
   });
 }

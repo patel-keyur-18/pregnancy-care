@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/delete_all_data.dart';
 import 'package:navmaas/core/platform/audio.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
@@ -54,6 +55,9 @@ class FakeScheduler implements ReminderScheduler {
 
   @override
   Future<NotificationResponse?> launchResponse() async => null;
+
+  @override
+  Future<void> cancelAll() async => scheduled = const [];
 }
 
 /// Plays nothing; records what the app asks for.
@@ -204,6 +208,7 @@ Future<AppDatabase> pumpApp(
   DateTime? buildExpiry,
   FakeBackupService? backup,
   ShareFile? share,
+  DeleteAllData? deleteAll,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
   double textScale = 1,
@@ -266,6 +271,19 @@ Future<AppDatabase> pumpApp(
           (_) async => backup ?? FakeBackupService(),
         ),
         shareFileProvider.overrideWithValue(share ?? (_) async {}),
+        // The real one deletes folders and keys; this empties the database.
+        deleteAllDataProvider.overrideWith(
+          (ref) =>
+              deleteAll ??
+              () async {
+                await ref.read(reminderSchedulerProvider).cancelAll();
+                await db.customStatement('PRAGMA foreign_keys = OFF');
+                for (final table in db.allTables) {
+                  await db.delete(table).go();
+                }
+                await db.customStatement('PRAGMA foreign_keys = ON');
+              },
+        ),
       ],
       child: const NavmaasApp(),
     ),

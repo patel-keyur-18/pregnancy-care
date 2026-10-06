@@ -134,7 +134,10 @@ Future<void> showPauseOrEnd(
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-                child: Text(l10n.pauseOrEnd, style: text.titleLarge),
+                child: Semantics(
+                  header: true,
+                  child: Text(l10n.pauseOrEnd, style: text.titleLarge),
+                ),
               ),
               option(
                 PregnancyStatus.paused,

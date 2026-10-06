@@ -310,13 +310,7 @@ Future<BackupService> backupService(Ref ref) async {
       attachmentKey: () => readOrCreateAttachmentKey(secureStorage),
       setAttachmentKey: (key) => writeAttachmentKey(secureStorage, key),
     ),
-    reopen: () async {
-      final old = ref.read(appDatabaseProvider);
-      ref.invalidate(appDatabaseProvider);
-      await old.close();
-      // Opening runs the migrations; a database that can't open throws.
-      await ref.read(appDatabaseProvider).customSelect('SELECT 1').get();
-    },
+    reopen: () => reopenAppDatabase(ref),
   );
 }
 

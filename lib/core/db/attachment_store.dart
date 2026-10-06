@@ -90,6 +90,10 @@ Future<void> writeAttachmentKey(FlutterSecureStorage storage, List<int> key) =>
       value: key.map((b) => b.toRadixString(16).padLeft(2, '0')).join(),
     );
 
+/// Delete all data: the next photo creates a new key.
+Future<void> deleteAttachmentKey(FlutterSecureStorage storage) =>
+    storage.delete(key: _attachmentKeyName);
+
 @Riverpod(keepAlive: true)
 Future<AttachmentStore> attachmentStore(Ref ref) async {
   final support = await getApplicationSupportDirectory();

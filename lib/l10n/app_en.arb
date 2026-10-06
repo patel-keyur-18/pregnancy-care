@@ -620,5 +620,13 @@
   "reminderWindDownBody": "Your audio is ready. Let the screen rest.",
   "reminderDigestMore": "{items} and {count} more",
   "@reminderDigestMore": {"placeholders": {"items": {"type": "String"}, "count": {"type": "int"}}},
-  "quietOff": "Off"
+  "quietOff": "Off",
+
+  "deleteAllData": "Delete all data",
+  "deleteAllTitle": "Delete all data?",
+  "deleteAllBody": "This deletes everything Navmaas keeps on this phone: your pregnancy, logs, photos, books, audio and settings. Backup files you saved elsewhere are not touched.",
+  "backUpFirst": "Back up first",
+  "deleteEverything": "Delete everything",
+  "deleting": "Deleting…",
+  "deleteAllFailed": "Not everything could be deleted. Please try again."
 }

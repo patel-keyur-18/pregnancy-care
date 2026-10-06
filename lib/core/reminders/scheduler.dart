@@ -97,6 +97,9 @@ abstract interface class ReminderScheduler {
 
   /// The tap that launched the app, if a reminder did.
   Future<NotificationResponse?> launchResponse();
+
+  /// Cancels every reminder, snoozed ones too (Delete all data).
+  Future<void> cancelAll();
 }
 
 class LocalNotificationsScheduler implements ReminderScheduler {
@@ -153,6 +156,9 @@ class LocalNotificationsScheduler implements ReminderScheduler {
       debugPrint('Navmaas: time zone not set ($e)');
     }
   }
+
+  @override
+  Future<void> cancelAll() => _plugin.cancelAll();
 
   @override
   Future<NotificationResponse?> launchResponse() async {

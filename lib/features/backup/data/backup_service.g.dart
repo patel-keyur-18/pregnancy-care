@@ -46,7 +46,7 @@ final class BackupServiceProvider
   }
 }
 
-String _$backupServiceHash() => r'0796cf1ccc4b5eb42b0763d789510a6a5f58091d';
+String _$backupServiceHash() => r'a43eb4efbaf1ef33d62f31582c10bfaeb1cd874c';
 
 /// How big a backup will be, with and without the library.
 

@@ -18,6 +18,7 @@ import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/core/widgets/step_button.dart';
 import 'package:navmaas/features/backup/data/backup_log.dart';
 import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart';
+import 'package:navmaas/features/settings/delete_data_dialog.dart';
 import 'package:navmaas/features/settings/tracking_stopped_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -258,6 +259,15 @@ class MeScreen extends ConsumerWidget {
                     onPressed: () => showPauseOrEnd(context, ref, pregnancy.id),
                     child: Text(l10n.pauseOrEnd, textAlign: TextAlign.center),
                   ),
+                // Red: it destroys data (DESIGN_SYSTEM §2).
+                TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    foregroundColor: scheme.error,
+                  ),
+                  onPressed: () => showDeleteAllData(context),
+                  child: Text(l10n.deleteAllData, textAlign: TextAlign.center),
+                ),
               ],
             ),
           ),
