@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.11 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M7a components; implementation notes in §8) |
+| **Status** | v1.11 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M7 components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 22 screens in light and dark (M7 Wellbeing boards added 2026-10-06) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -212,7 +212,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M7a)
+## 8. Implementation status (M7)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -241,7 +241,7 @@ Deliberate, permanent differences:
 | Walk screen | "Evening walk" | "Gentle walk"; steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
 | Exercise header | "2nd trimester · step 2 of 4" | "Step 2 of 7" (the trimester is on the Sessions tile) | Shorter at large text |
 | Exercise controls | Pause in the middle | Pause / Resume, then "Finish" when the last move ends | Clear end of the routine |
-| Move & breathe tiles | Four fixed tiles | Walk, this trimester's routines, slow breathing; locked routines show a lock and "Needs 'Doctor cleared me' in Me" and open Me | Routines follow trimester, high risk and clearance |
+| Move & breathe tiles | Four fixed tiles (M7: Meditation as a full-width tile under them) | Walk, this trimester's routines, slow breathing and Meditation in the same two-column grid; locked routines show a lock and "Needs 'Doctor cleared me' in Me" and open Me | Routines follow trimester, high risk and clearance, so the number of tiles varies |
 | Me → Exercise | "Unlocks walking and exercise routines" | "Unlocks exercise routines. Walking is always open." | Plan decision 27 |
 | Slow breathing | Opens Listen | Its own quiet screen: a lavender circle that grows and shrinks, "Breathe in / Breathe out", 5 min, Start / Pause / Finish | No audio can ship in the repo (Plan decision 28) |
 | Today's plan | Walk as an "Evening walk" row | "Gentle walk · 20 min · easy pace", ticked by a logged walk; the "add supplements" prompt is gone because the walk is always there | Walking is always open |
@@ -267,4 +267,7 @@ Deliberate, permanent differences:
 | Wellbeing header rows | One row | "Your week" and its dates, and "What did you feel?" and "Add your own", wrap to two lines at large text | No overflow at 2.0× |
 | Wellbeing tiles with nothing yet | (not drawn) | "Not logged yet"; the sleep card says "Log a night's sleep to see your weekly average." until one night is logged | Gentle empty states |
 | Today's card "+" | 44 px `primary` circle | 48 dp filled icon button with the tooltip "Add a glass" | Accessibility (§4) |
+| Meditation lengths | "5 min" … "20 min" segments, 40 px | Same labels, 48 dp segments (they wrap to two lines at large text) | Accessibility (§4) |
+| Meditation, running | Pause and Finish as 52 px outlined pills; "Breathe softly" / "Paused" | Same, as the app's outlined buttons (48 dp); they wrap under each other at large text; Finish (or the end bell) brings back the length choice | — |
+| Meditation, her own audio | One row, "Om chanting · 10:00" | The audio she played last; with more than one, a "Your audio" sheet to choose; it opens Listen headed "Meditation". With none: "Add audio in Sessions first", not tappable | Her library can hold many |
 
