@@ -116,7 +116,7 @@ void main() {
   });
 
   test('dates that need review leave the day out', () {
-    final s = snapshot(start: DateTime.utc(2027, 1, 1));
+    final s = snapshot(start: DateTime.utc(2027));
     expect(s['days'], isEmpty);
   });
 

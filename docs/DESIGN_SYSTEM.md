@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.11 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M7 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 22 screens in light and dark (M7 Wellbeing boards added 2026-10-06) |
+| **Status** | v1.12 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M10 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 25 screens in light and dark (M7 Wellbeing and M10 widgets, lock screen and Me → Your data boards added 2026-10-06) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -151,6 +151,7 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Word chip (M7) | Pill, 1.5 `border`, `surface`, label 14/800 (16/800 for mood and rested words); chosen = `primary` fill, `on-primary` label with a tick. A selection, never a verdict: no colour per word |
 | More chip (M7) | Dashed 1.5 `border` pill, `text-2` label "More · N" / "Fewer" with a chevron; folds the symptom chips to two rows |
 | Wellbeing tile (M7) | Card, 40 icon tile (mood `rose-soft` heart, symptoms `surface-2` notes, sleep `lavender-soft` bed, water `primary-soft` drop), label 13/700 `text-3`, value 16/800 |
+| Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: 28 `primary-soft` circle with the sprout, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
 
 ## 7. Flutter mapping
@@ -212,7 +213,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M7)
+## 8. Implementation status (M10)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -270,4 +271,6 @@ Deliberate, permanent differences:
 | Meditation lengths | "5 min" … "20 min" segments, 40 px | Same labels, 48 dp segments (they wrap to two lines at large text) | Accessibility (§4) |
 | Meditation, running | Pause and Finish as 52 px outlined pills; "Breathe softly" / "Paused" | Same, as the app's outlined buttons (48 dp); they wrap under each other at large text; Finish (or the end bell) brings back the length choice | — |
 | Meditation, her own audio | One row, "Om chanting · 10:00" | The audio she played last; with more than one, a "Your audio" sheet to choose; it opens Listen headed "Meditation". With none: "Add audio in Sessions first", not tappable | Her library can hold many |
-
+| Home-screen widget font | Nunito | The phone's system font: SF Rounded on iPhone, sans-serif on Android, same sizes and weights | Widgets are drawn by the home screen, outside the app, where its bundled fonts aren't loaded |
+| Home-screen widget, Android | (drawn for iPhone) | One resizable widget with the medium layout | One layout keeps the RemoteViews code small; it resizes down to about 3 × 2 cells |
+| Small widget's reminder line | "8:00 pm · Folic acid" | Shrinks to 85 % before it truncates | SF Rounded runs wider than Nunito |
