@@ -149,6 +149,16 @@ Future<AppDatabase> pumpApp(
   Size size = const Size(390, 844),
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+  // The app's wall clock starts at 9:00 on the test's day and moves with
+  // real and fake time, so rows it stamps fall on the day the screens show
+  // and still come in order.
+  final fakeStart = tester.binding.clock.now();
+  final real = Stopwatch()..start();
+  final pinned = DateTime(testToday.year, testToday.month, testToday.day, 9);
+  clockNow = () => pinned.add(
+    real.elapsed + tester.binding.clock.now().difference(fakeStart),
+  );
+  addTearDown(() => clockNow = DateTime.now);
   // Synchronous stream closing: no drift timer outlives the widget tree.
   final db = AppDatabase(
     DatabaseConnection(

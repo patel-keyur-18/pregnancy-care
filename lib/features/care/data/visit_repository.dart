@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'visit_repository.g.dart';
@@ -34,7 +35,7 @@ class VisitRepository {
       at: Value(at),
       doctor: v(doctor),
       place: v(place),
-      updatedAt: Value(DateTime.now()),
+      updatedAt: Value(clockNow()),
     );
     if (id == null) {
       return (await _db.into(_db.appointments).insertReturning(row)).id;
@@ -49,7 +50,7 @@ class VisitRepository {
       (_db.update(_db.appointments)..where((t) => t.id.equals(id))).write(
         AppointmentsCompanion(
           notes: Value(notes.trim().isEmpty ? null : notes.trim()),
-          updatedAt: Value(DateTime.now()),
+          updatedAt: Value(clockNow()),
         ),
       );
 
@@ -59,13 +60,13 @@ class VisitRepository {
           bringAlong: Value(
             items.map((s) => s.trim()).where((s) => s.isNotEmpty).join('\n'),
           ),
-          updatedAt: Value(DateTime.now()),
+          updatedAt: Value(clockNow()),
         ),
       );
 
   Future<void> removeAppointment(String id) =>
       (_db.update(_db.appointments)..where((t) => t.id.equals(id))).write(
-        AppointmentsCompanion(deletedAt: Value(DateTime.now())),
+        AppointmentsCompanion(deletedAt: Value(clockNow())),
       );
 
   Stream<List<VisitQuestion>> watchQuestions(String pregnancyId) =>
@@ -92,15 +93,15 @@ class VisitRepository {
     required String appointmentId,
   }) => (_db.update(_db.visitQuestions)..where((t) => t.id.equals(id))).write(
     VisitQuestionsCompanion(
-      askedAt: Value(asked ? DateTime.now() : null),
+      askedAt: Value(asked ? clockNow() : null),
       appointmentId: Value(asked ? appointmentId : null),
-      updatedAt: Value(DateTime.now()),
+      updatedAt: Value(clockNow()),
     ),
   );
 
   Future<void> removeQuestion(String id) =>
       (_db.update(_db.visitQuestions)..where((t) => t.id.equals(id))).write(
-        VisitQuestionsCompanion(deletedAt: Value(DateTime.now())),
+        VisitQuestionsCompanion(deletedAt: Value(clockNow())),
       );
 
   Stream<List<Attachment>> watchAttachments(String appointmentId) =>
@@ -132,7 +133,7 @@ class VisitRepository {
 
   Future<void> removeAttachment(AttachmentStore store, Attachment a) async {
     await (_db.update(_db.attachments)..where((t) => t.id.equals(a.id))).write(
-      AttachmentsCompanion(deletedAt: Value(DateTime.now())),
+      AttachmentsCompanion(deletedAt: Value(clockNow())),
     );
     await store.delete(a.fileName);
   }

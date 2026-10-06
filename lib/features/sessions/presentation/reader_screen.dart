@@ -39,7 +39,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
   late final LibraryRepository _library;
   late final SessionRepository _sessions;
   late final String? _pregnancyId;
-  final _startedAt = DateTime.now();
+  final DateTime _startedAt = clockNow();
   final _scroll = ScrollController();
 
   LibraryItem? _item;

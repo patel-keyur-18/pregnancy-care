@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_repository.g.dart';
@@ -42,7 +43,7 @@ class SessionRepository {
       (_db.update(_db.sessions)..where((t) => t.id.equals(id))).write(
         SessionsCompanion(
           durationSec: Value(durationSec),
-          updatedAt: Value(DateTime.now()),
+          updatedAt: Value(clockNow()),
         ),
       );
 

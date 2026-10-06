@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -22,7 +23,7 @@ class EditVisitScreen extends ConsumerStatefulWidget {
 class _EditVisitScreenState extends ConsumerState<EditVisitScreen> {
   final _doctor = TextEditingController();
   final _place = TextEditingController();
-  var _at = DateTime.now();
+  DateTime _at = clockNow();
   var _loaded = false;
   var _saving = false;
 
@@ -44,7 +45,7 @@ class _EditVisitScreenState extends ConsumerState<EditVisitScreen> {
     final existing = visits.value!
         .where((a) => a.id == widget.visitId)
         .firstOrNull;
-    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    final tomorrow = clockNow().add(const Duration(days: 1));
     _at =
         existing?.at ??
         DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 11);
@@ -53,7 +54,7 @@ class _EditVisitScreenState extends ConsumerState<EditVisitScreen> {
   }
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
+    final now = clockNow();
     final d = await showDatePicker(
       context: context,
       initialDate: _at,

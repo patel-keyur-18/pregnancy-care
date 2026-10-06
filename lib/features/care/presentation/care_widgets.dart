@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/vitals_repository.dart';
@@ -145,7 +146,7 @@ Future<void> showCareItemSheet(
     }
 
     Future<void> book() async {
-      final now = DateTime.now();
+      final now = clockNow();
       final initial = item.scheduledAt ?? now;
       final date = await showDatePicker(
         context: context,

@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
@@ -36,7 +37,7 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
   late final SessionRepository _sessions;
   late final StepSource _steps;
   late final String? _pregnancyId;
-  final _startedAt = DateTime.now();
+  final DateTime _startedAt = clockNow();
   Timer? _poll;
   bool? _access;
   int? _walkSteps;
@@ -65,7 +66,7 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
 
   Future<void> _readSteps() async {
     if (_access != true) return;
-    final now = DateTime.now();
+    final now = clockNow();
     final walk = await _steps.steps(_startedAt, now);
     final today = await _steps.steps(
       DateTime(now.year, now.month, now.day),

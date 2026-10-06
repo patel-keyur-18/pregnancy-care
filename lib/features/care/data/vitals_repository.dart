@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'vitals_repository.g.dart';
@@ -38,7 +39,7 @@ class VitalsRepository {
           kind: kind,
           value1: value1,
           value2: Value(value2),
-          at: at ?? DateTime.now(),
+          at: at ?? clockNow(),
         ),
       );
 }

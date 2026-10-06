@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'care_repository.g.dart';
@@ -46,7 +47,7 @@ class CareRepository {
 
   Future<void> markDone(String id, {required bool done}) => _update(
     id,
-    CareItemsCompanion(doneAt: Value(done ? DateTime.now() : null)),
+    CareItemsCompanion(doneAt: Value(done ? clockNow() : null)),
   );
 
   Future<void> setNotes(String id, String notes) => _update(
@@ -58,7 +59,7 @@ class CareRepository {
 
   Future<void> _update(String id, CareItemsCompanion row) =>
       (_db.update(_db.careItems)..where((t) => t.id.equals(id))).write(
-        row.copyWith(updatedAt: Value(DateTime.now())),
+        row.copyWith(updatedAt: Value(clockNow())),
       );
 }
 

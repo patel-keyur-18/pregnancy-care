@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'settings_repository.g.dart';
@@ -54,7 +55,7 @@ class SettingsRepository {
         onConflict: DoUpdate(
           (_) => SettingsCompanion(
             value: Value(value),
-            updatedAt: Value(DateTime.now()),
+            updatedAt: Value(clockNow()),
             deletedAt: const Value(null),
           ),
           target: [_db.settings.key],
@@ -65,8 +66,8 @@ class SettingsRepository {
   Future<void> remove(String key) =>
       (_db.update(_db.settings)..where((t) => t.key.equals(key))).write(
         SettingsCompanion(
-          deletedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
+          deletedAt: Value(clockNow()),
+          updatedAt: Value(clockNow()),
         ),
       );
 }

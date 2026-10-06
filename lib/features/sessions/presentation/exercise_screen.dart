@@ -9,6 +9,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -29,7 +30,7 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
     with SessionClock {
   late final SessionRepository _sessions;
   late final String? _pregnancyId;
-  final _startedAt = DateTime.now();
+  final DateTime _startedAt = clockNow();
   int _step = 0;
   int? _left;
   bool _done = false;

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_repository.g.dart';
@@ -31,7 +32,7 @@ class ProfileRepository {
       clinicName: v(clinicName),
       clinicPhone: v(clinicPhone),
       clinicAddress: v(clinicAddress),
-      updatedAt: Value(DateTime.now()),
+      updatedAt: Value(clockNow()),
     );
     return _db.transaction(() async {
       // A one-off read: a stream would wait for this transaction to end.
