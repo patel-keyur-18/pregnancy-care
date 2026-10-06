@@ -529,7 +529,7 @@ These rules apply to every milestone below, on top of its own "done when":
 | **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
 | **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan | v8 |
 | **M9** | Records vault, visit summary PDF, EPUB books | v9 |
-| **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (app lock) | No change (settings only) |
+| **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
 | **M11** | Limits for other apps (Android) and the Phase 2 release | v10 |
 
 #### M7 Wellbeing ✅
@@ -629,7 +629,7 @@ These rules apply to every milestone below, on top of its own "done when":
 
 **Owner's answers** (Plan decisions 46–50): `home_widget` and `local_auth` approved; "Hide details" off by default while app lock is off; lock after 1, 5 or 15 minutes away (default 1); the widget shows whichever notification fires next, nudges included; split into M10a (widgets) and M10b (app lock). The owner deferred M8 and M9 and took M10 first.
 
-**Status:** **M10a ✅ 2026-10-06 (PR #21)**: the snapshot (`WidgetSync`, ADR 047), the iPhone WidgetKit extension (small and medium) and the Android app widget, "Hide details on widget" in Me, taps opening Today (ADR 048). Android redraws at each reminder and midnight through `home_widget`'s scheduled updates, so no periodic refresh is needed. **M10b ✅ 2026-10-06**, stacked on M10a: app lock in Me (only with a phone screen lock; after 1, 5 or 15 minutes away), the lock screen above every route, the app-switcher cover, widget details hidden by default while it is on (ADR 049).
+**Status:** **M10a ✅ 2026-10-06 (PR #21)**: the snapshot (`WidgetSync`, ADR 047), the iPhone WidgetKit extension (small and medium) and the Android app widget, "Hide details on widget" in Me, taps opening Today (ADR 048). Android redraws at each reminder and midnight through `home_widget`'s scheduled updates, so no periodic refresh is needed. **M10b ✅ 2026-10-06 (PR #22)**, stacked on M10a: app lock in Me (only with a phone screen lock; after 1, 5 or 15 minutes away), the lock screen above every route, the app-switcher cover, widget details hidden by default while it is on (ADR 049).
 
 **Done when**
 - The widget updates within a minute of logging, on both phones (on-device check).
