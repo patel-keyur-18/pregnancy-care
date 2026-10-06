@@ -6,10 +6,10 @@ import 'package:integration_test/integration_test.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:path/path.dart' as p;
 
-/// On an iPhone signed with a free Apple ID, the build's expiry is read
-/// from its provisioning profile: within the next 7 days. The simulator has
-/// no profile, so it reads null. Run: flutter test
-/// integration_test/build_expiry_test.dart -d <iphone>
+// On an iPhone signed with a free Apple ID, the build's expiry is read
+// from its provisioning profile: within the next 7 days. The simulator has
+// no profile, so it reads null. Run:
+//   flutter test integration_test/build_expiry_test.dart -d <iphone>
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
