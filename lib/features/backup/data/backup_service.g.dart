@@ -46,7 +46,7 @@ final class BackupServiceProvider
   }
 }
 
-String _$backupServiceHash() => r'0796cf1ccc4b5eb42b0763d789510a6a5f58091d';
+String _$backupServiceHash() => r'a43eb4efbaf1ef33d62f31582c10bfaeb1cd874c';
 
 /// How big a backup will be, with and without the library.
 
@@ -92,7 +92,7 @@ final class BackupSizesProvider
   }
 }
 
-String _$backupSizesHash() => r'155596f3aae1046a1a3bfe11a502174d9fdb901c';
+String _$backupSizesHash() => r'734844e6cff4e30debcaecccbd8d85d5a4fcb872';
 
 @ProviderFor(shareFile)
 final shareFileProvider = ShareFileProvider._();

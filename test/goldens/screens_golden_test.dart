@@ -86,6 +86,17 @@ void main() {
             matchesGoldenFile('$_dir/${tab.toLowerCase()}_$name.png'),
           );
         }
+        await _tab(tester, 'Today');
+        final rest = find.text('Screen-free from 9:30 pm');
+        await tester.scrollUntilVisible(rest, 200);
+        await tester.ensureVisible(rest);
+        await tester.pumpAndSettle();
+        await tester.tap(rest);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/screen_rest_$name.png'),
+        );
       });
     }
   }

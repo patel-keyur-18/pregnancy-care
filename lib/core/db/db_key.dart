@@ -25,3 +25,7 @@ Future<String> readOrCreateDbKey(FlutterSecureStorage storage) async {
   await storage.write(key: _dbKeyName, value: key);
   return key;
 }
+
+/// Delete all data: the next open creates a new key.
+Future<void> deleteDbKey(FlutterSecureStorage storage) =>
+    storage.delete(key: _dbKeyName);

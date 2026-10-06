@@ -48,6 +48,7 @@ class AppDatabase extends _$AppDatabase {
         p.join((await getApplicationSupportDirectory()).path, 'db'),
       );
       await recoverInterruptedRestore(dir);
+      await removeDeletedData(dir);
       await dir.create(recursive: true);
       await _excludeFromBackup(dir);
       final key = await readOrCreateDbKey(secureStorage);
@@ -129,6 +130,16 @@ Future<void> recoverInterruptedRestore(Directory dbDir) async {
   await rollback.rename(dbDir.path);
 }
 
+/// Where "Delete all data" moves the database until the new one is open
+/// (ARCHITECTURE §13).
+Directory deletedDirFor(Directory dbDir) => Directory('${dbDir.path}-deleted');
+
+/// Finishes a "Delete all data" the app stopped in the middle of.
+Future<void> removeDeletedData(Directory dbDir) async {
+  final deleted = deletedDirFor(dbDir);
+  if (deleted.existsSync()) await deleted.delete(recursive: true);
+}
+
 /// Keeps the database out of iCloud / device backups on iOS. Android does the
 /// same through `res/xml` backup rules. The `.navmaas` backup file (M5) is
 /// the one way data moves between phones.
@@ -148,4 +159,14 @@ AppDatabase appDatabase(Ref ref) {
   final db = AppDatabase.open();
   ref.onDispose(db.close);
   return db;
+}
+
+/// Closes the app's database and opens the one now on disk (after a restore
+/// or "Delete all data"). Opening runs the migrations; a database that
+/// can't open throws.
+Future<void> reopenAppDatabase(Ref ref) async {
+  final old = ref.read(appDatabaseProvider);
+  ref.invalidate(appDatabaseProvider);
+  await old.close();
+  await ref.read(appDatabaseProvider).customSelect('SELECT 1').get();
 }

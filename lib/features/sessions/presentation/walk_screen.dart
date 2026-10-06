@@ -181,12 +181,15 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      l10n.walkTitle,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge!.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.walkTitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                   ),

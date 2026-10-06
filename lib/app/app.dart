@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/app/reminders.dart';
@@ -9,6 +11,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/screen_rest/data/screen_use.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Opens the database and waits for the first pregnancy and theme values
@@ -36,8 +39,14 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
   @override
   void initState() {
     super.initState();
-    // A new day may have started while the app was in the background.
-    _lifecycle = AppLifecycleListener(onResume: _onResume);
+    // Time on screen counts towards "In Navmaas today" (Screen Rest).
+    final use = ref.read(screenUseProvider.notifier);
+    _lifecycle = AppLifecycleListener(
+      // A new day may have started while the app was in the background.
+      onResume: _onResume,
+      onShow: use.shown,
+      onHide: () => unawaited(use.hidden()),
+    );
   }
 
   Future<void> _onResume() async {

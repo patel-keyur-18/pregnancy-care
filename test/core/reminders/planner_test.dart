@@ -123,4 +123,82 @@ void main() {
     expect(planned, hasLength(20));
     expect(planned.first.$1, t(5, 8));
   });
+
+  group('Screen Rest', () {
+    test('a meal window (1:00–1:45 pm) holds reminders until it ends', () {
+      expect(plan([c('calcium', t(5, 13, 10))]), [
+        (t(5, 13, 45), 'calcium', false),
+      ]);
+    });
+    test('its own notice is not held; other nudges in it are dropped', () {
+      expect(
+        plan([
+          c('${mealKeyPrefix}x', t(5, 13), kind: ReminderKind.nudge),
+          c('walk', t(5, 13, 20), kind: ReminderKind.nudge),
+        ]),
+        [(t(5, 13), '${mealKeyPrefix}x', false)],
+      );
+    });
+    test('meal times off: nothing is held', () {
+      expect(
+        plan([
+          c('calcium', t(5, 13, 10)),
+        ], settings: const ReminderSettings(on: true, mealOn: false)),
+        [(t(5, 13, 10), 'calcium', false)],
+      );
+    });
+    test('bedtime rest off: no quiet hours', () {
+      expect(
+        plan([
+          c('late', t(5, 22)),
+        ], settings: const ReminderSettings(on: true, quietOn: false)),
+        [(t(5, 22), 'late', false)],
+      );
+    });
+    test('a meal window ending in quiet hours waits for the morning', () {
+      expect(
+        plan(
+          [c('late', t(5, 21, 40))],
+          settings: const ReminderSettings(on: true, mealDinner: 21 * 60 + 30),
+        ),
+        [(t(6, 7), 'late', false)],
+      );
+    });
+  });
+
+  group('the digest and nudges', () {
+    ReminderCandidate nudge(String key, DateTime at) =>
+        c(key, at, kind: ReminderKind.nudge);
+    test('only nudges over the limit: no digest, the extra nudge drops', () {
+      expect(
+        plan([
+          c('s1', t(6, 9)),
+          c('s2', t(6, 11)),
+          c('s3', t(6, 15)),
+          nudge('n1', t(6, 17)),
+          nudge('n2', t(6, 19)),
+        ]),
+        [
+          (t(6, 9), 's1', false),
+          (t(6, 11), 's2', false),
+          (t(6, 15), 's3', false),
+          (t(6, 17), 'n1', false),
+        ],
+      );
+    });
+    test('nudges never wait for the morning digest', () {
+      expect(
+        plan([
+          for (var h = 9; h < 19; h += 2) c('s$h', t(6, h)),
+          nudge('wind', t(6, 21)),
+        ]),
+        [
+          (t(6, 7), 's15,s17', true),
+          (t(6, 9), 's9', false),
+          (t(6, 11), 's11', false),
+          (t(6, 13, 45), 's13', false),
+        ],
+      );
+    });
+  });
 }

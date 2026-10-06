@@ -67,9 +67,16 @@ jobs:
           path: test/goldens/linux/
           retention-days: 7
 
-      # The phone build: Arm only (~64 MB). Plan decision 25.
+      # The phone build: Arm only (~66 MB). Plan decision 25.
       - name: Build release APK
         run: flutter build apk --release --target-platform android-arm,android-arm64
+
+      # The owner's limit for the phone APK (Plan decision 14).
+      - name: Check the phone APK is under 100 MB
+        run: |
+          size=$(stat -c%s build/app/outputs/flutter-apk/app-release.apk)
+          echo "Phone APK: $size bytes"
+          test "$size" -lt 100000000
 
       - uses: actions/upload-artifact@v7
         with:

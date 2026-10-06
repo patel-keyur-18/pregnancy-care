@@ -21,6 +21,15 @@ abstract final class ReminderAction {
   static const snooze = 'snooze';
 }
 
+/// Screens a tapped reminder opens (ARCHITECTURE §7).
+abstract final class ReminderOpen {
+  /// The morning digest: Today.
+  static const today = 'today';
+
+  /// Wind-down: her last audio, screen off (Sessions if she has none).
+  static const windDown = 'wind-down';
+}
+
 /// What a scheduled reminder carries, so an action can act on it later.
 class ReminderPayload {
   const new({
@@ -29,6 +38,7 @@ class ReminderPayload {
     required this.body,
     this.actions = false,
     this.snoozed = false,
+    this.open,
   });
 
   factory fromJson(String json) {
@@ -39,6 +49,7 @@ class ReminderPayload {
       body: m['body'] as String,
       actions: m['actions'] as bool? ?? false,
       snoozed: m['snoozed'] as bool? ?? false,
+      open: m['open'] as String?,
     );
   }
 
@@ -48,12 +59,16 @@ class ReminderPayload {
   final bool actions;
   final bool snoozed;
 
+  /// A [ReminderOpen] screen for a tap, or null for wherever she was.
+  final String? open;
+
   String toJson() => jsonEncode({
     'keys': keys,
     'title': title,
     'body': body,
     'actions': actions,
     'snoozed': snoozed,
+    if (open != null) 'open': open,
   });
 }
 
@@ -79,6 +94,12 @@ abstract interface class ReminderScheduler {
 
   /// Re-reads the device time zone (it may change while travelling).
   Future<void> refreshTimeZone();
+
+  /// The tap that launched the app, if a reminder did.
+  Future<NotificationResponse?> launchResponse();
+
+  /// Cancels every reminder, snoozed ones too (Delete all data).
+  Future<void> cancelAll();
 }
 
 class LocalNotificationsScheduler implements ReminderScheduler {
@@ -136,6 +157,17 @@ class LocalNotificationsScheduler implements ReminderScheduler {
     }
   }
 
+  @override
+  Future<void> cancelAll() => _plugin.cancelAll();
+
+  @override
+  Future<NotificationResponse?> launchResponse() async {
+    final details = await _plugin.getNotificationAppLaunchDetails();
+    return details?.didNotificationLaunchApp ?? false
+        ? details!.notificationResponse
+        : null;
+  }
+
   AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
       .resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin
@@ -168,7 +200,9 @@ class LocalNotificationsScheduler implements ReminderScheduler {
     List<PlannedReminder> planned,
     AppLocalizations l10n,
   ) async {
-    final want = {for (final p in planned) p.id: (p, _payloadFor(p, l10n))};
+    final want = {
+      for (final p in planned) p.id: (p, reminderPayloadFor(p, l10n)),
+    };
     final pending = await _plugin.pendingNotificationRequests();
     final have = <int>{};
     for (final r in pending) {
@@ -199,37 +233,13 @@ class LocalNotificationsScheduler implements ReminderScheduler {
       body: payload.body,
       actions: payload.actions,
       snoozed: true,
+      open: payload.open,
     );
     return _schedule(
       stableId('snooze@${at.toIso8601String()}#${payload.keys.join('|')}'),
       at,
       snoozed,
       l10n,
-    );
-  }
-
-  ReminderPayload _payloadFor(PlannedReminder p, AppLocalizations l10n) {
-    final items = p.items;
-    final allDoses = items.every((i) => i.key.startsWith('dose:'));
-    final String title;
-    final String body;
-    if (p.isDigest) {
-      title = l10n.reminderDigest;
-      body = items.map((i) => i.title).join(' · ');
-    } else if (items.length == 1) {
-      title = items.single.title;
-      body = items.single.body;
-    } else {
-      title = items.every((i) => i.kind == ReminderKind.supplement)
-          ? l10n.reminderSupplements
-          : l10n.reminderGeneric;
-      body = items.map((i) => i.title).join(' · ');
-    }
-    return ReminderPayload(
-      keys: p.keys,
-      title: title,
-      body: body,
-      actions: allDoses && !p.isDigest,
     );
   }
 
@@ -284,3 +294,37 @@ class LocalNotificationsScheduler implements ReminderScheduler {
 
 @Riverpod(keepAlive: true)
 ReminderScheduler reminderScheduler(Ref ref) => LocalNotificationsScheduler();
+
+/// The title, body and tap target of [p] as the notification shows it.
+ReminderPayload reminderPayloadFor(PlannedReminder p, AppLocalizations l10n) {
+  final items = p.items;
+  final allDoses = items.every((i) => i.key.startsWith('dose:'));
+  final String title;
+  final String body;
+  if (p.isDigest) {
+    title = l10n.reminderDigest;
+    final shown = items.take(3).map((i) => i.title).join(' · ');
+    body = items.length > 3
+        ? l10n.reminderDigestMore(shown, items.length - 3)
+        : shown;
+  } else if (items.length == 1) {
+    title = items.single.title;
+    body = items.single.body;
+  } else {
+    title = items.every((i) => i.kind == ReminderKind.supplement)
+        ? l10n.reminderSupplements
+        : l10n.reminderGeneric;
+    body = items.map((i) => i.title).join(' · ');
+  }
+  return ReminderPayload(
+    keys: p.keys,
+    title: title,
+    body: body,
+    actions: allDoses && !p.isDigest,
+    open: p.isDigest
+        ? ReminderOpen.today
+        : items.length == 1 && items.single.key.startsWith(windDownKeyPrefix)
+        ? ReminderOpen.windDown
+        : null,
+  );
+}

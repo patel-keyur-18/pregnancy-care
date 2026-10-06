@@ -42,6 +42,24 @@ class LibraryRepository {
             ]))
           .watch();
 
+  /// The audio she played last (or the newest, if none has played yet).
+  Future<LibraryItem?> lastAudio() =>
+      (_db.select(_db.libraryItems)
+            ..where(
+              (t) =>
+                  t.deletedAt.isNull() & t.kind.equalsValue(LibraryKind.audio),
+            )
+            ..orderBy([
+              (t) => OrderingTerm(
+                expression: t.lastOpenedAt,
+                mode: OrderingMode.desc,
+                nulls: NullsOrder.last,
+              ),
+              (t) => OrderingTerm.desc(t.createdAt),
+            ])
+            ..limit(1))
+          .getSingleOrNull();
+
   Future<LibraryItem?> get(String id) => (_db.select(
     _db.libraryItems,
   )..where((t) => t.id.equals(id))).getSingleOrNull();
