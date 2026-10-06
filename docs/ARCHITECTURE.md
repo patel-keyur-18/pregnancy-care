@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v8 — updated 2026-10-05 (M4 complete: M4a library, reader, background audio, letters, schema v5; M4b walk with Health steps, exercise routines, breathing) |
+| **Status** | v9 — updated 2026-10-06 (M4 complete; M5a: schema v6, kick counter, contraction timer, pause or end tracking, iPhone build expiry; the app's one wall clock, `clockNow`) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -54,7 +54,7 @@ flowchart TB
     Health["HealthKit / Health Connect"]
     Audio["Background audio"]
     Share["Files · share sheet"]
-    Build["Build-expiry reader (iOS)"]
+    Build["Build-expiry reader (iOS, Dart)"]
     SR["Screen Rest channel (P2, Android)"]
   end
   Keys["Secure storage<br/>(Keychain / Keystore)"] --> DB
@@ -84,13 +84,13 @@ flowchart TB
 | Health | `health` | M4b. Reads steps from HealthKit and Health Connect; never writes (ADR 030) |
 | Audio | `just_audio` + `audio_service` | Background playback, lock-screen controls, sleep timer (M4a). `audio_service` brings a download cache (`flutter_cache_manager` → `http`, `sqflite`) that Navmaas never calls (ADR 026) |
 | Reading | `pdfrx` for PDF; built-in renderer for text/Markdown | M4a. PDFium is fetched at build time only. EPUB later (Plan decision 24) |
-| Import / export | `file_picker` (open + save), `image_picker`, `share_plus` | Books and audio (`file_picker`, M4a), backup files; `image_picker` (M3b) takes or chooses prescription photos through the system camera and photo picker, so no camera permission is declared |
-| Backup | `cryptography` (Argon2id, AES-256-GCM), `archive` (ZIP streaming) | See §11. `cryptography` also encrypts attachments (M3b, §13) |
+| Import / export | `file_picker` (open), `image_picker`, `share_plus` | Books and audio (`file_picker`, M4a); backup files are opened with `file_picker` and saved through the share sheet (`share_plus`, M5b), because `file_picker`'s save dialog needs the whole file in memory; `image_picker` (M3b) takes or chooses prescription photos through the system camera and photo picker, so no camera permission is declared |
+| Backup | `cryptography` (Argon2id, ChaCha20-Poly1305) | See §11. The body is a simple stream of files, so `archive` isn't needed (Plan decision 33). `cryptography` also encrypts attachments with AES-256-GCM (M3b, §13) |
 | Device | `url_launcher` | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps on iPhone and the maps app on Android (ADR 024) |
 | Security | `local_auth` (optional app lock) | |
 | Utilities | `intl`, `uuid` (v7), `collection` | |
 | Lints & tests | `very_good_analysis`, `flutter_test`, `mocktail` (when a fake needs it), `integration_test` | Golden tests for light/dark |
-| Native | Swift platform channels: `navmaas/files` (M1, keeps the database out of iOS backups) and `navmaas/build_info` (M5); `home_widget` + Kotlin Screen Rest channel (P2) | |
+| Native | Swift platform channel `navmaas/files` (M1, keeps the database out of iOS backups); `home_widget` + Kotlin Screen Rest channel (P2) | The build expiry (M5a) is read in Dart from the app bundle, so it needs no channel (ADR 033) |
 
 Versions are pinned in `pubspec.lock`. M1 started on Flutter 3.47.3 / Dart 3.13.3 with the latest stable packages; upgrades are deliberate.
 
@@ -107,27 +107,27 @@ pregnancy-care/
 │  │  ├─ theme/            # AppTheme (tokens → ThemeData light/dark), NavmaasColors, brand mark, prototype icons
 │  │  ├─ db/               # drift database, tables, key handling, attachment store, shared repositories
 │  │  ├─ pregnancy/        # pregnancy engine (pure Dart)
-│  │  ├─ reminders/        # planner (pure), scheduler adapter, calm-notification settings
+│  │  ├─ reminders/        # planner (pure), scheduler adapter, calm-notification settings, data reminders (build expiry)
 │  │  ├─ content/          # content-pack loaders (weeks, India care template, daily activities)
-│  │  ├─ widgets/          # shared widgets: pill segmented control, step button, icon motion
-│  │  ├─ platform/         # audio playback (M4a), steps (M4b); later build info, screen-rest channel
-│  │  └─ utils/            # todayProvider / nowProvider (clock), date-only maths and formatting
+│  │  ├─ widgets/          # shared widgets: pill segmented control, step button, icon motion, amber notice
+│  │  ├─ platform/         # audio playback (M4a), steps (M4b), iPhone build expiry (M5a); later screen-rest channel
+│  │  └─ utils/            # clockNow, todayProvider / nowProvider (clock), date-only maths and formatting
 │  ├─ features/
 │  │  ├─ onboarding/
 │  │  ├─ today/            # today screen, today's plan card
 │  │  ├─ journey/          # journey screen; data/ checklist repository
 │  │  ├─ sessions/         # data/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise, breathing (M4b)
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
-│  │  ├─ third_trimester/  # kick counter, contraction timer
+│  │  ├─ third_trimester/  # data/ domain/ presentation/: kick counter, contraction timer, her patterns (M5a)
 │  │  ├─ backup/           # backup format, crypto, create & restore flows
 │  │  ├─ screen_rest/
-│  │  └─ settings/         # me, edit details, your doctor; later build expiry, pause/end tracking
+│  │  └─ settings/         # me (with this iPhone build), edit details, your doctor, pause or end tracking and the quiet "tracking stopped" page
 │  └─ l10n/app_en.arb      # every string; gen/ is generated by `flutter pub get`
 ├─ assets/
 │  ├─ content/             # weeks.json (M2), care_template_in.json (M3b), activities.json (M4a), routines.json (M4b)
 │  └─ fonts/               # Nunito, Literata (OFL)
 ├─ test/                   # unit, widget, accessibility; drift/ migrations; goldens/
-├─ integration_test/      # on-device checks (reminders scheduled by the OS)
+├─ integration_test/      # on-device checks (reminders scheduled by the OS, the iPhone build expiry)
 ├─ drift_schemas/          # schema snapshots per schemaVersion
 ├─ android/  ios/
 ├─ design/                 # navmaas-tokens.css (prototype tokens)
@@ -142,8 +142,9 @@ pregnancy-care/
 
 - **Repositories** expose `Stream`s from Drift queries (`watch…`) and `Future` commands. Screens never touch the database directly.
 - **Controllers** (`Notifier` / `AsyncNotifier`) combine repositories with domain logic for each screen. For example, `todayPlanProvider` merges supplement schedules, the session plan and the next appointment.
-- **`todayProvider` is the clock** (`core/utils/clock.dart`). It gives today's calendar date, so date-dependent logic (gestational age, reminders, build expiry) can be tested with a fixed date. `nowProvider` gives the time for time-of-day wording (the greeting). The app refreshes both when it returns to the foreground.
-- **Startup:** `main()` opens the database and waits for the first pregnancy and theme values and the content pack before the first frame. It *listens* to those providers: Riverpod 3 pauses streams nobody listens to, and a plain `read` would wait forever.
+- **One wall clock** (`core/utils/clock.dart`). `clockNow()` is the only place the app reads the time: row stamps, session starts, "today". Widget tests pin it to 9:00 on their fixed day (`pumpApp`), and fake time moves it on, so what the app writes falls on the day the screens show (ADR 031).
+- **`todayProvider`** gives today's calendar date, so date-dependent logic (gestational age, reminders, build expiry) can be tested with a fixed date. `nowProvider` gives the time for time-of-day wording (the greeting). Both read `clockNow`, and the app refreshes them when it returns to the foreground.
+- **Startup:** `main()` opens the database and waits for the first pregnancy values (active and latest) and theme values and the content pack before the first frame. It *listens* to those providers: Riverpod 3 pauses streams nobody listens to, and a plain `read` would wait forever.
 - **Side effects** (scheduling notifications, Health reads, audio, file export) go through adapter interfaces, overridden with fakes in tests.
 
 ## 6. Pregnancy engine
@@ -166,7 +167,7 @@ This is pure date-only maths on calendar dates in the device's time zone, with n
   - Gestational age below 0, or above 44 weeks (more than 308 days, so from 44w1d), prompts the user to review the dates.
   - Past the due date, the app shows "due date + N days".
   - A twins flag changes copy only.
-  - Paused or ended pregnancies freeze the engine output.
+  - A paused, ended or delivered pregnancy isn't shown at all: the router replaces the tabs with one quiet page (Plan decision 31).
 - **Storage:** dates are UTC-midnight `DateTime`s in code and `yyyy-MM-dd` text in the database.
 - **Tests:** table-driven unit tests for every method, cycle lengths 21–40, leap years, month and year ends, trimester boundaries, below 0 / above 44 weeks, and DST. Expected dates are computed independently (Python `datetime`), not with the formulas under test.
 
@@ -190,7 +191,9 @@ flowchart LR
 
 The planner (`core/reminders/planner.dart`) is pure Dart and table-tested; `ReminderSync` (`app/reminders.dart`) feeds it and hands the result to the scheduler adapter.
 
-Sources (M3): untaken supplement doses and refills; visits the evening before (7 pm, mentioning questions waiting) and 2 hours before; booked tests, scans and vaccines the evening before; an unbooked one when its week window opens (10:00).
+Sources (M3): untaken supplement doses and refills; visits the evening before (7 pm, mentioning questions waiting) and 2 hours before; booked tests, scans and vaccines the evening before; an unbooked one when its week window opens (10:00). M5a: the iPhone build expiry, the day before at 10:00.
+
+Pregnancy reminders (supplements, visits, care items) come only from the *active* pregnancy, so pausing or ending tracking stops them at once. Data reminders (build expiry; the weekly backup in M5b) keep running, because they protect her data.
 
 1. **Quiet hours** (default 9:30 pm – 7:00 am, set in Me): reminders inside them move to their end; nudges are dropped. M3a covers quiet hours; Screen Rest windows join in M6.
 2. **Bundling:** reminders within 30 minutes of each other become one notification at the first time ("Supplements: Folic acid · Calcium"). Bundling happens before the limit, so a bundle counts once.
@@ -211,7 +214,7 @@ Sources (M3): untaken supplement doses and refills; visits the evening before (7
 
 ## 8. Data model
 
-All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`; the other tables arrive with their milestones.
+All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`, M5a `kick_session`, `contraction` and `backup_log`; the other tables arrive with their milestones.
 
 ```mermaid
 erDiagram
@@ -295,14 +298,14 @@ Tables not shown in detail:
 | `library_item` | M4a. Kind (`pdf` / `text` / `audio`), title, file name inside `db/library/`, audio length, and where she left off: `position` (PDF page, 0-based, or thousandths of the way through a text) out of `total`, plus `last_opened_at`. Not tied to a pregnancy. Reading progress lives here, so there is no separate `reading_progress` table |
 | `session` | M4a. A reading session is logged when she leaves the reader after at least a minute; listening is one session per item played, growing while it actually plays (from one minute). M4b: a walk (with the steps Health counted during it), a routine (`routine_key`) or breathing, each logged from one minute. A walk keeps counting with the screen off; the others pause in the background |
 | `letter` | M4a. Letters to baby (body text), in the encrypted database |
-| `kick_session` | Kick-counter sessions |
-| `contraction` | Start and end of each contraction |
+| `kick_session` | M5a. Movements counted (`count`) from the first tap (`started_at`) to the last (`ended_at`). Saved with Save, or when she leaves with a count |
+| `contraction` | M5a. Start and end of each timed contraction, saved when it ends (or when she leaves mid-way) |
 | `screen_rest_rule` | Screen Rest windows and settings |
 | `checklist_tick` | M2. Ticked items from the weekly checklists: `pregnancy_id`, `item_key` (the content pack's stable key, e.g. `w24-gtt`), unique together. Unticking soft-deletes the row |
-| `backup_log` | When each backup or restore happened, size, whether it included the library (never the password) |
+| `backup_log` | M5a (used from M5b). `kind` (`backup` / `restore`), `size_bytes`, `includes_library`; the row's `created_at` is when. Never the password |
 | `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). M4b: `step_goal` (default 6,000). Later: backup reminder day |
 
-Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
+Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
 
 ## 9. Content
 
@@ -327,8 +330,8 @@ Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `c
 | "Screen off — keep listening" | Switches to a near-black overlay that wakes on tap, and lets the phone lock normally | No wakelock is held |
 | Calls and maps (M3b) | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps (if installed) on iPhone, or the default maps app on Android, with the clinic address | Android declares `tel` and `geo` intent queries; iOS lists `comgooglemaps` to check Google Maps is installed. The maps app does any network use; Navmaas doesn't |
 | Prescription photos (M3b) | Take or choose a photo; it's encrypted before it touches disk | iOS camera and photo-library usage strings; Android uses the system photo picker and camera, so no permission |
-| Backup files | Save with the system "save file" dialog (Files on iOS, Storage Access Framework on Android) or the share sheet; open with the system file picker | Other apps (e.g. Google Drive) do the uploading; Navmaas itself stays offline |
-| Build expiry (iOS) | Reads the signing expiry date; shows it in Me and reminds before it | §12 |
+| Backup files | Save through the share sheet ("Save to Files" on iPhone; Files, Drive or another app on Android); open with the system file picker | Other apps (e.g. Google Drive) do the uploading; Navmaas itself stays offline |
+| Build expiry (iOS) | Reads the signing expiry date from the app bundle's provisioning profile; shows it in Me and on Today, and reminds before it | §12 |
 | Screen Rest (MVP) | In-app only: rest windows, foreground-time counter (`AppLifecycleListener`), eye-rest timer while reading | No special permissions |
 | Screen Rest (P2) | Gentle limits on apps she picks — **Android only** | `UsageStatsManager` + WorkManager (Kotlin). Not possible on iOS with a free Apple ID: Family Controls needs a paid membership |
 
@@ -342,8 +345,8 @@ flowchart TB
     C1["Password ×2<br/>(min 8 chars, never stored)"] --> C2["Pause writes<br/>WAL checkpoint"]
     C2 --> C3["Snapshot: DB file + its key,<br/>attachments + their key,<br/>library (optional)"]
     C3 --> C4["manifest.json<br/>sha256 per file, counts, schemaVersion"]
-    C4 --> C5["ZIP stream"]
-    C5 --> C6["Argon2id(password, salt)<br/>AES-256-GCM in 1 MiB chunks"]
+    C4 --> C5["File stream<br/>(length-prefixed)"]
+    C5 --> C6["Argon2id(password, salt)<br/>ChaCha20-Poly1305 in 1 MiB chunks"]
     C6 --> C7[".navmaas file<br/>Save to Files or share"]
   end
   subgraph Restore["Restore"]
@@ -362,7 +365,7 @@ flowchart TB
 |---|---|---|
 | Magic | `NAVMAAS` + format byte, 8 bytes | No |
 | Header | JSON with format version, KDF parameters (`argon2id`, memory, iterations, parallelism, salt), cipher, chunk size, created date, app version, schema version, whether the library is included | No, but authenticated: its hash is part of every chunk's associated data |
-| Body | ZIP stream split into 1 MiB chunks. Each chunk = 12-byte nonce + ciphertext + 16-byte tag. Associated data = header hash + chunk index + "last chunk" flag, so chunks can't be reordered, dropped or truncated unnoticed | Yes |
+| Body | The files one after another (each: name length, name, size, bytes; the manifest first), split into 1 MiB chunks. Each chunk = 12-byte nonce + ChaCha20-Poly1305 ciphertext + 16-byte tag. Associated data = header hash + chunk index + "last chunk" flag, so chunks can't be reordered, dropped or truncated unnoticed | Yes |
 
 ### Rules
 
@@ -405,13 +408,14 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 - **Behaviour:** a free-team build stops opening 7 days after it was signed. Running it again from Xcode (same Apple ID, same bundle ID) installs over the existing app and **keeps all data and Keychain items**.
 - **Detecting it:**
-  - A small Swift method on the `navmaas/build_info` channel reads `embedded.mobileprovision` from the app bundle.
-  - It extracts the XML plist inside it and returns `ExpirationDate`.
-  - On Android, or when the file is absent, it returns `null`.
+  - Dart reads `embedded.mobileprovision` next to the app's executable (`Platform.resolvedExecutable`, inside `Runner.app`; ADR 033).
+  - The profile is a signed envelope around a plain XML plist, so `parseProvisionExpiry` finds `ExpirationDate` as text.
+  - On Android, the simulator, or when the file is absent, it's `null` and nothing is shown.
+  - `integration_test/build_expiry_test.dart` checks it on the phone: within the next 7 days on an iPhone, `null` on the simulator.
 - **Surfacing it:**
-  - Me shows "This iPhone build expires Sat 10 Oct · in 6 days".
-  - Today shows a quiet banner when 1 day is left.
-  - The reminder planner schedules a notification the day before, combined with the backup reminder.
+  - Me shows "This iPhone build · Expires Sat 10 Oct · in 6 days" (an amber card).
+  - Today shows a quiet amber banner when 1 day is left.
+  - The reminder planner schedules a notification the day before at 10:00 ("back up, then run it from Xcode again"). It keeps running while tracking is paused or ended.
   - If the build lapses, the app won't open (and reminders may stop) until it's run from Xcode again. Data stays on the phone.
 - **Data-loss traps:**
   - **Deleting the app** deletes its data.
@@ -467,12 +471,13 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | **M3b Care: tests, visits, vitals** ✅ 2026-10-05 | India care template (Claude drafts, owner approves), care items under "Coming up", visits with questions, bring-along, notes, encrypted prescription photo, next visit, Call clinic and Directions (Apple / Google Maps), weight and BP logs, next-visit card on Today | Visit and care-item reminders follow the same calm rules; a prescription photo is encrypted on disk |
 | **M4a Library & reading** ✅ 2026-10-05 | Schema v5, library import (PDF / text / audio), Sessions tab with the Garbhasanskar path (read, listen, original daily activity, talk to baby), reader with 15-min timer and Paper / Night, background audio with lock-screen controls, sleep timer and screen-off, letters to baby, reading on Today's plan, Journey's "reading sessions" tile, "Night reading after 9 pm" in Me | A 15-min reading is logged end to end (widget test) |
 | **M4b Walk & exercise** ✅ 2026-10-05 | Walk with Health steps and a daily step goal, exercise routines (Claude drafts, owner approves) locked behind "doctor cleared me" and filtered for high risk, slow breathing, Me → Exercise switches, Move & breathe on Sessions, walk on Today's plan, Journey's "walks logged" tile | A 20-min walk is logged end to end (widget test) |
-| **M5 Third trimester & backup** | Kick counter, contraction timer, pause/end tracking, backup & restore (§11), build-expiry reader and reminders (§12) | A backup made on one phone restores on another; a wrong password changes nothing; expiry date shows correctly on the iPhone |
+| **M5a Third trimester & build expiry** ✅ 2026-10-06 | Schema v6, kick counter and contraction timer (Care tiles), pause / baby has arrived / end tracking with one quiet page, iPhone build expiry in Me, on Today and as a reminder | Pausing stops baby content and pregnancy reminders (widget test); the expiry date shows correctly on the iPhone |
+| **M5b Backup & restore** | Backup & restore (§11), restore from onboarding, weekly backup reminder | A backup made on one phone restores on another; a wrong password changes nothing |
 | **M6 Screen Rest & release** | Rest rules, in-app usage counter, digest polish, accessibility pass, release builds | Signed APK installed; iPhone renewed through one 7-day cycle without data loss |
 
 ## 16. Testing and CI
 
-- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); reminder planner (window, quiet hours, bundling, daily limit and digest, stable ids, cap); supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item); repositories on in-memory Drift; build-expiry parser on sample profiles.
+- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); reminder planner (window, quiet hours, bundling, daily limit and digest, stable ids, cap); supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item); repositories on in-memory Drift; build-expiry parser on sample profiles; kick and contraction patterns (most active window, last-hour averages).
 - **Backup tests:**
   - Round-trip with and without the library.
   - Wrong password.
@@ -480,9 +485,9 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
   - Restoring an older schema (migrates) and rejecting a newer one.
   - Interrupted swap (rollback works).
   - A 500 MB library within the memory budget.
-- **Widget and golden tests:** onboarding, Today, Journey, Sessions and Me in light and dark; the 15-min reading and 20-min walk logged end to end; routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
+- **Widget and golden tests:** onboarding, Today, Journey, Sessions and Me in light and dark; the 15-min reading and 20-min walk logged end to end; kick counter and contraction timer logged; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
 - **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent (weeks, care template, activities, routines), routines for every trimester even when high-risk, no lying on the back, review copies in sync.
-- **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); later: onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
+- **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); `integration_test/build_expiry_test.dart` reads the iPhone build's expiry; later: onboarding → Today; take a supplement from a notification action; import a PDF and log a reading session; back up, delete data, restore.
 - **GitHub Actions** (free for public repos), on every pull request, every push to `main` and on demand. Ubuntu, Flutter pinned (3.47.3), Java 17:
   - `dart format --set-exit-if-changed`
   - `flutter analyze`
@@ -504,7 +509,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | 007 | Single reminder planner with budget, quiet hours and a rolling 7-day window | Calm by default; works within the iOS 64-notification limit |
 | 008 | Bundle fonts instead of fetching at runtime | No network calls; works offline |
 | 009 | Tracking aid only; no SOS or emergency features | Owner handles emergencies manually, as the doctor advises |
-| 010 | Password-protected `.navmaas` backup file (Argon2id + chunked AES-256-GCM) instead of cloud sync | Survives phone loss and app deletion without a backend; streams large libraries |
+| 010 | Password-protected `.navmaas` backup file (Argon2id + chunked ChaCha20-Poly1305; AES-256-GCM until Plan decision 33) instead of cloud sync | Survives phone loss and app deletion without a backend; streams large libraries |
 | 011 | Design within free-Apple-ID capabilities; read and surface the 7-day expiry | No paid membership; avoids surprise lock-outs |
 | 012 | Other-app Screen Rest limits are Android-only | Family Controls isn't available to a free Apple ID |
 | 013 | SQLCipher through `package:sqlite3` build hooks (`source: sqlcipher`) | `sqlcipher_flutter_libs` reached end-of-life with `sqlite3` 3.x |
@@ -525,3 +530,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | 028 | Library files in `db/library/`, unencrypted; reading progress on `library_item` | Skipped by OS backups like the database (ADR 014); audio has to stream to the player; one table instead of two |
 | 029 | M4 split into M4a (library, reading, listening, letters) and M4b (walk, exercise) | Two reviewable PRs, like M3 |
 | 030 | Read steps only; never write walks or workouts to Health | Smaller permission request; the walk is logged in Navmaas |
+| 031 | One wall clock, `clockNow`, for every time the app reads or stamps | Widget tests fix "today"; rows stamped with the real clock fell on another day once the real date moved on. Tests pin it; the app uses `DateTime.now` |
+| 032 | Pause, baby has arrived and end tracking set the pregnancy's status; anything but active shows one quiet page instead of the tabs | Owner decision (Plan 30, 31). Every feature already reads only the active pregnancy, so baby content and pregnancy reminders stop at once with no per-screen checks. Never asks why |
+| 033 | Read the build expiry in Dart from the app bundle, not through a Swift channel | The profile sits next to the executable; one small parser, testable on sample profiles; no native code (owner-approved change, Plan 33) |
+| 034 | M5 split into M5a (third trimester, pause/end, build expiry) and M5b (backup and restore) | Two reviewable PRs, like M3 and M4 |
