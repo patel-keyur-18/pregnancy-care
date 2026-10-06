@@ -12262,6 +12262,464 @@ class WaterLogsCompanion extends UpdateCompanion<WaterLog> {
   }
 }
 
+class $AppLimitsTable extends AppLimits
+    with TableInfo<$AppLimitsTable, AppLimit> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AppLimitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packageMeta = const VerificationMeta(
+    'package',
+  );
+  @override
+  late final GeneratedColumn<String> package = GeneratedColumn<String>(
+    'package',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minutesMeta = const VerificationMeta(
+    'minutes',
+  );
+  @override
+  late final GeneratedColumn<int> minutes = GeneratedColumn<int>(
+    'minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    package,
+    label,
+    minutes,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'app_limit';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AppLimit> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('package')) {
+      context.handle(
+        _packageMeta,
+        package.isAcceptableOrUnknown(data['package']!, _packageMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_packageMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('minutes')) {
+      context.handle(
+        _minutesMeta,
+        minutes.isAcceptableOrUnknown(data['minutes']!, _minutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minutesMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {package},
+  ];
+  @override
+  AppLimit map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AppLimit(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      package: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      minutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}minutes'],
+      )!,
+    );
+  }
+
+  @override
+  $AppLimitsTable createAlias(String alias) {
+    return $AppLimitsTable(attachedDatabase, alias);
+  }
+}
+
+class AppLimit extends DataClass implements Insertable<AppLimit> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+
+  /// Android package name, e.g. `com.google.android.youtube`.
+  final String package;
+
+  /// The app's name as the launcher showed it when she chose it.
+  final String label;
+  final int minutes;
+  const AppLimit({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.package,
+    required this.label,
+    required this.minutes,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['package'] = Variable<String>(package);
+    map['label'] = Variable<String>(label);
+    map['minutes'] = Variable<int>(minutes);
+    return map;
+  }
+
+  AppLimitsCompanion toCompanion(bool nullToAbsent) {
+    return AppLimitsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      package: Value(package),
+      label: Value(label),
+      minutes: Value(minutes),
+    );
+  }
+
+  factory AppLimit.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AppLimit(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      package: serializer.fromJson<String>(json['package']),
+      label: serializer.fromJson<String>(json['label']),
+      minutes: serializer.fromJson<int>(json['minutes']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'package': serializer.toJson<String>(package),
+      'label': serializer.toJson<String>(label),
+      'minutes': serializer.toJson<int>(minutes),
+    };
+  }
+
+  AppLimit copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? package,
+    String? label,
+    int? minutes,
+  }) => AppLimit(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    package: package ?? this.package,
+    label: label ?? this.label,
+    minutes: minutes ?? this.minutes,
+  );
+  AppLimit copyWithCompanion(AppLimitsCompanion data) {
+    return AppLimit(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      package: data.package.present ? data.package.value : this.package,
+      label: data.label.present ? data.label.value : this.label,
+      minutes: data.minutes.present ? data.minutes.value : this.minutes,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppLimit(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('package: $package, ')
+          ..write('label: $label, ')
+          ..write('minutes: $minutes')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, createdAt, updatedAt, deletedAt, package, label, minutes);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AppLimit &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.package == this.package &&
+          other.label == this.label &&
+          other.minutes == this.minutes);
+}
+
+class AppLimitsCompanion extends UpdateCompanion<AppLimit> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> package;
+  final Value<String> label;
+  final Value<int> minutes;
+  final Value<int> rowid;
+  const AppLimitsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.package = const Value.absent(),
+    this.label = const Value.absent(),
+    this.minutes = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AppLimitsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String package,
+    required String label,
+    required int minutes,
+    this.rowid = const Value.absent(),
+  }) : package = Value(package),
+       label = Value(label),
+       minutes = Value(minutes);
+  static Insertable<AppLimit> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? package,
+    Expression<String>? label,
+    Expression<int>? minutes,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (package != null) 'package': package,
+      if (label != null) 'label': label,
+      if (minutes != null) 'minutes': minutes,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AppLimitsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? package,
+    Value<String>? label,
+    Value<int>? minutes,
+    Value<int>? rowid,
+  }) {
+    return AppLimitsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      package: package ?? this.package,
+      label: label ?? this.label,
+      minutes: minutes ?? this.minutes,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (package.present) {
+      map['package'] = Variable<String>(package.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (minutes.present) {
+      map['minutes'] = Variable<int>(minutes.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AppLimitsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('package: $package, ')
+          ..write('label: $label, ')
+          ..write('minutes: $minutes, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -12288,6 +12746,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SymptomEntriesTable symptomEntries = $SymptomEntriesTable(this);
   late final $SleepLogsTable sleepLogs = $SleepLogsTable(this);
   late final $WaterLogsTable waterLogs = $WaterLogsTable(this);
+  late final $AppLimitsTable appLimits = $AppLimitsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -12315,6 +12774,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     symptomEntries,
     sleepLogs,
     waterLogs,
+    appLimits,
   ];
   @override
   DriftDatabaseOptions get options =>
@@ -22350,6 +22810,245 @@ typedef $$WaterLogsTableProcessedTableManager =
       WaterLog,
       PrefetchHooks Function({bool pregnancyId})
     >;
+typedef $$AppLimitsTableCreateCompanionBuilder = AppLimitsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String package,
+  required String label,
+  required int minutes,
+  Value<int> rowid,
+});
+typedef $$AppLimitsTableUpdateCompanionBuilder = AppLimitsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> package,
+  Value<String> label,
+  Value<int> minutes,
+  Value<int> rowid,
+});
+
+class $$AppLimitsTableFilterComposer
+    extends Composer<_$AppDatabase, $AppLimitsTable> {
+  $$AppLimitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get package => $composableBuilder(
+    column: $table.package,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AppLimitsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AppLimitsTable> {
+  $$AppLimitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get package => $composableBuilder(
+    column: $table.package,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AppLimitsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AppLimitsTable> {
+  $$AppLimitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get package =>
+      $composableBuilder(column: $table.package, builder: (column) => column);
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<int> get minutes =>
+      $composableBuilder(column: $table.minutes, builder: (column) => column);
+}
+
+class $$AppLimitsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AppLimitsTable,
+          AppLimit,
+          $$AppLimitsTableFilterComposer,
+          $$AppLimitsTableOrderingComposer,
+          $$AppLimitsTableAnnotationComposer,
+          $$AppLimitsTableCreateCompanionBuilder,
+          $$AppLimitsTableUpdateCompanionBuilder,
+          (AppLimit, BaseReferences<_$AppDatabase, $AppLimitsTable, AppLimit>),
+          AppLimit,
+          PrefetchHooks Function()
+        > {
+  $$AppLimitsTableTableManager(_$AppDatabase db, $AppLimitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AppLimitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AppLimitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AppLimitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> package = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AppLimitsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                package: package,
+                label: label,
+                minutes: minutes,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String package,
+                required String label,
+                required int minutes,
+                Value<int> rowid = const Value.absent(),
+              }) => AppLimitsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                package: package,
+                label: label,
+                minutes: minutes,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AppLimitsTable, AppLimit>(table),
+                  BaseReferences<_$AppDatabase, $AppLimitsTable, AppLimit>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AppLimitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AppLimitsTable,
+      AppLimit,
+      $$AppLimitsTableFilterComposer,
+      $$AppLimitsTableOrderingComposer,
+      $$AppLimitsTableAnnotationComposer,
+      $$AppLimitsTableCreateCompanionBuilder,
+      $$AppLimitsTableUpdateCompanionBuilder,
+      (AppLimit, BaseReferences<_$AppDatabase, $AppLimitsTable, AppLimit>),
+      AppLimit,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -22398,4 +23097,6 @@ class $AppDatabaseManager {
       $$SleepLogsTableTableManager(_db, _db.sleepLogs);
   $$WaterLogsTableTableManager get waterLogs =>
       $$WaterLogsTableTableManager(_db, _db.waterLogs);
+  $$AppLimitsTableTableManager get appLimits =>
+      $$AppLimitsTableTableManager(_db, _db.appLimits);
 }

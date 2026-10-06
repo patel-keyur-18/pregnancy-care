@@ -40,6 +40,7 @@ part 'app_database.g.dart';
     SymptomEntries,
     SleepLogs,
     WaterLogs,
+    AppLimits,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -61,7 +62,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -102,6 +103,8 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.sleepLog);
         await m.createTable(schema.waterLog);
       },
+      // v8 (M11a): daily limits on other apps (Android).
+      from7To8: (m, schema) => m.createTable(schema.appLimit),
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );
