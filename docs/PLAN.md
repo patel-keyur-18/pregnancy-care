@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–45; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built) |
+| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–50; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock in progress, M8 and M9 deferred) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -64,6 +64,11 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 43 | Wellbeing keys and labels (M7) | The database stores keys only (mood, symptom, severity, rested); labels live in `app_en.arb` under fixed prefixes, like the supplement quick-pick. The content hard-line test checks those labels and every Wellbeing string for advice, warning and good/bad words |
 | 44 | Sleep, mood and Today card (M7) | Sleep: one entry per night, dated by the wake-up day: bedtime, wake time, nap minutes and how rested (Rested · A bit tired · Very tired); the weekly average counts night plus naps. Today's "How are you today?" card shows while today has no mood or water is under the goal, has + / − water taps and hides for the day when dismissed |
 | 45 | M7 split | **M7a** (schema v7, mood, symptoms, sleep, water, Wellbeing, Today card, water reminders, backup and delete) and **M7b** (meditation), stacked PRs |
+| 46 | M10 packages | **`home_widget`** (the widget snapshot in the App Group / shared preferences, widget reloads and Android update alarms) and **`local_auth`** (app lock). Neither makes network calls |
+| 47 | Widget details (M10) | "Hide details on widget" is **off by default** while app lock is off; with app lock on it is on unless she turns it off. Hidden, the widget shows only the brand mark and the next reminder's time; while tracking is stopped, only the mark |
+| 48 | App lock timeout (M10) | Always locks on a fresh open; after leaving Navmaas for **1, 5 or 15 minutes** (default 1), so a file picker, share sheet or Health dialog never locks her out mid-task |
+| 49 | Widget's next reminder (M10) | **Whatever notification fires next**, nudges and the digest included, as the notification titles it |
+| 50 | M10 split | **M10a** (widgets, hide details) and **M10b** (app lock), stacked PRs |
 
 ### What these decisions change
 
