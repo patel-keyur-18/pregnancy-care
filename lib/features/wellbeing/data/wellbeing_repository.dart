@@ -248,6 +248,12 @@ Stream<int> waterGoal(Ref ref) => ref
     .watch(SettingKeys.waterGoal)
     .map((v) => int.tryParse(v ?? '') ?? defaultWaterGoal);
 
+/// The day (`yyyy-MM-dd`) Today's wellbeing card was closed, if any.
+@riverpod
+Stream<String?> wellbeingCardHidden(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.wellbeingCardHidden);
+
 const defaultWaterGoal = 8;
 const minWaterGoal = 4;
 const maxWaterGoal = 16;

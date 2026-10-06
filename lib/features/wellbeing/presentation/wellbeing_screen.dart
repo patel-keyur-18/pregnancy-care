@@ -119,11 +119,12 @@ class WellbeingScreen extends ConsumerWidget {
                   const SizedBox(height: 18),
                   _SleepWeekCard(week),
                   const SizedBox(height: 18),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.end,
+                    spacing: 12,
                     children: [
-                      Expanded(child: SectionTitle(l10n.yourWeek)),
+                      SectionTitle(l10n.yourWeek),
                       Text(
                         l10n.dateRange(
                           DateFormat('d MMM').format(week.last.day),
@@ -320,7 +321,8 @@ class _DayRow extends StatelessWidget {
         spacing: 14,
         children: [
           SizedBox(
-            width: 64,
+            // Room for "Today" and "Sun 4 Oct", growing with the text.
+            width: MediaQuery.textScalerOf(context).scale(64).clamp(64, 120),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

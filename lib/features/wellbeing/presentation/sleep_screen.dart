@@ -10,7 +10,6 @@ import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
-import 'package:navmaas/core/widgets/step_button.dart';
 import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart'
     show pickMinute;
 import 'package:navmaas/features/third_trimester/presentation/tool_widgets.dart';
@@ -143,18 +142,24 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                   radius: 12,
                 ),
                 Expanded(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.bodyLarge!.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                Text(
-                  formatMinuteOfDay(minute),
-                  style: theme.textTheme.bodyLarge!.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: scheme.primary,
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 12,
+                    children: [
+                      Text(
+                        label,
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        formatMinuteOfDay(minute),
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: scheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -254,64 +259,20 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                           (m) => _woke = m,
                         ),
                         const Divider(height: 1),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                          child: Row(
-                            spacing: 8,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      l10n.sleepNaps,
-                                      style: theme.textTheme.bodyLarge!
-                                          .copyWith(
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                    ),
-                                    Text(
-                                      l10n.sleepNapsHint,
-                                      style: theme.textTheme.bodySmall!
-                                          .copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: scheme.outline,
-                                          ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              StepButton(
-                                symbol: '−',
-                                tooltip: l10n.napLess,
-                                onPressed: _nap == 0
-                                    ? null
-                                    : () => _change(() => _nap -= _napStep),
-                              ),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(minWidth: 64),
-                                child: Text(
-                                  _nap == 0
-                                      ? l10n.napNone
-                                      : l10n.minutesShort(_nap),
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.bodyLarge!.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    fontFeatures: const [
-                                      FontFeature.tabularFigures(),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              StepButton(
-                                symbol: '+',
-                                tooltip: l10n.napMore,
-                                onPressed: _nap >= _maxNap
-                                    ? null
-                                    : () => _change(() => _nap += _napStep),
-                              ),
-                            ],
-                          ),
+                        StepperRow(
+                          title: l10n.sleepNaps,
+                          hint: l10n.sleepNapsHint,
+                          value: _nap == 0
+                              ? l10n.napNone
+                              : l10n.minutesShort(_nap),
+                          lessTooltip: l10n.napLess,
+                          moreTooltip: l10n.napMore,
+                          onLess: _nap == 0
+                              ? null
+                              : () => _change(() => _nap -= _napStep),
+                          onMore: _nap >= _maxNap
+                              ? null
+                              : () => _change(() => _nap += _napStep),
                         ),
                       ],
                     ),

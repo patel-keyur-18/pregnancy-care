@@ -185,4 +185,64 @@ void main() {
     await _tap(tester, find.byTooltip('Remove Itchy skin'));
     expect(find.text('Itchy skin · Strong'), findsNothing);
   });
+
+  group("Today's card", () {
+    Finder card() => find.text('How are you today?');
+
+    testWidgets('a mood tap and water taps are saved', (tester) async {
+      final db = await pumpApp(tester, seed: _seed);
+      await tester.ensureVisible(card());
+      await _tap(tester, find.text('Okay'));
+      expect(
+        tester.getSemantics(find.text('Okay')),
+        isSemantics(isChecked: true),
+      );
+      await _tap(tester, find.byTooltip('Add a glass'));
+      await _tap(tester, find.byTooltip('Add a glass'));
+      await _tap(tester, find.byTooltip('Remove a glass'));
+      expect(find.text('1 of 8 glasses'), findsOneWidget);
+      final rows = await tester.runAsync(
+        () async => (
+          await db.select(db.moodEntries).get(),
+          await db.select(db.waterLogs).get(),
+        ),
+      );
+      expect(rows!.$1.map((m) => m.mood), contains(MoodWord.okay));
+      expect(rows.$2.single.glasses, 1);
+    });
+
+    testWidgets('closing it hides it for the rest of the day', (tester) async {
+      await pumpApp(
+        tester,
+        seed: (db) async {
+          await _seed(db);
+          // Closed yesterday: that doesn't hide it today.
+          await SettingsRepository(db)
+              .put(SettingKeys.wellbeingCardHidden, '2026-10-04');
+        },
+      );
+      expect(card(), findsOneWidget);
+      await _tap(tester, find.byTooltip('Hide for today'));
+      expect(card(), findsNothing);
+    });
+
+    testWidgets('gone once today has a mood and the water goal', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        seed: (db) async {
+          await _seed(db);
+          final id = (await db.select(db.pregnancies).getSingle()).id;
+          final repo = WellbeingRepository(db);
+          await repo.setMood(pregnancyId: id, day: testToday, mood: .calm);
+          await SettingsRepository(db).put(SettingKeys.waterGoal, '4');
+          await repo.addWater(pregnancyId: id, day: testToday, delta: 3);
+        },
+      );
+      expect(card(), findsOneWidget, reason: 'one glass to go');
+      await _tap(tester, find.byTooltip('Add a glass'));
+      expect(card(), findsNothing);
+    });
+  });
 }

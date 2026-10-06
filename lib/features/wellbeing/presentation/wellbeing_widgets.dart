@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/core/widgets/step_button.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// The words for the keys the database stores (Plan decision 43).
@@ -163,6 +164,76 @@ class SectionTitle extends StatelessWidget {
       child: Text(
         text,
         style: small ? style.copyWith(fontSize: 16, height: 22 / 16) : style,
+      ),
+    );
+  }
+}
+
+/// A titled "−  value  +" row (naps, water goal). At large text the stepper
+/// moves under the title and the value wraps, so nothing overflows.
+class StepperRow extends StatelessWidget {
+  const new({
+    required this.title,
+    required this.hint,
+    required this.value,
+    required this.lessTooltip,
+    required this.moreTooltip,
+    required this.onLess,
+    required this.onMore,
+    super.key,
+  });
+
+  final String title;
+  final String hint;
+  final String value;
+  final String lessTooltip;
+  final String moreTooltip;
+  final VoidCallback? onLess;
+  final VoidCallback? onMore;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        runSpacing: 8,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SectionTitle(title, small: true),
+              Text(
+                hint,
+                style: theme.textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.outline,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              StepButton(symbol: '−', tooltip: lessTooltip, onPressed: onLess),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 64, maxWidth: 120),
+                child: Text(
+                  value,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge!.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ),
+              StepButton(symbol: '+', tooltip: moreTooltip, onPressed: onMore),
+            ],
+          ),
+        ],
       ),
     );
   }

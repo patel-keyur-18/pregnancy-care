@@ -96,9 +96,11 @@ class _SymptomsScreenState extends ConsumerState<SymptomsScreen> {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 children: [
-                  Row(
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Expanded(child: SectionTitle(l10n.symptomsWhat)),
+                      SectionTitle(l10n.symptomsWhat),
                       TextButton.icon(
                         onPressed: () => setState(() {
                           _ownOpen = !_ownOpen;

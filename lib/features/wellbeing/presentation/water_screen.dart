@@ -145,52 +145,18 @@ class WaterScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Card(
                     margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                      child: Row(
-                        spacing: 8,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SectionTitle(l10n.waterGoalTitle, small: true),
-                                Text(
-                                  l10n.waterGoalHint,
-                                  style: theme.textTheme.bodySmall!.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: scheme.outline,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          StepButton(
-                            symbol: '−',
-                            tooltip: l10n.goalLower,
-                            onPressed: goal <= minWaterGoal
-                                ? null
-                                : () => setGoal(goal - 1),
-                          ),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 84),
-                            child: Text(
-                              l10n.waterGoalValue(goal),
-                              textAlign: TextAlign.center,
-                              style: theme.textTheme.bodyLarge!.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          StepButton(
-                            symbol: '+',
-                            tooltip: l10n.goalRaise,
-                            onPressed: goal >= maxWaterGoal
-                                ? null
-                                : () => setGoal(goal + 1),
-                          ),
-                        ],
-                      ),
+                    child: StepperRow(
+                      title: l10n.waterGoalTitle,
+                      hint: l10n.waterGoalHint,
+                      value: l10n.waterGoalValue(goal),
+                      lessTooltip: l10n.goalLower,
+                      moreTooltip: l10n.goalRaise,
+                      onLess: goal <= minWaterGoal
+                          ? null
+                          : () => setGoal(goal - 1),
+                      onMore: goal >= maxWaterGoal
+                          ? null
+                          : () => setGoal(goal + 1),
                     ),
                   ),
                   const SizedBox(height: 16),

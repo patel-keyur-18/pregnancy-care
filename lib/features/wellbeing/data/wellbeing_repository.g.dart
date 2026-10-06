@@ -350,3 +350,42 @@ final class WaterGoalProvider
 }
 
 String _$waterGoalHash() => r'7655166fb13d5987b94470ef2012c4a7e4718b74';
+
+/// The day (`yyyy-MM-dd`) Today's wellbeing card was closed, if any.
+
+@ProviderFor(wellbeingCardHidden)
+final wellbeingCardHiddenProvider = WellbeingCardHiddenProvider._();
+
+/// The day (`yyyy-MM-dd`) Today's wellbeing card was closed, if any.
+
+final class WellbeingCardHiddenProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
+    with $FutureModifier<String?>, $StreamProvider<String?> {
+  /// The day (`yyyy-MM-dd`) Today's wellbeing card was closed, if any.
+  WellbeingCardHiddenProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'wellbeingCardHiddenProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$wellbeingCardHiddenHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<String?> create(Ref ref) {
+    return wellbeingCardHidden(ref);
+  }
+}
+
+String _$wellbeingCardHiddenHash() =>
+    r'3c200ee1a7d75d0727df627a1e01757d281b835a';
