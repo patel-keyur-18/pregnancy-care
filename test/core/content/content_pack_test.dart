@@ -236,6 +236,7 @@ void main() {
         'weekWater',
         'goal',
         'noteOptional',
+        'meditation',
       ];
       final text = [
         for (final MapEntry(:key, :value) in arb.entries)
