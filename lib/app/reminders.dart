@@ -5,12 +5,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/reminders/data_reminders.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/backup/data/backup_log.dart';
 import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
@@ -97,7 +99,9 @@ class ReminderSync extends _$ReminderSync {
       ..listen(appointmentsProvider, (_, _) => refresh())
       ..listen(careItemsProvider, (_, _) => refresh())
       ..listen(visitQuestionsProvider, (_, _) => refresh())
-      ..listen(buildExpiryProvider, (_, _) => refresh());
+      ..listen(buildExpiryProvider, (_, _) => refresh())
+      ..listen(backupDayProvider, (_, _) => refresh())
+      ..listen(lastBackupProvider, (_, _) => refresh());
     refresh();
   }
 
@@ -118,6 +122,7 @@ class ReminderSync extends _$ReminderSync {
     ref.invalidate(nowProvider);
     final now = ref.read(nowProvider);
     final questions = ref.read(visitQuestionsProvider).value ?? const [];
+    final expiry = ref.read(buildExpiryProvider).value;
     final planned = planReminders(
       now: now,
       settings: settings,
@@ -143,8 +148,12 @@ class ReminderSync extends _$ReminderSync {
             pregnancyStart: pregnancy.startDate,
             l10n: _l10n,
           ),
-        ...buildExpiryCandidates(
-          expiry: ref.read(buildExpiryProvider).value,
+        ...buildExpiryCandidates(expiry: expiry, l10n: _l10n),
+        ...backupCandidates(
+          now: now,
+          day: ref.read(backupDayProvider).value ?? DateTime.sunday,
+          lastBackup: ref.read(lastBackupProvider).value,
+          expiry: expiry,
           l10n: _l10n,
         ),
       ],

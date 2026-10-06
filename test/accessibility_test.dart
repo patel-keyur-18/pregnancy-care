@@ -18,6 +18,10 @@ const _small = Size(360, 640);
 /// The iPhone build expires tomorrow: Today's banner and Me's card show.
 final _expiry = DateTime(2026, 10, 6, 14);
 
+/// The file picker hands over a backup (for Restore).
+Future<PickedFile?> _pickBackup(List<String> _) async =>
+    (name: 'navmaas-backup.navmaas', bytes: Stream.value([1]));
+
 /// Library files for the seeded screens (a book and an audio file).
 final Directory _library = Directory.systemTemp.createTempSync('navmaas_a11y');
 
@@ -64,6 +68,26 @@ Future<void> _settleIo(WidgetTester tester) async {
     await tester.pump();
   }
   await tester.pumpAndSettle();
+}
+
+/// Types into the [index]th text field, scrolling it into view first
+/// (lists build lazily: scroll to [below], a unique text under the fields).
+Future<void> _type(
+  WidgetTester tester,
+  int index,
+  String text, {
+  String below = 'Include books & audio',
+}) async {
+  await tester.scrollUntilVisible(
+    find.text(below),
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  final field = find.byType(TextField).at(index);
+  await tester.ensureVisible(field);
+  await tester.pumpAndSettle();
+  await tester.enterText(field, text);
+  await tester.pump();
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -296,6 +320,47 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'Pause or end pregnancy tracking');
     },
   ),
+  'backup': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, 'Backup & restore');
+      await _type(t, 0, 'correct horse');
+      await _type(t, 1, 'correct hors');
+    },
+  ),
+  'backup ready': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, 'Backup & restore');
+      await _type(t, 0, 'correct horse');
+      await _type(t, 1, 'correct horse');
+      await _tapText(t, 'Create encrypted backup');
+    },
+  ),
+  'restore': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, 'Backup & restore');
+      await _tapText(t, 'Restore');
+      await _tapText(t, 'Choose backup file');
+      await _type(t, 0, 'wrong horse', below: 'Replace data and restore');
+      await _tapText(t, 'Replace data and restore');
+    },
+  ),
+  'restored': (
+    true,
+    (t) async {
+      await _tab(t, 'Me');
+      await _tapText(t, 'Backup & restore');
+      await _tapText(t, 'Restore');
+      await _tapText(t, 'Choose backup file');
+      await _type(t, 0, 'correct horse', below: 'Replace data and restore');
+      await _tapText(t, 'Replace data and restore');
+    },
+  ),
   'tracking ended': (
     true,
     (t) async {
@@ -318,6 +383,7 @@ void main() {
           seed: seeded ? _seed : null,
           library: _library,
           buildExpiry: _expiry,
+          pickFile: _pickBackup,
           textScale: scale,
           size: _small,
         );
@@ -340,6 +406,7 @@ void main() {
           seed: seeded ? _seed : null,
           library: _library,
           buildExpiry: _expiry,
+          pickFile: _pickBackup,
           platformBrightness: brightness,
         );
         await open(tester);

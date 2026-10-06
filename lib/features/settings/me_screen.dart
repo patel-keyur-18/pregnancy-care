@@ -16,6 +16,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/core/widgets/step_button.dart';
+import 'package:navmaas/features/backup/data/backup_log.dart';
 import 'package:navmaas/features/settings/tracking_stopped_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -246,6 +247,7 @@ class MeScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const _BackupRow(),
                 if (pregnancy != null)
                   TextButton(
                     style: TextButton.styleFrom(
@@ -631,6 +633,93 @@ class BuildExpirySection extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
       ],
+    );
+  }
+}
+
+/// Me → Your data: "Backup & restore · Last backup Sat 3 Oct · password
+/// protected".
+class _BackupRow extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final last = ref.watch(lastBackupProvider).value;
+    return Material(
+      color: scheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Semantics(
+        container: true,
+        button: true,
+        child: InkWell(
+          onTap: () => context.push('/backup'),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 60),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                spacing: 12,
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: NmIcon(
+                        NavmaasIcon.download,
+                        size: 20,
+                        color: scheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.backupTitle,
+                          style: theme.textTheme.bodyLarge!.copyWith(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Text(
+                          l10n.backupRowSub(
+                            last == null
+                                ? l10n.noBackupYet
+                                : l10n.lastBackup(
+                                    DateFormat('EEE d MMM').format(last),
+                                  ),
+                          ),
+                          style: theme.textTheme.bodySmall!.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: scheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  NmIcon(
+                    NavmaasIcon.chevronRight,
+                    size: 20,
+                    strokeWidth: 2,
+                    color: scheme.outline,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -9,7 +9,8 @@ import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Shown instead of the tabs while tracking is paused, ended or the baby has
 /// arrived (Plan: pregnancy loss handling). One quiet page: no baby content,
-/// no week numbers, nothing to stumble on. Her data stays saved.
+/// no week numbers, nothing to stumble on. Her data stays saved, and Backup
+/// & restore is here too.
 class TrackingStoppedScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -47,6 +48,10 @@ class TrackingStoppedScreen extends ConsumerWidget {
         ),
         OutlinedButton(onPressed: resume, child: Text(l10n.resumeTracking)),
       ],
+      TextButton(
+        onPressed: () => context.go('/backup'),
+        child: Text(l10n.backupTitle),
+      ),
     ];
 
     return Scaffold(

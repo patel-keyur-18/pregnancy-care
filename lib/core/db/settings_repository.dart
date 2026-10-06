@@ -21,6 +21,10 @@ abstract final class SettingKeys {
 
   /// Walk: daily step goal (default 6,000).
   static const stepGoal = 'step_goal';
+
+  /// Weekly backup reminder: 1 (Monday) to 7 (Sunday, the default), or 0
+  /// for off.
+  static const backupDay = 'backup_day';
 }
 
 class SettingsRepository {
@@ -95,3 +99,11 @@ Stream<int> stepGoal(Ref ref) => ref
     .map((v) => int.tryParse(v ?? '') ?? defaultStepGoal);
 
 const defaultStepGoal = 6000;
+
+/// The weekly backup reminder's day (`DateTime.monday` … `DateTime.sunday`),
+/// or 0 when off. Sunday by default (Plan decision 32).
+@riverpod
+Stream<int> backupDay(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.backupDay)
+    .map((v) => int.tryParse(v ?? '') ?? DateTime.sunday);

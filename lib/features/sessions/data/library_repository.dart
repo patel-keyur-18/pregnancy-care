@@ -75,6 +75,19 @@ class LibraryRepository {
         );
   }
 
+  /// Writes [bytes] as [item]'s file again (after a restore without the
+  /// library). Her place in it stays.
+  Future<void> replaceFile(LibraryItem item, Stream<List<int>> bytes) async {
+    final dir = await directory();
+    await dir.create(recursive: true);
+    final sink = File(p.join(dir.path, item.fileName)).openWrite();
+    try {
+      await sink.addStream(bytes);
+    } finally {
+      await sink.close();
+    }
+  }
+
   Future<File> file(LibraryItem item) async =>
       File(p.join((await directory()).path, item.fileName));
 

@@ -73,7 +73,7 @@ class TodayPlanCard extends ConsumerWidget {
           title: l10n.planReading,
           subtitle: l10n.minutesTitle(readGoalMinutes, book.title),
           done: readToday,
-          onOpen: () => openLibraryItem(context, book),
+          onOpen: () => openLibraryItem(context, ref, book),
         ),
       // Walking is always open (Plan decision 27).
       _PlanRow(

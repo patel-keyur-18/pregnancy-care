@@ -4,6 +4,7 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
+import 'package:navmaas/features/backup/presentation/backup_screen.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_visit_screen.dart';
@@ -48,6 +49,11 @@ GoRouter router(Ref ref) {
       final pregnancy = latest.value;
       final at = state.matchedLocation;
       // No pregnancy yet: onboarding.
+      // Backup & restore is open in every state (a new phone restores
+      // from onboarding). Onboarding and the quiet page *go* there rather
+      // than push: a refresh re-checks the route underneath, which would
+      // close it as soon as the restored data appears.
+      if (at == '/backup') return null;
       if (pregnancy == null) return at == '/onboarding' ? null : '/onboarding';
       // Paused, ended or delivered: only the quiet page (and onboarding, to
       // start a new pregnancy).
@@ -63,7 +69,7 @@ GoRouter router(Ref ref) {
         builder: (_, _) => const TrackingStoppedScreen(),
       ),
       // Full screen, above the tab bar (prototype Reader, Listen, Walk,
-      // Exercise, Kick counter and Contraction timer).
+      // Exercise, Kick counter, Contraction timer and Backup & restore).
       GoRoute(
         path: '/read',
         builder: (_, state) => ReaderScreen(itemId: state.extra! as String),
@@ -80,6 +86,10 @@ GoRouter router(Ref ref) {
       ),
       GoRoute(path: '/breathe', builder: (_, _) => const BreathingScreen()),
       GoRoute(path: '/kicks', builder: (_, _) => const KickCounterScreen()),
+      GoRoute(
+        path: '/backup',
+        builder: (_, state) => BackupScreen(restore: state.extra == true),
+      ),
       GoRoute(
         path: '/contractions',
         builder: (_, _) => const ContractionScreen(),

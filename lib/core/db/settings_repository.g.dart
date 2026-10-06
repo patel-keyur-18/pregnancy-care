@@ -165,3 +165,44 @@ final class StepGoalProvider
 }
 
 String _$stepGoalHash() => r'301ea04d8b2ba445c22737247c10053feccbd2b6';
+
+/// The weekly backup reminder's day (`DateTime.monday` … `DateTime.sunday`),
+/// or 0 when off. Sunday by default (Plan decision 32).
+
+@ProviderFor(backupDay)
+final backupDayProvider = BackupDayProvider._();
+
+/// The weekly backup reminder's day (`DateTime.monday` … `DateTime.sunday`),
+/// or 0 when off. Sunday by default (Plan decision 32).
+
+final class BackupDayProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  /// The weekly backup reminder's day (`DateTime.monday` … `DateTime.sunday`),
+  /// or 0 when off. Sunday by default (Plan decision 32).
+  BackupDayProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupDayProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupDayHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    return backupDay(ref);
+  }
+}
+
+String _$backupDayHash() => r'124a1d5139936cf7d2bdfc973750c96e30322828';

@@ -201,7 +201,8 @@ void main() {
     expect(find.text('Tracking is paused'), findsOneWidget);
     expect(find.byType(NavmaasTabBar), findsNothing);
     expect(find.textContaining('weeks'), findsNothing);
-    expect(scheduler.scheduled, isEmpty);
+    // Pregnancy reminders stop; the weekly backup reminder keeps going.
+    expect(scheduler.scheduled.map((r) => r.kind), [ReminderKind.backup]);
     final id = await _pregnancyId(tester, db);
     final row = (await tester.runAsync(
       () => db.select(db.pregnancies).getSingle(),

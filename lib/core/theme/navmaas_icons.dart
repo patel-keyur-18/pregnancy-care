@@ -124,7 +124,9 @@ enum NavmaasIcon {
   clock([
     'M12 6a7.5 7.5 0 1 0 0 15a7.5 7.5 0 1 0 0-15z',
     'M12 10v3.5l2.5 2M9.5 2.5h5',
-  ]);
+  ]),
+  download(['M12 4v11M7 10.5l5 5 5-5M5 20h14']),
+  upload(['M12 20V9M7 13.5l5-5 5 5M5 4h14']);
 
   new(this.svg, {this.fill = false});
 
