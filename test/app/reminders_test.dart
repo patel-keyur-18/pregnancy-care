@@ -179,8 +179,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(scheduler.scheduled, isNotEmpty);
-    expect(scheduler.scheduled.first.items.single.title, 'Iron');
-    expect(scheduler.scheduled.first.at.hour, 21);
+    // Meal-time notices (Screen Rest, on by default) come too.
+    final iron = scheduler.scheduled.firstWhere(
+      (p) => p.kind == ReminderKind.supplement,
+    );
+    expect(iron.items.single.title, 'Iron');
+    expect(iron.at.hour, 21);
 
     await tester.runAsync(
       () => SettingsRepository(db).put(SettingKeys.remindersOn, 'false'),

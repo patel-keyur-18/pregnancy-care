@@ -16,9 +16,12 @@ import 'package:navmaas/l10n/gen/app_localizations.dart';
 /// going with the screen off, with a sleep timer and a near-black "screen
 /// off" mode. No wakelock: the phone locks as usual.
 class ListenScreen extends ConsumerStatefulWidget {
-  const new({required this.itemId, super.key});
+  const new({required this.itemId, this.screenOff = false, super.key});
 
   final String itemId;
+
+  /// Opens already in screen-off mode.
+  final bool screenOff;
 
   @override
   ConsumerState<ListenScreen> createState() => _ListenScreenState();
@@ -27,7 +30,7 @@ class ListenScreen extends ConsumerStatefulWidget {
 class _ListenScreenState extends ConsumerState<ListenScreen> {
   LibraryItem? _item;
   bool _failed = false;
-  bool _asleep = false;
+  late bool _asleep = widget.screenOff;
 
   @override
   void initState() {

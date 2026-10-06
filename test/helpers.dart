@@ -51,6 +51,9 @@ class FakeScheduler implements ReminderScheduler {
 
   @override
   Future<void> refreshTimeZone() async {}
+
+  @override
+  Future<NotificationResponse?> launchResponse() async => null;
 }
 
 /// Plays nothing; records what the app asks for.

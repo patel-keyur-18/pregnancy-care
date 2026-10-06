@@ -46,4 +46,4 @@ final class ReminderSettingsProvider
   }
 }
 
-String _$reminderSettingsHash() => r'b3984b8fc1d4c802187c956d4f53aae0274e3d7d';
+String _$reminderSettingsHash() => r'a8339af058d4b493ab7991383aa74d048aaacc56';

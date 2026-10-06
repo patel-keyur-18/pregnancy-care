@@ -55,11 +55,19 @@ class PlannedReminder {
   List<String> get keys => [for (final i in items) i.key];
 }
 
+/// Key prefix of a meal window's own notice, which its window doesn't hold.
+const mealKeyPrefix = 'meal@';
+
+/// Key prefix of the wind-down nudge; tapping it opens her audio.
+const windDownKeyPrefix = 'wind-down@';
+
 /// Plans the next [days] days from [now]:
-/// 1. reminders inside quiet hours move to their end; nudges are dropped;
+/// 1. reminders inside a meal window or quiet hours move to their end;
+///    nudges there are dropped;
 /// 2. reminders within 30 minutes are bundled at the first time;
 /// 3. each day keeps at most `dailyLimit` by priority; the rest fold into
-///    one digest at the end of quiet hours (skipped if that has passed);
+///    one digest at the end of quiet hours (skipped if that has passed).
+///    Nudges never wait for the digest: over the limit they are dropped;
 /// 4. at most [maxPending] are kept (iOS allows 64 pending).
 List<PlannedReminder> planReminders({
   required DateTime now,
@@ -77,18 +85,24 @@ List<PlannedReminder> planReminders({
     now.minute,
   );
 
-  // 1. Quiet hours, then the window.
+  // 1. Meal windows and quiet hours, then the window.
   final moved = <ReminderCandidate>[];
   for (final c in candidates) {
-    final minute = c.at.hour * 60 + c.at.minute;
+    final nudge = c.kind == ReminderKind.nudge;
     var at = c.at;
+    final mealEnd = settings.mealEnd(at.hour * 60 + at.minute);
+    if (mealEnd != null && !c.key.startsWith(mealKeyPrefix)) {
+      if (nudge) continue;
+      at = DateTime(at.year, at.month, at.day, 0, mealEnd);
+    }
+    final minute = at.hour * 60 + at.minute;
     if (settings.isQuiet(minute)) {
-      if (c.kind == ReminderKind.nudge) continue;
+      if (nudge) continue;
       final nextDay = minute >= settings.quietEnd ? 1 : 0;
       at = DateTime(
-        c.at.year,
-        c.at.month,
-        c.at.day + nextDay,
+        at.year,
+        at.month,
+        at.day + nextDay,
         settings.quietEnd ~/ 60,
         settings.quietEnd % 60,
       );
@@ -125,13 +139,13 @@ List<PlannedReminder> planReminders({
         final p = _kind(a).index.compareTo(_kind(b).index);
         return p != 0 ? p : a.first.at.compareTo(b.first.at);
       });
-    final keep = ranked.length <= limit
-        ? ranked
-        : ranked.take(limit - 1).toList();
-    for (final g in keep) {
+    // Nudges rank last; if only nudges are over the limit, no digest.
+    final needed = ranked.where((g) => _kind(g) != ReminderKind.nudge).length;
+    final digest = needed > limit;
+    for (final g in ranked.take(digest ? limit - 1 : limit)) {
       out.add(_planned(g, g.first.at, digest: false));
     }
-    if (ranked.length > limit) {
+    if (digest) {
       final digestAt = DateTime(
         day.year,
         day.month,
@@ -140,13 +154,12 @@ List<PlannedReminder> planReminders({
         settings.quietEnd % 60,
       );
       if (!digestAt.isBefore(now)) {
-        out.add(
-          _planned(
-            [for (final g in ranked.skip(limit - 1)) ...g],
-            digestAt,
-            digest: true,
-          ),
-        );
+        final waiting = [
+          for (final g in ranked.skip(limit - 1))
+            for (final c in g)
+              if (c.kind != ReminderKind.nudge) c,
+        ];
+        out.add(_planned(waiting, digestAt, digest: true));
       }
     }
   }

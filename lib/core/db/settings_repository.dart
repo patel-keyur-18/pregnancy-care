@@ -25,6 +25,27 @@ abstract final class SettingKeys {
   /// Weekly backup reminder: 1 (Monday) to 7 (Sunday, the default), or 0
   /// for off.
   static const backupDay = 'backup_day';
+
+  /// Screen Rest rules (ARCHITECTURE §8). Bedtime rest switches quiet hours
+  /// on or off (default on).
+  static const quietOn = 'quiet_on';
+
+  /// Meal times (default on): `meal_lunch` / `meal_dinner` start each
+  /// 45-minute window (default 1:00 pm and 8:00 pm).
+  static const mealRest = 'meal_rest';
+  static const mealLunch = 'meal_lunch';
+  static const mealDinner = 'meal_dinner';
+
+  /// Eye-rest nudge while reading (default on).
+  static const eyeRest = 'eye_rest';
+
+  /// Wind-down audio nudge (default off) at `wind_down_at` (default 9 pm).
+  static const windDown = 'wind_down';
+  static const windDownAt = 'wind_down_at';
+
+  /// Time in Navmaas today: the day (`yyyy-MM-dd`) and its seconds.
+  static const useDay = 'use_day';
+  static const useSeconds = 'use_seconds';
 }
 
 class SettingsRepository {

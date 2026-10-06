@@ -3,6 +3,7 @@ import 'dart:ui' show DartPluginRegistrant, Locale;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:navmaas/app/router.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
@@ -18,6 +19,8 @@ import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/features/care/domain/care_reminders.dart';
 import 'package:navmaas/features/care/domain/supplement_reminders.dart';
+import 'package:navmaas/features/screen_rest/domain/rest_reminders.dart';
+import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -67,18 +70,50 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
   }
 }
 
+/// A tap on a reminder (not on one of its actions) opens the screen it
+/// names: the digest opens Today; wind-down opens her last audio with the
+/// screen off, or Sessions when she has none.
+Future<void> openReminder(
+  ProviderContainer container,
+  NotificationResponse response,
+) async {
+  final raw = response.payload;
+  if (response.actionId != null || raw == null) return;
+  final router = container.read(routerProvider);
+  switch (ReminderPayload.fromJson(raw).open) {
+    case ReminderOpen.today:
+      router.go('/today');
+    case ReminderOpen.windDown:
+      final audio = await container.read(libraryRepositoryProvider).lastAudio();
+      if (audio == null) {
+        router.go('/sessions');
+      } else {
+        unawaited(router.push('/listen?screen=off', extra: audio.id));
+      }
+  }
+}
+
 /// Sets up notifications for the app. Failures never block start-up.
 Future<void> initReminders(ProviderContainer container) async {
   try {
     final scheduler = container.read(reminderSchedulerProvider);
     await scheduler.init(
-      onAction: (r) => applyReminderAction(
-        r,
-        supplements: container.read(supplementRepositoryProvider),
-        scheduler: scheduler,
-      ),
+      onAction: (r) async {
+        await applyReminderAction(
+          r,
+          supplements: container.read(supplementRepositoryProvider),
+          scheduler: scheduler,
+        );
+        await openReminder(container, r);
+      },
       onBackgroundAction: reminderActionInBackground,
     );
+    // Launched by a tap: open its screen once the first frame is up.
+    if (await scheduler.launchResponse() case final launch?) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(openReminder(container, launch)),
+      );
+    }
   } on Object catch (e) {
     debugPrint('Navmaas: reminders not initialised ($e)');
   }
@@ -148,6 +183,9 @@ class ReminderSync extends _$ReminderSync {
             pregnancyStart: pregnancy.startDate,
             l10n: _l10n,
           ),
+        // Screen Rest's nudges speak of baby time: active pregnancy only.
+        if (pregnancy != null)
+          ...restCandidates(now: now, settings: settings, l10n: _l10n),
         ...buildExpiryCandidates(expiry: expiry, l10n: _l10n),
         ...backupCandidates(
           now: now,
