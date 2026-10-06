@@ -16,6 +16,19 @@
 	<array>
 		<string>comgooglemaps</string>
 	</array>
+	<!-- The home-screen widget opens Today with navmaas://widget/today
+	     (Flutter deep linking hands /today to the router). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.patelkeyur.navmaas</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>navmaas</string>
+			</array>
+		</dict>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
