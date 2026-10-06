@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.10 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M6 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 16 screens in light and dark |
+| **Status** | v1.11 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M7a components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 22 screens in light and dark (M7 Wellbeing boards added 2026-10-06) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -148,6 +148,10 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Segmented control | `surface-2` pill container; selected = `surface` + shadow |
 | Progress | 6–8 h bar on `track`, or ring (stroke 8–10) |
 | Tab bar | 84 h, 5 tabs (Today, Journey, Sessions, Care, Me); active = `primary-soft` pill behind the icon |
+| Word chip (M7) | Pill, 1.5 `border`, `surface`, label 14/800 (16/800 for mood and rested words); chosen = `primary` fill, `on-primary` label with a tick. A selection, never a verdict: no colour per word |
+| More chip (M7) | Dashed 1.5 `border` pill, `text-2` label "More · N" / "Fewer" with a chevron; folds the symptom chips to two rows |
+| Wellbeing tile (M7) | Card, 40 icon tile (mood `rose-soft` heart, symptoms `surface-2` notes, sleep `lavender-soft` bed, water `primary-soft` drop), label 13/700 `text-3`, value 16/800 |
+| Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
 
 ## 7. Flutter mapping
 
@@ -208,7 +212,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M6)
+## 8. Implementation status (M7a)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -257,3 +261,10 @@ Deliberate, permanent differences:
 | Me → Quiet hours | "Matches your Screen Rest bedtime" | Same; shows "Off" when bedtime rest is off; still tappable to change the times | Same setting in both places |
 | Reader eye rest | (not drawn) | A lavender banner over the top of the page: "Rest your eyes: look far away for 20 seconds.", a countdown and Close; gone after 20 seconds | Screen Rest → Eye-rest nudge |
 | Me → Your data | Backup row and "Pause or end pregnancy tracking" | Also a red "Delete all data" text button under them; its dialog (title, what goes, last backup) has "Back up first", Cancel and a red "Delete everything" | Plan decision 35; red only for destructive actions |
+| Steppers on Sleep and Water | SVG minus and plus in 44 px circles | The app's `StepButton` (48 dp, "−" / "+"); at large text the stepper moves under its title and the value wraps | Accessibility (§4) |
+| Symptom chips | Five chips, then "More · 5" at this width | Folds to whatever fits in two rows at the phone's width and text size (measured), her recent symptoms (and her own) first; the chosen chip always shows | Two rows at every text size |
+| Symptoms "Logged today" | Name · strength, time and note | Same, plus a × to remove one (tooltip "Remove …") | Mistakes need undoing |
+| Wellbeing header rows | One row | "Your week" and its dates, and "What did you feel?" and "Add your own", wrap to two lines at large text | No overflow at 2.0× |
+| Wellbeing tiles with nothing yet | (not drawn) | "Not logged yet"; the sleep card says "Log a night's sleep to see your weekly average." until one night is logged | Gentle empty states |
+| Today's card "+" | 44 px `primary` circle | 48 dp filled icon button with the tooltip "Add a glass" | Accessibility (§4) |
+
