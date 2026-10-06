@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–45; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built) |
+| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–50; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -64,6 +64,11 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 43 | Wellbeing keys and labels (M7) | The database stores keys only (mood, symptom, severity, rested); labels live in `app_en.arb` under fixed prefixes, like the supplement quick-pick. The content hard-line test checks those labels and every Wellbeing string for advice, warning and good/bad words |
 | 44 | Sleep, mood and Today card (M7) | Sleep: one entry per night, dated by the wake-up day: bedtime, wake time, nap minutes and how rested (Rested · A bit tired · Very tired); the weekly average counts night plus naps. Today's "How are you today?" card shows while today has no mood or water is under the goal, has + / − water taps and hides for the day when dismissed |
 | 45 | M7 split | **M7a** (schema v7, mood, symptoms, sleep, water, Wellbeing, Today card, water reminders, backup and delete) and **M7b** (meditation), stacked PRs |
+| 46 | M10 packages | **`home_widget`** (the widget snapshot in the App Group / shared preferences, widget reloads and Android update alarms) and **`local_auth`** (app lock). Neither makes network calls |
+| 47 | Widget details (M10) | "Hide details on widget" is **off by default** while app lock is off; with app lock on it is on unless she turns it off. Hidden, the widget shows only the brand mark and the next reminder's time; while tracking is stopped, only the mark |
+| 48 | App lock timeout (M10) | Always locks on a fresh open; after leaving Navmaas for **1, 5 or 15 minutes** (default 1), so a file picker, share sheet or Health dialog never locks her out mid-task |
+| 49 | Widget's next reminder (M10) | **Whatever notification fires next**, nudges and the digest included, as the notification titles it |
+| 50 | M10 split | **M10a** (widgets, hide details) and **M10b** (app lock), stacked PRs |
 
 ### What these decisions change
 
@@ -108,14 +113,14 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 (M7) |
 | **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 (M8) |
 | **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 (M9) |
-| **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10) |
-| **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10) |
+| **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10 ✅ 2026-10-06) |
+| **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10b ✅ 2026-10-06) |
 | **Postpartum & baby mode** ★ | Her recovery, baby feeding and sleep, baby vaccine schedule and visits | P3 (M12–M14) |
 | **Family sharing** ★ | Would need a backend and accounts | **Out of scope** (decision 37) |
 
 ## 4. Interactive prototype
 
-The prototype covers 22 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens were added on 2026-10-06, ADR 043): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
+The prototype covers 25 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards were added on 2026-10-06, ADR 043): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
 
 Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Backup & restore · Me & settings · Wellbeing · Mood check-in · Symptom log · Sleep entry · Water · Meditation timer.
 
@@ -154,6 +159,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
-| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock · M11 Limits for other apps (Android) and the Phase 2 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
+| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release. The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
 | **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
 | Out of scope | Family sharing (decision 37) |

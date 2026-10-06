@@ -9,16 +9,20 @@ part of 'reminders.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Keeps the OS schedule in step with supplements, taken doses and the
-/// calm-notification settings. Re-plans on any change and on resume.
+/// calm-notification settings. Re-plans on any change and on resume. Its
+/// state is the plan, which the home-screen widget shows the next of.
 
 @ProviderFor(ReminderSync)
 final reminderSyncProvider = ReminderSyncProvider._();
 
 /// Keeps the OS schedule in step with supplements, taken doses and the
-/// calm-notification settings. Re-plans on any change and on resume.
-final class ReminderSyncProvider extends $NotifierProvider<ReminderSync, void> {
+/// calm-notification settings. Re-plans on any change and on resume. Its
+/// state is the plan, which the home-screen widget shows the next of.
+final class ReminderSyncProvider
+    extends $NotifierProvider<ReminderSync, List<PlannedReminder>> {
   /// Keeps the OS schedule in step with supplements, taken doses and the
-  /// calm-notification settings. Re-plans on any change and on resume.
+  /// calm-notification settings. Re-plans on any change and on resume. Its
+  /// state is the plan, which the home-screen widget shows the next of.
   ReminderSyncProvider._()
     : super(
         from: null,
@@ -38,30 +42,31 @@ final class ReminderSyncProvider extends $NotifierProvider<ReminderSync, void> {
   ReminderSync create() => ReminderSync();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(void value) {
+  Override overrideWithValue(List<PlannedReminder> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<void>(value),
+      providerOverride: $SyncValueProvider<List<PlannedReminder>>(value),
     );
   }
 }
 
-String _$reminderSyncHash() => r'e71df34fe57c718df92f025ca4e49fab2baea478';
+String _$reminderSyncHash() => r'9e56943c8832c4b54230ad9a17b7230509d4a844';
 
 /// Keeps the OS schedule in step with supplements, taken doses and the
-/// calm-notification settings. Re-plans on any change and on resume.
+/// calm-notification settings. Re-plans on any change and on resume. Its
+/// state is the plan, which the home-screen widget shows the next of.
 
-abstract class _$ReminderSync extends $Notifier<void> {
-  void build();
+abstract class _$ReminderSync extends $Notifier<List<PlannedReminder>> {
+  List<PlannedReminder> build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<void, void>;
+    final ref = this.ref as $Ref<List<PlannedReminder>, List<PlannedReminder>>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<void, void>,
-              void,
+              AnyNotifier<List<PlannedReminder>, List<PlannedReminder>>,
+              List<PlannedReminder>,
               Object?,
               Object?
             >;

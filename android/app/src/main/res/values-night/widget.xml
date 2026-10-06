@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Moonlit Sage dark tokens for the widget. -->
+<resources>
+    <color name="widget_surface">#24202A</color>
+    <color name="widget_text">#E8E0D8</color>
+    <color name="widget_text_2">#C2B8B0</color>
+    <color name="widget_text_3">#A99F98</color>
+    <color name="widget_primary">#9CC2AE</color>
+    <color name="widget_primary_soft">#2B3A33</color>
+    <color name="widget_on_primary_soft">#CFE4D7</color>
+</resources>
