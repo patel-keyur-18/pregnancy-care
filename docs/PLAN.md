@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v11 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–36) |
+| **Status** | v12 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–38; Phase 2 and 3 milestones M7–M14 planned) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -55,10 +55,12 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 34 | Screen Rest rules | Four rules, as drawn: **Bedtime rest** (the quiet hours), **Meal times** (hold reminders until each 45-minute window ends, and send one gentle notice as it starts), **Eye-rest nudge** (a 20-second rest every 20 minutes of reading, in the reader only) and **Wind-down audio** (off by default; a 9:00 pm nudge that opens the audio she played last with the screen off, or Sessions if she has none). Time in Navmaas today is counted on the phone. The prototype's Phase 2 "Limits for other apps" card is left out until P2 |
 | 35 | Delete all data | **In the MVP (M6).** Me → Your data → "Delete all data" (red). A dialog says what goes, shows the last backup with "Back up first", then "Delete everything" wipes the phone's Navmaas data and keys and starts again at onboarding. Backup files saved elsewhere stay |
 | 36 | Universal APK size | Up to **150 MB** (it's for emulators); the phone APK stays at 100 MB at most |
+| 37 | Family sharing | **Out of scope** for Phases 2 and 3. Navmaas never needs a backend or accounts (ADR 042) |
+| 38 | Phase 2 and 3 scope | **Everything else in the feature map is in scope.** Phase 2 is M7–M11 and Phase 3 is M12–M14, each with scope, owner decisions and done-when criteria in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). Each milestone draws its new screens in the prototype first (ADR 043) |
 
 ### What these decisions change
 
-- **No backend in v1.** No accounts, CMS, Supabase or partner sync. The app makes no network calls at all, which keeps it simple and private.
+- **No backend, ever.** No accounts, CMS, Supabase or partner sync; family sharing is out of scope (decision 37). The app makes no network calls at all, which keeps it simple and private.
 - **Content is the owner's own.** Week-by-week notes ship as a small bundled content pack (general, well-known information). Books (PDF and text) and audio are imported on the phone and never leave it.
 - **Public repo means no copyrighted content in git.** Only original or public-domain text goes into the bundled content pack. Personal books and audio stay on the device.
 - **Tracking aid only.** The app records and reminds. It does not interpret readings, recommend doses or provide emergency features: no SOS, no emergency card, no danger-sign list.
@@ -84,24 +86,25 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Onboarding & pregnancy engine** | Due date from last period (with cycle length), conception date, IVF transfer or scan. Shows weeks + days, the month ("Month 6") and the trimester. Optional first name, editable in Me. Twins flag, high-risk flag ★, "doctor cleared me for exercise" ★ | MVP |
 | **Today (home)** | Week ring, baby size (Indian fruit and vegetable comparisons), today's plan (supplements, session, walk), next visit, Screen Rest status | MVP |
 | **Journey (trimester-wise)** | Trimester tabs, week picker, baby and body notes per week, weekly checklist, trimester progress from her own logs | MVP |
-| **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books (PDF, text) and audio, reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP |
-| **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps (**Android only**) | MVP → P2 |
+| **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books (PDF, text; EPUB in P2) and audio, reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP; EPUB P2 (M9) |
+| **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps (**Android only**) | MVP → P2 (M11) |
 | **Supplements** | Quick-pick of common names, dose as prescribed, schedule, on-time reminders with Taken / Snooze, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
 | **Vaccines & tests** ★ | India template (tests, scans, vaccines with week windows); book a date, mark done; gentle reminders | MVP |
 | **Doctor visits** | Appointments, reminders, "questions to ask" collected over weeks ★, what to bring, notes, prescription photo (encrypted), next visit, Call clinic and Directions | MVP |
 | **Walking** | Walk timer, steps from Apple Health / Health Connect, daily goal, history; always open | MVP |
 | **Exercise** | Trimester-filtered guided routines with timers, locked until "doctor cleared me" is on | MVP |
-| **Vitals** ★ | Weight and blood pressure logs (blood sugar in P2). Logged values only — no interpretation | MVP / P2 |
-| **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor); hospital bag checklist and birth plan in P2 | MVP / P2 |
+| **Vitals** ★ | Weight and blood pressure logs (blood sugar in P2). Logged values only — no interpretation | MVP / P2 (M8) |
+| **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor); hospital bag checklist and birth plan in P2 | MVP / P2 (M8) |
 | **Backup & restore** ★ | Password-protected `.navmaas` backup file, optional books and audio, weekly reminder, restore with password | MVP |
 | **iPhone build-expiry reminder** ★ | Reads the 7-day signing expiry; shows it in Me; reminds the day before to back up and re-run from Xcode | MVP |
 | **Pregnancy loss handling** ★ | Pause tracking, baby has arrived, or end tracking (never asks why); one quiet page; immediately stops baby content and pregnancy reminders | MVP |
-| **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 |
-| **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 |
-| **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 |
-| **Widgets** ★ | Home-screen widget (week + next reminder); App Groups work with a free Apple ID | P2 |
-| **Postpartum & baby mode** ★ | Recovery, feeding, sleep, baby vaccine schedule | P3 |
-| **Family sharing** ★ | Needs a backend; only if wanted later | P3 (optional) |
+| **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 (M7) |
+| **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 (M8) |
+| **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 (M9) |
+| **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10) |
+| **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10) |
+| **Postpartum & baby mode** ★ | Her recovery, baby feeding and sleep, baby vaccine schedule and visits | P3 (M12–M14) |
+| **Family sharing** ★ | Would need a backend and accounts | **Out of scope** (decision 37) |
 
 ## 4. Interactive prototype
 
@@ -144,5 +147,6 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
-| **2** | Other-app Screen Rest (Android), wellbeing, nutrition notes, records vault + PDF, widgets, blood sugar |
-| **3** | Postpartum & baby mode, optional family sharing |
+| **2 — Enhancements** | M7 Wellbeing · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock · M11 Limits for other apps (Android) and the Phase 2 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
+| **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
+| Out of scope | Family sharing (decision 37) |
