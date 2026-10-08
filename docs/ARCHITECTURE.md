@@ -756,7 +756,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 | Enhancement | Scope | Schema |
 |---|---|---|
 | **E1 Sessions fixes** ✅ 2026-10-08 (PR #28) | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
-| **E2 Links** ✅ 2026-10-08 | Add, edit and remove links to YouTube, YouTube Music and Spotify in the library; a tap opens the service's app, or the browser without it; the empty Listen tile offers audio or a link; Replace file for audio | v10 |
+| **E2 Links** ✅ 2026-10-08 (PR #29) | Add, edit and remove links to YouTube, YouTube Music and Spotify in the library; a tap opens the service's app, or the browser without it; the empty Listen tile offers audio or a link; Replace file for audio | v10 |
 | **E3 Voice letters** | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
 | **E4 Mood scenes on Today** | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
 
@@ -766,7 +766,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 
 **E2 done when** (all met): only YouTube, YouTube Music and Spotify links are saved, with `https` (unit test); a link is added, opened (the right address handed to the launcher), edited and removed, and a failed open says so (widget test); the empty Listen tile offers audio or a link; Replace file swaps the file under a new name, keeps the title, resets the length and deletes the old file (widget test); the v9 → v10 migration adds an empty `media_link`, and a schema 9 backup restores.
 
-**Status:** **E2 ✅ 2026-10-08**: schema v10 (`media_link`, ADR 054), `parseMediaLink` / `serviceOf`, `MediaLinkRepository` and the `openLink` hook, link rows and sheets, the Listen tile's choice, Replace file (the player reloads a replaced file because its path changed); prototype boards for the Add sheet, the link dialog and the audio and link sheets, and a link row on Sessions.
+**Status:** **E2 ✅ 2026-10-08 (PR #29)**: schema v10 (`media_link`, ADR 054), `parseMediaLink` / `serviceOf`, `MediaLinkRepository` and the `openLink` hook, link rows and sheets, the Listen tile's choice, Replace file (the player reloads a replaced file because its path changed); prototype boards for the Add sheet, the link dialog and the audio and link sheets, and a link row on Sessions.
 
 ### Out of scope
 
