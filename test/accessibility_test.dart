@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/third_trimester/data/third_trimester_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
@@ -40,7 +41,14 @@ Future<void> _seed(AppDatabase db) async {
   // Two audio files, so Meditation offers the "Your audio" sheet
   // (om chanting, added last, stays first in the library).
   await library.import('rain_sounds.mp3', Stream.value([0]));
-  await library.import('om_chanting.mp3', Stream.value([0]));
+  final om = await library.import('om_chanting.mp3', Stream.value([0]));
+  // Played once, so Listen shows it rather than the saved link below.
+  await library.markOpened(om!.id);
+  // A saved link, so its row and sheet are checked (E2).
+  await MediaLinkRepository(db).add(
+    title: 'Lullaby playlist',
+    url: Uri.parse('https://open.spotify.com/playlist/abc'),
+  );
   // Routines unlocked, so the exercise screen is reachable.
   final pregnancy = await db.select(db.pregnancies).getSingle();
   await PregnancyRepository(db).setFlags(pregnancy.id, exerciseCleared: true);
@@ -128,6 +136,21 @@ Future<void> _tab(WidgetTester tester, String label) async {
 
 /// Scrolls [text] into view (screens are long at 2.0×), then taps it.
 /// [last]: the text appears more than once; take the last.
+/// Long-presses [text] (a library row, below any path tile showing the
+/// same title): scrolls past the library first, so every row is built.
+Future<void> _longPressText(WidgetTester tester, String text) async {
+  await tester.scrollUntilVisible(
+    find.text('Move & breathe'),
+    200,
+    scrollable: find.byType(Scrollable).last,
+  );
+  final finder = find.text(text).last;
+  await tester.ensureVisible(finder);
+  await tester.pumpAndSettle();
+  await tester.longPress(finder);
+  await tester.pumpAndSettle();
+}
+
 Future<void> _tapText(
   WidgetTester tester,
   String text, {
@@ -414,6 +437,29 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
     (t) async {
       await _tab(t, 'Sessions');
       await _tapText(t, 'Add');
+    },
+  ),
+  'add a link': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Add');
+      await t.tap(find.text('A link'));
+      await t.pumpAndSettle();
+    },
+  ),
+  'audio, rename / replace / remove': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _longPressText(t, 'om chanting');
+    },
+  ),
+  'link, edit / remove': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _longPressText(t, 'Lullaby playlist');
     },
   ),
   'activity': (

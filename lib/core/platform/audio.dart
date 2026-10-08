@@ -93,6 +93,7 @@ class DeviceAudioPlayback extends BaseAudioHandler
   final _player = AudioPlayer();
   final _changes = StreamController<Playback>.broadcast();
   String? _itemId;
+  String? _path;
   Playback _current = idlePlayback;
 
   /// For the meditation track: where each piece starts, and its length.
@@ -147,8 +148,10 @@ class DeviceAudioPlayback extends BaseAudioHandler
     required String title,
     required String path,
   }) async {
-    if (_itemId == itemId) return _player.duration;
+    // The same item with a new path is a replaced file: load it again.
+    if (_itemId == itemId && _path == path) return _player.duration;
     _itemId = itemId;
+    _path = path;
     _offsets = _total = null;
     final duration = await _player.setFilePath(path);
     mediaItem.add(MediaItem(id: itemId, title: title, duration: duration));
@@ -164,6 +167,7 @@ class DeviceAudioPlayback extends BaseAudioHandler
     final id = meditationTimerId(minutes);
     if (_itemId == id) return _total;
     _itemId = id;
+    _path = null;
     const bell = Duration(seconds: 4);
     const quiet = Duration(seconds: 30);
     final length = Duration(minutes: minutes);

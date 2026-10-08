@@ -106,6 +106,37 @@ class LibraryRepository {
     }
   }
 
+  /// Swaps [item]'s audio for the file called [name] (E2, Replace file):
+  /// a new file name, so the player loads it afresh; the title stays and
+  /// the length is read again. False for a file that isn't audio.
+  Future<bool> replaceAudio(
+    LibraryItem item,
+    String name,
+    Stream<List<int>> bytes,
+  ) async {
+    final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
+    if (libraryExtensions[ext] != LibraryKind.audio) return false;
+    final dir = await directory();
+    await dir.create(recursive: true);
+    final fileName = '${newId()}.$ext';
+    final sink = File(p.join(dir.path, fileName)).openWrite();
+    try {
+      await sink.addStream(bytes);
+    } finally {
+      await sink.close();
+    }
+    final old = await file(item);
+    await _write(
+      item.id,
+      LibraryItemsCompanion(
+        fileName: Value(fileName),
+        durationSec: const Value(null),
+      ),
+    );
+    if (old.existsSync()) await old.delete();
+    return true;
+  }
+
   Future<File> file(LibraryItem item) async =>
       File(p.join((await directory()).path, item.fileName));
 

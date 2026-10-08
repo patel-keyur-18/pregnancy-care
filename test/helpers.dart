@@ -22,6 +22,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Records what the app asks the OS to schedule (no platform plugin).
@@ -299,6 +300,7 @@ Future<AppDatabase> pumpApp(
   FakeAppUsage? appUsage,
   Directory? library,
   PickFile? pickFile,
+  OpenLink? openLink,
   DateTime? buildExpiry,
   FakeBackupService? backup,
   ShareFile? share,
@@ -370,6 +372,7 @@ Future<AppDatabase> pumpApp(
           ),
         ),
         pickFileProvider.overrideWithValue(pickFile ?? (_) async => null),
+        openLinkProvider.overrideWithValue(openLink ?? (_) async => true),
         buildExpiryProvider.overrideWith((_) async => buildExpiry),
         backupServiceProvider.overrideWith(
           (_) async => backup ?? FakeBackupService(),
