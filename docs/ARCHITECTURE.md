@@ -753,14 +753,14 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 
 | Enhancement | Scope | Schema |
 |---|---|---|
-| **E1 Sessions fixes** ✅ 2026-10-08 | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
+| **E1 Sessions fixes** ✅ 2026-10-08 (PR #28) | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
 | **E2 YouTube links** | Add, edit and remove YouTube links in the library; a tap opens the YouTube app, or the browser without it | v10 |
 | **E3 Voice letters** | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
 | **E4 Mood scenes on Today** | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
 
 **E1 done when** (all met): a finished book stays "Finished" after going back (repository and widget tests); the ⋯ button opens Rename / Remove; nothing runs before Start on Walk or a routine; a walk paused by leaving carries on from the same time and is logged only at Finish walk with the steps of the stretches walked; a walk left from an earlier day goes to that day; Today's reading tick logs and removes a 15-minute session; the v8 → v9 migration fills `furthest` from `position`, and a schema 8 backup restores.
 
-**Status:** **E1 ✅ 2026-10-08**: schema v9 (`library_item.furthest`), the `walk_draft` setting (`WalkDraft`, ADR 051), the ⋯ icon in `NavmaasIcon`, Walk and Exercise controls, Today's reading tick; prototype boards updated (Walk and Exercise before Start, the library's ⋯ and Today's reading tick).
+**Status:** **E1 ✅ 2026-10-08 (PR #28)**: schema v9 (`library_item.furthest`), the `walk_draft` setting (`WalkDraft`, ADR 051), the ⋯ icon in `NavmaasIcon`, Walk and Exercise controls, Today's reading tick; prototype boards updated (Walk and Exercise before Start, the library's ⋯ and Today's reading tick).
 
 ### Out of scope
 
