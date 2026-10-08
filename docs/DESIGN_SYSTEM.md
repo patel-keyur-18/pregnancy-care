@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.12 — decided 2026-10-04, updated 2026-10-06 (motion in §5; M3–M11 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06) |
+| **Status** | v1.13 — decided 2026-10-04, updated 2026-10-08 (motion in §5; M3–M11 and E1 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -215,7 +215,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M11)
+## 8. Implementation status (E1)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -233,21 +233,19 @@ Deliberate, permanent differences:
 | Scan icon | (not drawn) | A screen with a gentle wave, same line style | Scans needed their own icon |
 | Past test windows | (not shown) | "Weeks 6–10", not "Due" | No guilt for a window that has passed |
 | Reader subtitle | "Chapter 6 · The little lamp" | PDF: "Page 42 of 120"; text: none (the library row shows "42% read") | PDFs don't reliably mark chapters |
-| Library row | "chapter 6 of 14" | "page 42 of 120" (PDF) or "42% read" (text) | Same reason |
-| Library actions | (not drawn) | Long press a row (or the screen reader's custom action) to rename or remove | No room for a visible menu button in the row |
+| Library row | "chapter 6 of 14" | "page 42 of 120" (PDF) or "42% read" (text), counting how far she has read; "Finished" once she reaches the end, even after going back (E1) | Same reason; progress never goes backwards (Plan decision 56) |
 | Listen chips | "Sleep timer · 10 min" and "Downloaded" | Sleep timer only (tap: off → 10 → 20 → 30 min); 48 dp tall | Everything is already on the phone |
 | Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
 | Letters to baby | (not drawn) | A list of letters (date, first lines in Literata) and a writing screen, in the Visit screens' card style | Talk to baby needed somewhere to write |
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
 | Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
 | Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
-| Walk screen | "Evening walk" | "Gentle walk"; steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
+| Walk screen | "Evening walk" | "Gentle walk"; the Sessions tile shows "Paused · 12:30" while a walk waits to be carried on (E1); steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
 | Exercise header | "2nd trimester · step 2 of 4" | "Step 2 of 7" (the trimester is on the Sessions tile) | Shorter at large text |
-| Exercise controls | Pause in the middle | Pause / Resume, then "Finish" when the last move ends | Clear end of the routine |
 | Move & breathe tiles | Four fixed tiles (M7: Meditation as a full-width tile under them) | Walk, this trimester's routines, slow breathing and Meditation in the same two-column grid; locked routines show a lock and "Needs 'Doctor cleared me' in Me" and open Me | Routines follow trimester, high risk and clearance, so the number of tiles varies |
 | Me → Exercise | "Unlocks walking and exercise routines" | "Unlocks exercise routines. Walking is always open." | Plan decision 27 |
 | Slow breathing | Opens Listen | Its own quiet screen: a lavender circle that grows and shrinks, "Breathe in / Breathe out", 5 min, Start / Pause / Finish | No audio can ship in the repo (Plan decision 28) |
-| Today's plan | Walk as an "Evening walk" row | "Gentle walk · 20 min · easy pace", ticked by a logged walk; the "add supplements" prompt is gone because the walk is always there | Walking is always open |
+| Today's plan | Walk as an "Evening walk" row | "Gentle walk · 20 min · easy pace", ticked by a logged walk; the "add supplements" prompt is gone because the walk is always there. Reading is always listed ("15 min · your book" with no book in the library) and its tick logs 15 minutes; read in the reader, it stays ticked (E1) | Walking is always open; a printed book counts too (Plan decision 57) |
 | Kick counter | Fixed sample count and times | The session starts at the first tap ("Started —" before it); leaving with a count saves it too; "Usually most active" appears from three sessions (the two-hour window with the most movements per minute); "Saved sessions appear here." when empty | Nothing is lost; a pattern needs a few sessions |
 | Contraction timer | Sample log | Shows the last day's contractions (up to 12); averages cover the last hour, "—" until there are two; a contraction is also saved if she leaves mid-way | A log for the doctor, never a verdict |
 | Me → Your data | "Last backup Sat 3 Oct · password protected" | Same row ("No backup yet · password protected" before the first); "Pause or end pregnancy tracking" opens a sheet: Pause tracking, Baby has arrived, End tracking | Plan decision 30 |

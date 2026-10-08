@@ -19,7 +19,9 @@ It combines:
 >
 > **Release 1.1.0** (Phase 2) has M7, M10 and M11. All of its on-phone flows (onboarding, Taken from a notification, reading a PDF) are checked by `integration_test/app_flow_test.dart`.
 >
-> **Next:** the deferred Phase 2 milestones (M8 body and birth prep; M9 records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+> **Enhancements (E1–E4, 2026-10-08):** E1 Sessions fixes is built: a finished book stays finished when you go back a page, a ⋯ button on each library row to rename or remove, walks and exercise routines that start when you tap Start (a paused walk can be carried on later, even after closing the app), and Today's reading can be ticked by hand for a printed book.
+>
+> **Next:** E2 YouTube links, E3 voice letters to baby and E4 a gentle mood scene on Today (with Navmaas 1.2.0); later, the deferred Phase 2 milestones (M8 body and birth prep; M9 records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >

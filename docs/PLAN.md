@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | v13 — approved 2026-10-04, updated 2026-10-06 (MVP built, M1–M6; owner decisions 12–54; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred) |
+| **Status** | v14 — approved 2026-10-04, updated 2026-10-08 (MVP built, M1–M6; owner decisions 12–63; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1 Sessions fixes built) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
 | **Cost** | Free — no subscription, no ads, no paid developer account |
-| **Last updated** | 2026-10-06 |
+| **Last updated** | 2026-10-08 |
 
 Related: [Design system](DESIGN_SYSTEM.md) · [Architecture](ARCHITECTURE.md) · [Interactive prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) (private link — share it from its Share menu)
 
@@ -72,7 +72,16 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 51 | App-limit notice wording (M11) | Title **"Time for a pause"**, body **"{minutes} min on {app} today. Phone down, baby time."**. One per app per day; nothing is blocked |
 | 52 | App-limit minute steps (M11) | **15 · 30 · 45 · 60 · 90 · 120** minutes a day per app, default 30 |
 | 53 | How the Android check follows the calm rules (M11) | **A rules snapshot.** Dart writes, for the week ahead, the times a notice may go out (outside quiet hours and meal windows, so a notice waits until a window ends, the same day), each day's room under the daily limit after the planned reminders, and the ready-made notice per app. A Kotlin WorkManager job every 15 minutes, only while a limit is set, applies it. Over the daily limit the notice is dropped. No new pub package; WorkManager is already in the app through `home_widget` (ADR 050) |
-| 54 | M11 split | **M11a** (schema v10, Usage access, app picker, limits, the check and notice) and **M11b** (the deferred integration tests, accessibility pass over Phase 2 screens, version 1.1.0, release builds), stacked PRs |
+| 54 | M11 split | **M11a** (schema v8, Usage access, app picker, limits, the check and notice) and **M11b** (the deferred integration tests, accessibility pass over Phase 2 screens, version 1.1.0, release builds), stacked PRs |
+| 55 | Enhancements E1–E4 | The owner's requests of 2026-10-08, built one at a time, each on its own branch from `main` with its own PR, planned and approved before it starts: **E1** Sessions fixes (schema v9), **E2** YouTube links (v10), **E3** voice letters (v11), **E4** mood scenes on Today. Version **1.2.0** comes with E4. Small prototype changes for them need no separate approval; the prototype and docs are updated in the same PR (ADR 053) |
+| 56 | Reading progress (E1) | The library shows **how far she has read** (`furthest`, which only goes up), not the page she is on, so going back to page 1 of a finished book keeps it **"Finished"**. The book still reopens where she left off. No "read again" action |
+| 57 | Reading ticked by hand (E1) | For a printed book: Today's reading row is always there, even with no book in the library, and its tick logs a **15-minute** reading session with no book. Unticking takes it back. Reading done in the reader ticks it for the day and can't be unticked |
+| 58 | Walk timer (E1) | The walk waits for **Start**, then Pause / Resume and **Finish walk**. Leaving pauses it, and the unfinished walk is kept (even if the app closes) until Finish, so she carries on from the same time. Only Finish logs it, from one minute, with the steps counted while she walked. A walk left from an earlier day is logged to that day (ending at its midnight at the latest) and a fresh one starts |
+| 59 | Exercise timer (E1) | Every routine (Gentle flow, Pelvic floor, Seated stretches) waits for **Start**, then Pause / Resume and **Finish**. Leaving without Finish still logs it from one minute |
+| 60 | Library actions (E1) | A visible **⋯** button on each library row opens Rename / Remove; long press still works |
+| 61 | YouTube links (E2) | She can add, edit and remove YouTube links (her own title) in the library. A tap opens the **YouTube app**, or the browser when the app isn't there; Navmaas itself still makes no network calls and logs no listening time for links |
+| 62 | Voice letters (E3) | Talk to baby takes a voice note recorded with the microphone, as well as or instead of text (`record` package and microphone permission approved). Voice notes are **encrypted** like prescription photos. Backups include them only when a switch is on (**off by default**) |
+| 63 | Mood scenes on Today (E4) | Each of the five mood words gets its **own gentle scene** on Today for the rest of the day, so no mood is marked as bad. Tired and Low get a baby scene with a line such as "You and baby, together today" that promises nothing. Drawn originally in Flutter (no Lottie or downloaded animation), and a still picture when the phone asks to reduce motion |
 
 ### What these decisions change
 
@@ -107,8 +116,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Supplements** | Quick-pick of common names, dose as prescribed, schedule, on-time reminders with Taken / Snooze, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
 | **Vaccines & tests** ★ | India template (tests, scans, vaccines with week windows); book a date, mark done; gentle reminders | MVP |
 | **Doctor visits** | Appointments, reminders, "questions to ask" collected over weeks ★, what to bring, notes, prescription photo (encrypted), next visit, Call clinic and Directions | MVP |
-| **Walking** | Walk timer, steps from Apple Health / Health Connect, daily goal, history; always open | MVP |
-| **Exercise** | Trimester-filtered guided routines with timers, locked until "doctor cleared me" is on | MVP |
+| **Walking** | Walk timer (Start, pause, carry on later, Finish; E1), steps from Apple Health / Health Connect, daily goal, history; always open | MVP |
+| **Exercise** | Trimester-filtered guided routines with timers (Start, pause, Finish; E1), locked until "doctor cleared me" is on | MVP |
 | **Vitals** ★ | Weight and blood pressure logs (blood sugar in P2). Logged values only — no interpretation | MVP / P2 (M8) |
 | **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor); hospital bag checklist and birth plan in P2 | MVP / P2 (M8) |
 | **Backup & restore** ★ | Password-protected `.navmaas` backup file, optional books and audio, weekly reminder, restore with password | MVP |
@@ -124,7 +133,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 
 ## 4. Interactive prototype
 
-The prototype covers 29 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards, and the M11 Screen Rest limits card, Limits for other apps and Usage access boards, were added on 2026-10-06, ADR 043): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
+The prototype covers 29 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards, and the M11 Screen Rest limits card, Limits for other apps and Usage access boards, were added on 2026-10-06, ADR 043; on 2026-10-08 E1 updated Walk and Exercise before Start, the library's ⋯ button and Today's reading tick): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
 
 Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Backup & restore · Me & settings · Wellbeing · Mood check-in · Symptom log · Sleep entry · Water · Meditation timer.
 
@@ -165,4 +174,5 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
 | **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release ✅ 2026-10-06 (M11a limits; M11b the Phase 2 release, Navmaas 1.1.0, without the deferred M8 and M9). The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
 | **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
+| **Enhancements (E1–E4)** | The owner's requests of 2026-10-08 (decisions 55–63): E1 Sessions fixes ✅ 2026-10-08 (reading progress, ⋯ on library rows, walk and exercise Start / Finish, reading ticked by hand) · E2 YouTube links · E3 voice letters · E4 mood scenes on Today and Navmaas 1.2.0. Scope: [Architecture §15](ARCHITECTURE.md#enhancements-e1e4) |
 | Out of scope | Family sharing (decision 37) |
