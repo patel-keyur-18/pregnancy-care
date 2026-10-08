@@ -225,4 +225,4 @@ final class LimitMinutesTodayProvider
   }
 }
 
-String _$limitMinutesTodayHash() => r'22e1f3cf80e2d29dff7c38d39f4050062532cfe9';
+String _$limitMinutesTodayHash() => r'2a11222f2bf810dedbd71ef99945a61623e0e568';

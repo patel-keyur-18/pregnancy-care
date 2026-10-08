@@ -44,11 +44,13 @@ void main() {
     expect(await repo.import('x.epub', const Stream.empty()), isNull);
 
     await repo.setProgress(item.id, position: 41, total: 120);
+    // Going back keeps how far she has read.
+    await repo.setProgress(item.id, position: 3);
     await repo.rename(item.id, ' Evening stories ');
     final saved = (await repo.watchItems().first).single;
     expect(
-      (saved.title, saved.position, saved.total),
-      ('Evening stories', 41, 120),
+      (saved.title, saved.position, saved.furthest, saved.total),
+      ('Evening stories', 3, 41, 120),
     );
 
     await repo.remove(saved);

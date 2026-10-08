@@ -15,8 +15,9 @@ import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Exercise session (prototype "Exercise session"): one move at a time with
-/// a ring timer, up next, previous / next. Reached only when "doctor cleared
-/// me" is on. Leaving logs the routine from one minute.
+/// a ring timer, up next, previous / next. The timer waits for Start, then
+/// Pause / Resume and Finish. Reached only when "doctor cleared me" is on.
+/// Finish or leaving logs the routine from one minute.
 class ExerciseScreen extends ConsumerStatefulWidget {
   const new({required this.routineKey, super.key});
 
@@ -30,7 +31,7 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
     with SessionClock {
   late final SessionRepository _sessions;
   late final String? _pregnancyId;
-  final DateTime _startedAt = clockNow();
+  DateTime? _startedAt;
   int _step = 0;
   int? _left;
   bool _done = false;
@@ -40,6 +41,7 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
     super.initState();
     _sessions = ref.read(sessionRepositoryProvider);
     _pregnancyId = ref.read(activePregnancyProvider).value?.id;
+    paused = true; // until she taps Start
     startClock();
   }
 
@@ -73,12 +75,12 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
   @override
   void dispose() {
     stopClock();
-    if (seconds >= 60 && _pregnancyId != null) {
+    if (seconds >= 60 && _pregnancyId != null && _startedAt != null) {
       unawaited(
         _sessions.log(
           pregnancyId: _pregnancyId,
           type: SessionType.exercise,
-          startedAt: _startedAt,
+          startedAt: _startedAt!,
           durationSec: seconds,
           routineKey: widget.routineKey,
         ),
@@ -102,6 +104,8 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
     final move = routine.moves[_step];
     final left = _left ?? move.sec;
     final upNext = routine.moves.skip(_step + 1).toList();
+    final started = _startedAt != null;
+    final buttonText = theme.textTheme.labelLarge!.copyWith(fontSize: 16);
 
     Widget round(NavmaasIcon icon, String tooltip, VoidCallback? onPressed) =>
         IconButton(
@@ -322,46 +326,77 @@ class _ExerciseScreenState extends ConsumerState<ExerciseScreen>
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                spacing: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12,
                 children: [
-                  round(
-                    NavmaasIcon.chevronLeft,
-                    l10n.previousMove,
-                    _step > 0 ? () => _go(_step - 1) : null,
-                  ),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 150),
-                      child: FilledButton(
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(48, 60),
-                          textStyle: theme.textTheme.labelLarge!.copyWith(
-                            fontSize: 16,
-                          ),
-                        ),
-                        onPressed: _done
-                            ? () => context.pop()
-                            : () => setState(() => paused = !paused),
-                        child: Text(
-                          _done
-                              ? l10n.finishButton
-                              : paused
-                              ? l10n.resumeButton
-                              : l10n.pauseButton,
-                          textAlign: TextAlign.center,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    spacing: 20,
+                    children: [
+                      round(
+                        NavmaasIcon.chevronLeft,
+                        l10n.previousMove,
+                        _step > 0 ? () => _go(_step - 1) : null,
+                      ),
+                      Flexible(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minWidth: 150),
+                          child: started
+                              ? OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size(48, 60),
+                                    backgroundColor: scheme.surface,
+                                    side: BorderSide(
+                                      width: 1.5,
+                                      color: scheme.outlineVariant,
+                                    ),
+                                    textStyle: buttonText,
+                                  ),
+                                  onPressed: _done
+                                      ? null
+                                      : () => setState(() => paused = !paused),
+                                  child: Text(
+                                    paused
+                                        ? l10n.resumeButton
+                                        : l10n.pauseButton,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              : FilledButton(
+                                  style: FilledButton.styleFrom(
+                                    minimumSize: const Size(48, 60),
+                                    textStyle: buttonText,
+                                  ),
+                                  onPressed: () => setState(() {
+                                    _startedAt = clockNow();
+                                    paused = false;
+                                  }),
+                                  child: Text(
+                                    l10n.startButton,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
                         ),
                       ),
+                      round(
+                        NavmaasIcon.chevronRight,
+                        l10n.nextMove,
+                        _step < routine.moves.length - 1
+                            ? () => _go(_step + 1)
+                            : null,
+                      ),
+                    ],
+                  ),
+                  if (started)
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(48, 56),
+                        textStyle: buttonText,
+                      ),
+                      onPressed: () => context.pop(),
+                      child: Text(l10n.finishButton),
                     ),
-                  ),
-                  round(
-                    NavmaasIcon.chevronRight,
-                    l10n.nextMove,
-                    _step < routine.moves.length - 1
-                        ? () => _go(_step + 1)
-                        : null,
-                  ),
                 ],
               ),
             ),

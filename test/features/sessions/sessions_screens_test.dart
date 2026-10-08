@@ -151,6 +151,76 @@ void main() {
     expect(find.text('reading session'), findsOneWidget);
   });
 
+  testWidgets('a printed book: reading is ticked by hand on Today', (
+    tester,
+  ) async {
+    final db = await pumpApp(tester, library: library, seed: _seed(library));
+    // No book in the library: the reading still shows, with a tick.
+    await tester.scrollUntilVisible(find.text('15 min · your book'), 200);
+    expect(find.text('0 of 2 done'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Mark done: Garbhasanskar reading'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 of 2 done'), findsOneWidget);
+    var sessions = (await tester.runAsync(() => db.select(db.sessions).get()))!;
+    expect(
+      (sessions.single.type, sessions.single.durationSec),
+      (SessionType.reading, 15 * 60),
+    );
+    expect(sessions.single.libraryItemId, isNull);
+
+    // Unticking takes it back.
+    await tester.tap(find.bySemanticsLabel('Done: Garbhasanskar reading'));
+    await tester.pumpAndSettle();
+    expect(find.text('0 of 2 done'), findsOneWidget);
+    sessions = (await tester.runAsync(() => db.select(db.sessions).get()))!;
+    expect(sessions.single.deletedAt, isNotNull);
+
+    // Counted on Journey once ticked again.
+    await tester.tap(find.bySemanticsLabel('Mark done: Garbhasanskar reading'));
+    await tester.pumpAndSettle();
+    await _tab(tester, 'Journey');
+    await tester.scrollUntilVisible(
+      find.text('reading session'),
+      300,
+      scrollable: _list,
+    );
+    expect(find.text('reading session'), findsOneWidget);
+  });
+
+  testWidgets('library: going back keeps Finished; ⋯ opens rename / remove', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      library: library,
+      seed: (db) async {
+        await _seed(library, {'short.txt': _story})(db);
+        final repo = LibraryRepository(db, directory: () async => library);
+        final item = (await repo.watchItems().first).single;
+        await repo.setProgress(item.id, position: 1000, total: 1000);
+        await repo.setProgress(item.id, position: 0, total: 1000);
+      },
+    );
+    await _tab(tester, 'Sessions');
+    await tester.scrollUntilVisible(find.text('short'), 200, scrollable: _list);
+    expect(find.text('Text you added · Finished'), findsOneWidget);
+    final item = (await tester.runAsync(
+      () => db.select(db.libraryItems).getSingle(),
+    ))!;
+    expect((item.position, item.furthest), (0, 1000));
+
+    await tester.ensureVisible(find.byTooltip('Rename or remove'));
+    await tester.tap(find.byTooltip('Rename or remove'));
+    await tester.pumpAndSettle();
+    expect(find.text('Rename'), findsOneWidget);
+    await tester.tap(find.text('Remove from library'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove from library').last);
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
+    expect(find.text('short'), findsNothing);
+  });
+
   testWidgets('reader: night colours by switch, and the place is kept', (
     tester,
   ) async {

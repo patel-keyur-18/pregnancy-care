@@ -6921,6 +6921,18 @@ class $LibraryItemsTable extends LibraryItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _furthestMeta = const VerificationMeta(
+    'furthest',
+  );
+  @override
+  late final GeneratedColumn<int> furthest = GeneratedColumn<int>(
+    'furthest',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _totalMeta = const VerificationMeta('total');
   @override
   late final GeneratedColumn<int> total = GeneratedColumn<int>(
@@ -6952,6 +6964,7 @@ class $LibraryItemsTable extends LibraryItems
     fileName,
     durationSec,
     position,
+    furthest,
     total,
     lastOpenedAt,
   ];
@@ -7019,6 +7032,12 @@ class $LibraryItemsTable extends LibraryItems
         position.isAcceptableOrUnknown(data['position']!, _positionMeta),
       );
     }
+    if (data.containsKey('furthest')) {
+      context.handle(
+        _furthestMeta,
+        furthest.isAcceptableOrUnknown(data['furthest']!, _furthestMeta),
+      );
+    }
     if (data.containsKey('total')) {
       context.handle(
         _totalMeta,
@@ -7081,6 +7100,10 @@ class $LibraryItemsTable extends LibraryItems
         DriftSqlType.int,
         data['${effectivePrefix}position'],
       )!,
+      furthest: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}furthest'],
+      )!,
       total: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}total'],
@@ -7119,6 +7142,10 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
   /// through a text.
   final int position;
 
+  /// The furthest she has read, in the same units as [position]. Only
+  /// goes up, so going back to an earlier page keeps "Finished" (v9).
+  final int furthest;
+
   /// PDF pages, or 1000 for a text, once opened.
   final int? total;
   final DateTime? lastOpenedAt;
@@ -7132,6 +7159,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
     required this.fileName,
     this.durationSec,
     required this.position,
+    required this.furthest,
     this.total,
     this.lastOpenedAt,
   });
@@ -7155,6 +7183,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
       map['duration_sec'] = Variable<int>(durationSec);
     }
     map['position'] = Variable<int>(position);
+    map['furthest'] = Variable<int>(furthest);
     if (!nullToAbsent || total != null) {
       map['total'] = Variable<int>(total);
     }
@@ -7179,6 +7208,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
           ? const Value.absent()
           : Value(durationSec),
       position: Value(position),
+      furthest: Value(furthest),
       total: total == null && nullToAbsent
           ? const Value.absent()
           : Value(total),
@@ -7205,6 +7235,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
       fileName: serializer.fromJson<String>(json['fileName']),
       durationSec: serializer.fromJson<int?>(json['durationSec']),
       position: serializer.fromJson<int>(json['position']),
+      furthest: serializer.fromJson<int>(json['furthest']),
       total: serializer.fromJson<int?>(json['total']),
       lastOpenedAt: serializer.fromJson<DateTime?>(json['lastOpenedAt']),
     );
@@ -7224,6 +7255,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
       'fileName': serializer.toJson<String>(fileName),
       'durationSec': serializer.toJson<int?>(durationSec),
       'position': serializer.toJson<int>(position),
+      'furthest': serializer.toJson<int>(furthest),
       'total': serializer.toJson<int?>(total),
       'lastOpenedAt': serializer.toJson<DateTime?>(lastOpenedAt),
     };
@@ -7239,6 +7271,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
     String? fileName,
     Value<int?> durationSec = const Value.absent(),
     int? position,
+    int? furthest,
     Value<int?> total = const Value.absent(),
     Value<DateTime?> lastOpenedAt = const Value.absent(),
   }) => LibraryItem(
@@ -7251,6 +7284,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
     fileName: fileName ?? this.fileName,
     durationSec: durationSec.present ? durationSec.value : this.durationSec,
     position: position ?? this.position,
+    furthest: furthest ?? this.furthest,
     total: total.present ? total.value : this.total,
     lastOpenedAt: lastOpenedAt.present ? lastOpenedAt.value : this.lastOpenedAt,
   );
@@ -7267,6 +7301,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
           ? data.durationSec.value
           : this.durationSec,
       position: data.position.present ? data.position.value : this.position,
+      furthest: data.furthest.present ? data.furthest.value : this.furthest,
       total: data.total.present ? data.total.value : this.total,
       lastOpenedAt: data.lastOpenedAt.present
           ? data.lastOpenedAt.value
@@ -7286,6 +7321,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
           ..write('fileName: $fileName, ')
           ..write('durationSec: $durationSec, ')
           ..write('position: $position, ')
+          ..write('furthest: $furthest, ')
           ..write('total: $total, ')
           ..write('lastOpenedAt: $lastOpenedAt')
           ..write(')'))
@@ -7303,6 +7339,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
     fileName,
     durationSec,
     position,
+    furthest,
     total,
     lastOpenedAt,
   );
@@ -7319,6 +7356,7 @@ class LibraryItem extends DataClass implements Insertable<LibraryItem> {
           other.fileName == this.fileName &&
           other.durationSec == this.durationSec &&
           other.position == this.position &&
+          other.furthest == this.furthest &&
           other.total == this.total &&
           other.lastOpenedAt == this.lastOpenedAt);
 }
@@ -7333,6 +7371,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
   final Value<String> fileName;
   final Value<int?> durationSec;
   final Value<int> position;
+  final Value<int> furthest;
   final Value<int?> total;
   final Value<DateTime?> lastOpenedAt;
   final Value<int> rowid;
@@ -7346,6 +7385,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
     this.fileName = const Value.absent(),
     this.durationSec = const Value.absent(),
     this.position = const Value.absent(),
+    this.furthest = const Value.absent(),
     this.total = const Value.absent(),
     this.lastOpenedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -7360,6 +7400,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
     required String fileName,
     this.durationSec = const Value.absent(),
     this.position = const Value.absent(),
+    this.furthest = const Value.absent(),
     this.total = const Value.absent(),
     this.lastOpenedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -7376,6 +7417,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
     Expression<String>? fileName,
     Expression<int>? durationSec,
     Expression<int>? position,
+    Expression<int>? furthest,
     Expression<int>? total,
     Expression<DateTime>? lastOpenedAt,
     Expression<int>? rowid,
@@ -7390,6 +7432,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
       if (fileName != null) 'file_name': fileName,
       if (durationSec != null) 'duration_sec': durationSec,
       if (position != null) 'position': position,
+      if (furthest != null) 'furthest': furthest,
       if (total != null) 'total': total,
       if (lastOpenedAt != null) 'last_opened_at': lastOpenedAt,
       if (rowid != null) 'rowid': rowid,
@@ -7406,6 +7449,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
     Value<String>? fileName,
     Value<int?>? durationSec,
     Value<int>? position,
+    Value<int>? furthest,
     Value<int?>? total,
     Value<DateTime?>? lastOpenedAt,
     Value<int>? rowid,
@@ -7420,6 +7464,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
       fileName: fileName ?? this.fileName,
       durationSec: durationSec ?? this.durationSec,
       position: position ?? this.position,
+      furthest: furthest ?? this.furthest,
       total: total ?? this.total,
       lastOpenedAt: lastOpenedAt ?? this.lastOpenedAt,
       rowid: rowid ?? this.rowid,
@@ -7458,6 +7503,9 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
+    if (furthest.present) {
+      map['furthest'] = Variable<int>(furthest.value);
+    }
     if (total.present) {
       map['total'] = Variable<int>(total.value);
     }
@@ -7482,6 +7530,7 @@ class LibraryItemsCompanion extends UpdateCompanion<LibraryItem> {
           ..write('fileName: $fileName, ')
           ..write('durationSec: $durationSec, ')
           ..write('position: $position, ')
+          ..write('furthest: $furthest, ')
           ..write('total: $total, ')
           ..write('lastOpenedAt: $lastOpenedAt, ')
           ..write('rowid: $rowid')
@@ -19015,6 +19064,7 @@ typedef $$LibraryItemsTableCreateCompanionBuilder =
       required String fileName,
       Value<int?> durationSec,
       Value<int> position,
+      Value<int> furthest,
       Value<int?> total,
       Value<DateTime?> lastOpenedAt,
       Value<int> rowid,
@@ -19030,6 +19080,7 @@ typedef $$LibraryItemsTableUpdateCompanionBuilder =
       Value<String> fileName,
       Value<int?> durationSec,
       Value<int> position,
+      Value<int> furthest,
       Value<int?> total,
       Value<DateTime?> lastOpenedAt,
       Value<int> rowid,
@@ -19111,6 +19162,11 @@ class $$LibraryItemsTableFilterComposer
 
   ColumnFilters<int> get position => $composableBuilder(
     column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get furthest => $composableBuilder(
+    column: $table.furthest,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -19204,6 +19260,11 @@ class $$LibraryItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get furthest => $composableBuilder(
+    column: $table.furthest,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get total => $composableBuilder(
     column: $table.total,
     builder: (column) => ColumnOrderings(column),
@@ -19252,6 +19313,9 @@ class $$LibraryItemsTableAnnotationComposer
 
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<int> get furthest =>
+      $composableBuilder(column: $table.furthest, builder: (column) => column);
 
   GeneratedColumn<int> get total =>
       $composableBuilder(column: $table.total, builder: (column) => column);
@@ -19324,6 +19388,7 @@ class $$LibraryItemsTableTableManager
                 Value<String> fileName = const Value.absent(),
                 Value<int?> durationSec = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<int> furthest = const Value.absent(),
                 Value<int?> total = const Value.absent(),
                 Value<DateTime?> lastOpenedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -19337,6 +19402,7 @@ class $$LibraryItemsTableTableManager
                 fileName: fileName,
                 durationSec: durationSec,
                 position: position,
+                furthest: furthest,
                 total: total,
                 lastOpenedAt: lastOpenedAt,
                 rowid: rowid,
@@ -19352,6 +19418,7 @@ class $$LibraryItemsTableTableManager
                 required String fileName,
                 Value<int?> durationSec = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<int> furthest = const Value.absent(),
                 Value<int?> total = const Value.absent(),
                 Value<DateTime?> lastOpenedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -19365,6 +19432,7 @@ class $$LibraryItemsTableTableManager
                 fileName: fileName,
                 durationSec: durationSec,
                 position: position,
+                furthest: furthest,
                 total: total,
                 lastOpenedAt: lastOpenedAt,
                 rowid: rowid,

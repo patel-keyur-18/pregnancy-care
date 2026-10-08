@@ -165,7 +165,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 8));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 9));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -279,7 +279,8 @@ void main() {
     expect(await b.db.select(b.db.pregnancies).get(), hasLength(1));
   });
 
-  // Backups from before M5 (schema 5), M7 (schema 6) and M11 (schema 7).
+  // Backups from before M5 (schema 5), M7 (schema 6), M11 (schema 7) and
+  // reading progress (schema 8).
   const wellbeingTables = [
     'mood_entry',
     'symptom_entry',
@@ -299,11 +300,16 @@ void main() {
     ),
     (6, [...wellbeingTables, 'app_limit']),
     (7, ['app_limit']),
+    (8, <String>[]),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
         await a.db.customStatement('DROP TABLE $t');
       }
+      // v9 added how far she has read.
+      await a.db.customStatement(
+        'ALTER TABLE library_item DROP COLUMN furthest',
+      );
       await a.db.customStatement('PRAGMA user_version = $version');
       final file = File(p.join(a.root.path, 'old.navmaas'));
       final snapshot = File(p.join(a.root.path, 'old.db'));

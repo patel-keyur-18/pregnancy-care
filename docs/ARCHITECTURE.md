@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v14 — updated 2026-10-06 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b)) |
+| **Status** | v15 — updated 2026-10-08 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b). Updated 2026-10-08: enhancements E1–E4 planned (ADR 053); E1 Sessions fixes built (schema v9, ADRs 051–052)) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -118,7 +118,7 @@ pregnancy-care/
 │  │  ├─ onboarding/
 │  │  ├─ today/            # today screen, today's plan card, "How are you today?" card (M7a), Screen Rest card
 │  │  ├─ journey/          # journey screen; data/ checklist repository
-│  │  ├─ sessions/         # data/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise, breathing (M4b); meditation and the shared screen-off overlay (M7b)
+│  │  ├─ sessions/         # data/ domain/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise, breathing (M4b); meditation and the shared screen-off overlay (M7b); the unfinished walk (domain/walk_draft.dart, E1)
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
 │  │  ├─ third_trimester/  # data/ domain/ presentation/: kick counter, contraction timer, her patterns (M5a)
 │  │  ├─ backup/           # data/: the .navmaas file format, the backup service, the backup log; presentation/: Backup & restore
@@ -222,7 +222,7 @@ Pregnancy reminders (supplements, visits, care items), Screen Rest's nudges and 
 
 ## 8. Data model
 
-All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`, M5a `kick_session`, `contraction` and `backup_log`, M7a `mood_entry`, `symptom_entry`, `sleep_log` and `water_log`; the other tables arrive with their milestones.
+All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`, M5a `kick_session`, `contraction` and `backup_log`, M7a `mood_entry`, `symptom_entry`, `sleep_log` and `water_log`, M11a `app_limit`; E1 added `library_item.furthest`; the other tables arrive with their milestones.
 
 ```mermaid
 erDiagram
@@ -307,8 +307,8 @@ Tables not shown in detail:
 | `visit_question` | M3b. Waits unlinked for the next visit; ticking it as asked links it to that visit |
 | `attachment` | M3b. Encrypted file name (in `db/attachments/`), MIME type, the visit it belongs to |
 | `vital_reading` | M3b. `weight` (kg) or `bloodPressure` (systolic / diastolic, mmHg) and time. Logged only, never interpreted |
-| `library_item` | M4a. Kind (`pdf` / `text` / `audio`), title, file name inside `db/library/`, audio length, and where she left off: `position` (PDF page, 0-based, or thousandths of the way through a text) out of `total`, plus `last_opened_at`. Not tied to a pregnancy. Reading progress lives here, so there is no separate `reading_progress` table |
-| `session` | M4a. A reading session is logged when she leaves the reader after at least a minute; listening is one session per item played, growing while it actually plays (from one minute). M4b: a walk (with the steps Health counted during it), a routine (`routine_key`) or breathing, each logged from one minute. A walk keeps counting with the screen off; the others pause in the background. M7b: `meditation`, logged like listening (playing time, from one minute) from the timer's track or her own audio (then with its `library_item_id`); Finish or the end bell closes it, so the next one is a new session |
+| `library_item` | M4a. Kind (`pdf` / `text` / `audio`), title, file name inside `db/library/`, audio length, and where she left off: `position` (PDF page, 0-based, or thousandths of the way through a text) out of `total`, plus `last_opened_at`. E1 (v9): `furthest`, how far she has read in the same units, which only goes up; the library's progress and "Finished" use it, while the reader reopens at `position` (Plan decision 56). Not tied to a pregnancy. Reading progress lives here, so there is no separate `reading_progress` table |
+| `session` | M4a. A reading session is logged when she leaves the reader after at least a minute (E1: or by ticking Today's reading row, 15 minutes with no `library_item_id`, soft-deleted when unticked; Plan decision 57); listening is one session per item played, growing while it actually plays (from one minute). M4b: a walk (with the steps Health counted during it), a routine (`routine_key`) or breathing, each logged from one minute. A walk keeps counting with the screen off; the others pause in the background. E1: walks, routines and breathing start at Start; a walk is logged only at Finish walk, with the time and steps of the stretches she walked (the unfinished walk waits in the `walk_draft` setting; Plan decision 58). M7b: `meditation`, logged like listening (playing time, from one minute) from the timer's track or her own audio (then with its `library_item_id`); Finish or the end bell closes it, so the next one is a new session |
 | `letter` | M4a. Letters to baby (body text), in the encrypted database |
 | `kick_session` | M5a. Movements counted (`count`) from the first tap (`started_at`) to the last (`ended_at`). Saved with Save, or when she leaves with a count |
 | `contraction` | M5a. Start and end of each timed contraction, saved when it ends (or when she leaves mid-way) |
@@ -319,9 +319,9 @@ Tables not shown in detail:
 | `water_log` | M7a. Glasses on a `day` (unique with the pregnancy); + / − change the count, never below zero |
 | `app_limit` | M11a (Android). A daily limit on another app: `package` (unique), `label` (its name when she chose it), `minutes` (15–120). Not tied to a pregnancy; removing one soft-deletes it, and choosing the app again brings the row back. Backed up like everything else; on another phone only installed apps show their icon |
 | `backup_log` | M5a (written from M5b). `kind` (`backup` / `restore`), `size_bytes`, `includes_library`; the row's `created_at` is when. Never the password |
-| `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). M4b: `step_goal` (default 6,000). M5b: `backup_day` (weekly backup reminder, 1–7 for Monday–Sunday or 0 for off; default 7, Sunday). M6a (Screen Rest, ADR 037): `quiet_on` (bedtime rest, default on), `meal_rest` (default on), `meal_lunch` / `meal_dinner` (window starts, default 780 / 1200), `eye_rest` (default on), `wind_down` (default off), `wind_down_at` (default 1260), and `use_day` / `use_seconds` (time in Navmaas on that day, saved when the app leaves the screen). M7a: `water_goal` (glasses, 4–16, default 8), `water_remind` (default off), `water_every` (2 or 3 hours, default 2) and `wellbeing_card_hidden` (the day Today's "How are you today?" card was closed). M10a: `widget_hide` ("Hide details on widget"; unset, it follows app lock: off, or on while app lock is on; Plan decision 47). M10b: `app_lock` (default off) and `app_lock_after` (1, 5 or 15 minutes, default 1; Plan decision 48) |
+| `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). M4b: `step_goal` (default 6,000). E1: `walk_draft` (the walk she started and hasn't finished: the start and end of each stretch as JSON; removed at Finish walk; ADR 051). M5b: `backup_day` (weekly backup reminder, 1–7 for Monday–Sunday or 0 for off; default 7, Sunday). M6a (Screen Rest, ADR 037): `quiet_on` (bedtime rest, default on), `meal_rest` (default on), `meal_lunch` / `meal_dinner` (window starts, default 780 / 1200), `eye_rest` (default on), `wind_down` (default off), `wind_down_at` (default 1260), and `use_day` / `use_seconds` (time in Navmaas on that day, saved when the app leaves the screen). M7a: `water_goal` (glasses, 4–16, default 8), `water_remind` (default off), `water_every` (2 or 3 hours, default 2) and `wellbeing_card_hidden` (the day Today's "How are you today?" card was closed). M10a: `widget_hide` ("Hide details on widget"; unset, it follows app lock: off, or on while app lock is on; Plan decision 47). M10b: `app_lock` (default off) and `app_lock_after` (1, 5 or 15 minutes, default 1; Plan decision 48) |
 
-Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, 8 in M11a: adds `app_limit`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
+Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, 8 in M11a: adds `app_limit`, 9 in E1: adds `library_item.furthest`, filled from `position`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
 
 ## 9. Content
 
@@ -342,7 +342,7 @@ Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `c
 
 | Capability | MVP behaviour | Platform notes |
 |---|---|---|
-| Steps & walks (M4b) | Reads today's steps and the steps during a walk (asked on the first walk, re-read every 30 s); records walk sessions in Navmaas. Never writes to Health | iOS: HealthKit entitlement (`Runner.entitlements`, available to a free Apple ID) and a read-only usage string. Android: `health.READ_STEPS`, Health Connect queries, the permissions-rationale intent filter and the Android 14 `VIEW_PERMISSION_USAGE` alias; min SDK 26. On Android 9–13 the Health Connect app comes from the Play Store; Android 8 has none, so steps show "—" |
+| Steps & walks (M4b) | Reads today's steps and the steps during a walk (only the stretches she walked, E1; asked on the first walk, re-read every 30 s); records walk sessions in Navmaas. Never writes to Health | iOS: HealthKit entitlement (`Runner.entitlements`, available to a free Apple ID) and a read-only usage string. Android: `health.READ_STEPS`, Health Connect queries, the permissions-rationale intent filter and the Android 14 `VIEW_PERMISSION_USAGE` alias; min SDK 26. On Android 9–13 the Health Connect app comes from the Play Store; Android 8 has none, so steps show "—" |
 | Background audio (M4a) | Plays with the screen off and shows lock-screen controls (back / forward 15 s, play / pause); sleep timer of 10, 20 or 30 min. The audio service starts on first play, not at app start. M7b: the meditation timer plays as one track (bell, 30 s quiet clips with the last one clipped, bell at exactly 5–20 min), so it keeps time and rings with the phone locked; its position and length cover the whole track | iOS `UIBackgroundModes` → `audio` (available to a free Apple ID); Android `AudioService` media foreground service (`FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `WAKE_LOCK`) and `MainActivity` extends `AudioServiceFragmentActivity` |
 | "Screen off — keep listening" | Switches to a near-black overlay that wakes on tap, and lets the phone lock normally | No wakelock is held |
 | Calls and maps (M3b) | "Call clinic" opens the dialler; "Directions" opens Apple Maps or Google Maps (if installed) on iPhone, or the default maps app on Android, with the clinic address | Android declares `tel` and `geo` intent queries; iOS lists `comgooglemaps` to check Google Maps is installed. The maps app does any network use; Navmaas doesn't |
@@ -489,7 +489,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 ## 15. Delivery milestones
 
-Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements; its release, 1.1.0, has M7, M10 and M11, with M8 and M9 deferred by the owner and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope.
+Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements; its release, 1.1.0, has M7, M10 and M11, with M8 and M9 deferred by the owner and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope. The owner's enhancement requests of 2026-10-08 run as E1–E4 alongside them (see [Enhancements](#enhancements-e1e4)).
 
 ### Phase 1 — MVP ✅ 2026-10-06
 
@@ -528,8 +528,8 @@ These rules apply to every milestone below, on top of its own "done when":
 | Milestone | Focus | Schema |
 |---|---|---|
 | **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
-| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan (deferred) | v9 |
-| **M9** | Records vault, visit summary PDF, EPUB books (deferred) | v10 |
+| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan (deferred) | The next free version |
+| **M9** | Records vault, visit summary PDF, EPUB books (deferred) | The next free version |
 | **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
 | **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (PR #24, limits); M11b 2026-10-06 (PR #25, release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
 
@@ -560,7 +560,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M8 Body and birth prep
 
 **Scope**
-- Schema v9 (v8 went to M11a, built first): a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
+- Schema: the next free version (v8 went to M11a and v9–v11 to E1–E3, built first): a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
 - **Blood sugar** in Vitals:
   - Each reading has mg/dL, a context (fasting, before a meal, 1 h or 2 h after, bedtime), a time and a note.
   - Readings are listed by day, with no ranges, colours or labels such as "high".
@@ -587,7 +587,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M9 Records vault, visit summary PDF and EPUB
 
 **Scope**
-- Schema v10: `attachment` gains `category` (report / scan / prescription / other), `title`, `taken_on` and `size_bytes`, and its visit link becomes optional.
+- Schema (the next free version): `attachment` gains `category` (report / scan / prescription / other), `title`, `taken_on` and `size_bytes`, and its visit link becomes optional.
 - **Records** (Care):
   - Add from the camera, photos or files (images or PDF), up to 25 MB each.
   - Encrypted through `AttachmentStore` like prescription photos, which now appear under Prescriptions.
@@ -608,7 +608,7 @@ These rules apply to every milestone below, on top of its own "done when":
 - Records on disk carry no image or PDF signature, and no plaintext copy is left anywhere after viewing or sharing (unit tests).
 - The PDF contains only the chosen sections, and its text has no interpretation words (text-extraction test).
 - A small EPUB built in the test opens with its chapters and reopens at the same place (widget test).
-- Records are in backups, and the v9 migration shows existing prescription photos under Prescriptions.
+- Records are in backups, and its migration shows existing prescription photos under Prescriptions.
 
 #### M10 Home-screen widgets and app lock ✅
 
@@ -673,14 +673,14 @@ These rules apply to every milestone below, on top of its own "done when":
 
 | Milestone | Focus | Schema |
 |---|---|---|
-| **M12** | Postpartum mode and her recovery | v11 |
-| **M13** | Baby feeding and sleep | v12 |
-| **M14** | Baby vaccines and visits, and the Phase 3 release | v13 |
+| **M12** | Postpartum mode and her recovery | The next free version |
+| **M13** | Baby feeding and sleep | The next free version |
+| **M14** | Baby vaccines and visits, and the Phase 3 release | The next free version |
 
 #### M12 Postpartum mode and her recovery
 
 **Scope**
-- Schema v11: `baby` (pregnancy, optional name, birth date and time, birth weight and length as recorded).
+- Schema (the next free version): `baby` (pregnancy, optional name, birth date and time, birth weight and length as recorded).
 - **"Baby has arrived"** now leads to **postpartum mode**, after a short baby-details step (twins get two babies), instead of the quiet page.
   - Pause and End still show the quiet page.
   - This changes Plan decision 31 for "Baby has arrived" only.
@@ -703,7 +703,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M13 Baby feeding and sleep
 
 **Scope**
-- Schema v12:
+- Schema (the next free version):
   - `feed`: baby, kind (breast / bottle / pumping), side, start, end, amount in ml, milk type, note.
   - `baby_sleep`: baby, start, end, note.
 - **Feeding:**
@@ -727,7 +727,7 @@ These rules apply to every milestone below, on top of its own "done when":
 #### M14 Baby vaccines and visits, and the Phase 3 release
 
 **Scope**
-- Schema v13: `care_item` and `appointment` gain an optional `baby_id`, and the pediatrician's details sit beside her doctor's in `profile`.
+- Schema (the next free version): `care_item` and `appointment` gain an optional `baby_id`, and the pediatrician's details sit beside her doctor's in `profile`.
 - **Baby vaccines:**
   - An India schedule by age, `baby_vaccines_in.json`: original wording that follows India's public national schedule, with every item deferring to the pediatrician.
   - Dates are worked out from the birth date.
@@ -747,21 +747,36 @@ These rules apply to every milestone below, on top of its own "done when":
 - A baby visit and its records show under the baby, and the PDF's baby section has only the chosen data.
 - The Phase 3 release builds are installed and survive a renewal without data loss (owner checks on the phones).
 
+### Enhancements (E1–E4)
+
+The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E1–E4 so they don't clash with Phases 1–3 (ADR 053). Each is planned and approved before it starts, built on its own branch from `main` and merged through its own PR, with the docs and the prototype updated in the same PR.
+
+| Enhancement | Scope | Schema |
+|---|---|---|
+| **E1 Sessions fixes** ✅ 2026-10-08 (PR #28) | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
+| **E2 YouTube links** | Add, edit and remove YouTube links in the library; a tap opens the YouTube app, or the browser without it | v10 |
+| **E3 Voice letters** | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
+| **E4 Mood scenes on Today** | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
+
+**E1 done when** (all met): a finished book stays "Finished" after going back (repository and widget tests); the ⋯ button opens Rename / Remove; nothing runs before Start on Walk or a routine; a walk paused by leaving carries on from the same time and is logged only at Finish walk with the steps of the stretches walked; a walk left from an earlier day goes to that day; Today's reading tick logs and removes a 15-minute session; the v8 → v9 migration fills `furthest` from `position`, and a schema 8 backup restores.
+
+**Status:** **E1 ✅ 2026-10-08 (PR #28)**: schema v9 (`library_item.furthest`), the `walk_draft` setting (`WalkDraft`, ADR 051), the ⋯ icon in `NavmaasIcon`, Walk and Exercise controls, Today's reading tick; prototype boards updated (Walk and Exercise before Start, the library's ⋯ and Today's reading tick).
+
 ### Out of scope
 
 - **Family sharing** (Plan decision 37, ADR 042). It would need a backend and accounts; Navmaas stays local-only, with no network calls.
 
 ## 16. Testing and CI
 
-- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); delete all data (only a new, empty database is left; the keys go before it opens; an interrupted delete finishes); reminder planner (window, quiet hours, meal windows and their notices, bundling, daily limit and digest, nudges never in the digest, water nudges in the day only and none once today's goal is reached, stable ids, cap); rest windows and time in Navmaas; notification text and tap targets; supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item; meditation logged as meditation and ended at Finish or the end bell); the committed bell and quiet clip match `tool/bell.dart`; repositories on in-memory Drift (wellbeing: one mood a day, symptoms by key or her own name, one night per wake-up day, water never below zero, the week and the sleep average); build-expiry parser on sample profiles; kick and contraction patterns (most active window, last-hour averages). M10a: the home-screen widget snapshot (a day per entry and the reminders ahead; hidden holds no week, size, baby or reminder text; stopped holds nothing; Android redraw times). M11a: the app-limit rules (the notice in the owner's words, open windows outside quiet hours and meal times, the whole day with rest rules off, room under the daily limit after planned reminders, nothing when reminders are off or tracking stopped).
+- **Unit tests:** pregnancy engine; database encryption (no SQLite header or plaintext, unreadable without or with a wrong key); delete all data (only a new, empty database is left; the keys go before it opens; an interrupted delete finishes); reminder planner (window, quiet hours, meal windows and their notices, bundling, daily limit and digest, nudges never in the digest, water nudges in the day only and none once today's goal is reached, stable ids, cap); rest windows and time in Navmaas; notification text and tap targets; supplement reminders and Taken / Snooze against the database; the listening log (only playing time counts, from one minute, one session per item; meditation logged as meditation and ended at Finish or the end bell); the committed bell and quiet clip match `tool/bell.dart`; repositories on in-memory Drift (wellbeing: one mood a day, symptoms by key or her own name, one night per wake-up day, water never below zero, the week and the sleep average); build-expiry parser on sample profiles; kick and contraction patterns (most active window, last-hour averages); the unfinished walk (only walked stretches count, saved and read back, an earlier day's walk ends at its midnight; E1); reading progress only goes up (E1). M10a: the home-screen widget snapshot (a day per entry and the reminders ahead; hidden holds no week, size, baby or reminder text; stopped holds nothing; Android redraw times). M11a: the app-limit rules (the notice in the owner's words, open windows outside quiet hours and meal times, the whole day with rest rules off, room under the daily limit after planned reminders, nothing when reminders are off or tracking stopped).
 - **Backup tests:**
   - Round-trip with and without the library.
   - Wrong password.
   - Truncated, reordered or tampered chunks.
-  - Restoring an older schema (schema 5, the pre-M7 schema 6 and the pre-M11 schema 7 migrate) and rejecting a newer one; the round trip carries the wellbeing tables and app limits.
+  - Restoring an older schema (schema 5, the pre-M7 schema 6, the pre-M11 schema 7 and the pre-E1 schema 8 migrate) and rejecting a newer one; the round trip carries the wellbeing tables and app limits.
   - Interrupted swap (rollback works).
   - A 500 MB library needs about the memory of a 50 MB one (under 48 MB more; under 128 MB in all).
-- **Widget and golden tests:** onboarding, Today, Journey, Sessions, Me, Screen Rest and (M7a) Wellbeing, mood, symptoms, sleep, water and (M7b) Meditation in light and dark; meditation logged from one minute with and without screen off, and her own audio logged as meditation; wellbeing entries saved and shown in the week, the symptom chips folding to two rows, Today's card (mood and water taps, hidden for the day, gone at the goal) and water nudges re-planned at the goal; the widget snapshot published with the week and next reminder, and hidden from Me (M10a); app lock (a fresh open locked, a failed try stays locked, locked again after the chosen minutes away, a notification or widget tap only navigates behind the lock, the app-switcher cover, no screen lock keeps it off) and goldens of the lock screen and Me → Your data (M10b); app limits: hidden on iPhone, Usage access then an app and its minutes, removing the last limit stops the check, minutes past the limit said calmly, paused when access is off, and goldens of Screen Rest's card, the Limits screen and the paused state (M11a); the 15-min reading and 20-min walk logged end to end; kick counter and contraction timer logged; delete all data (explains, Back up first, starts again at onboarding, a failure says so); Screen Rest rules change what is planned and shown, time in Navmaas is counted and saved, the eye rest shows every 20 minutes of reading, and wind-down opens her audio with the screen off; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
+- **Widget and golden tests:** onboarding, Today, Journey, Sessions, Me, Screen Rest and (M7a) Wellbeing, mood, symptoms, sleep, water and (M7b) Meditation in light and dark; meditation logged from one minute with and without screen off, and her own audio logged as meditation; wellbeing entries saved and shown in the week, the symptom chips folding to two rows, Today's card (mood and water taps, hidden for the day, gone at the goal) and water nudges re-planned at the goal; the widget snapshot published with the week and next reminder, and hidden from Me (M10a); app lock (a fresh open locked, a failed try stays locked, locked again after the chosen minutes away, a notification or widget tap only navigates behind the lock, the app-switcher cover, no screen lock keeps it off) and goldens of the lock screen and Me → Your data (M10b); app limits: hidden on iPhone, Usage access then an app and its minutes, removing the last limit stops the check, minutes past the limit said calmly, paused when access is off, and goldens of Screen Rest's card, the Limits screen and the paused state (M11a); the 15-min reading and 20-min walk logged end to end (E1: the walk starts at Start, pauses when she leaves, carries on from the Sessions tile and is logged only at Finish walk; a walk from yesterday goes to yesterday); reading ticked and unticked by hand on Today (E1); a finished book stays "Finished" and the library's ⋯ opens Rename / Remove (E1); routines wait for Start (E1); kick counter and contraction timer logged; delete all data (explains, Back up first, starts again at onboarding, a failure says so); Screen Rest rules change what is planned and shown, time in Navmaas is counted and saved, the eye rest shows every 20 minutes of reading, and wind-down opens her audio with the screen off; pause, baby has arrived, end and resume (reminders stop and return); routines locked, unlocked and hidden for high risk at 1.0× and 2.0× text (`test/goldens/`). Goldens use Flutter's built-in test font, so they check layout, colour and icons, not letter shapes. Text rounds slightly differently on macOS and Linux, so each platform keeps its own exact set: `macos/` (local runs, `flutter test test/goldens --update-goldens`) and `linux/` (CI). When CI's tests fail, it uploads the diff images as `golden-failures` and fresh Linux renders as `linux-goldens` to copy in after an intended change.
 - **Content tests:** weeks 4–42 complete, stable unique checklist keys, hard-line words absent (weeks, care template, activities, routines, and Wellbeing's words and strings: no advice, warning or good/bad wording), every wellbeing key has its word, routines for every trimester even when high-risk, no lying on the back, review copies in sync.
 - **Integration tests (on a phone):** `integration_test/reminders_test.dart` checks the OS really schedules, re-syncs and snoozes reminders (needs notifications allowed); `integration_test/build_expiry_test.dart` reads the iPhone build's expiry; `integration_test/backup_test.dart` backs up, restores, deletes all data and restores again under new keys, with the real keychain and files (empty installs only, since it replaces data); `integration_test/app_flow_test.dart` (M11b) runs the app on the real encrypted database: fresh install → onboarding → Today shows the week; "Taken" through the background isolate's action entry point logs the dose; a PDF imported through the picker, read for a minute and logged (empty installs only; each deletes all data at the end; all pass on the iOS simulator).
 - **GitHub Actions** (free for public repos), on every pull request, every push to `main` and on demand. Ubuntu, Flutter pinned (3.47.3), Java 17:
@@ -826,3 +841,6 @@ These rules apply to every milestone below, on top of its own "done when":
 | 048 | Widget taps open `navmaas://widget/today` through Flutter's deep linking, not `home_widget`'s click API | The router already owns navigation (and, in M10b, the lock); `home_widget` claims URLs with a `homeWidget` query and would stop Flutter from routing them, so the URL has none |
 | 049 | App lock is an overlay above the router (`MaterialApp.builder`, the app `Offstage` underneath), not a route or a redirect | Every route, dialog and sheet is covered at once and keeps its state; notification and widget taps keep navigating as before, behind the lock; nothing underneath is painted, tapped or read out until she unlocks |
 | 050 | The Android app-limit check follows a rules snapshot written by Dart instead of running Dart in the background | Dart already knows the plan and the calm rules; it writes, for the week ahead, when a notice may go out (outside quiet hours and meal windows), each day's room under the daily limit and each app's ready-made notice, and a small Kotlin WorkManager job only follows it. No new pub package (`workmanager` would open the encrypted database in a background isolate every 15 minutes), the rules stay tested in Dart, and every word stays in `app_en.arb` (Plan decision 53) |
+| 051 | The unfinished walk is kept as the start and end of each stretch in one `walk_draft` setting, not a table, and its time is worked out from those timestamps | Leaving pauses the walk and the app may be closed before she carries on, so the time can't live in a screen timer; timestamps keep counting with the screen off without a lifecycle listener, and steps are read for the stretches only. One small value she has at most one of needs no schema change (Plan decision 58) |
+| 052 | `library_item.furthest` (schema v9) next to `position` | Progress must survive going back, while the reader still reopens where she left off; one column that only goes up, filled from `position` by the migration (Plan decision 56) |
+| 053 | The owner's 2026-10-08 requests are enhancements E1–E4, one branch and PR each from `main`, versioned once (1.2.0) with E4; unbuilt milestones (M8, M9, M12–M14) take the next free schema version when built | "Phase 1" already means the MVP; fixed version numbers for deferred milestones went stale as soon as other work took them (Plan decision 55) |
