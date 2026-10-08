@@ -62,7 +62,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -105,6 +105,13 @@ class AppDatabase extends _$AppDatabase {
       },
       // v8 (M11a): daily limits on other apps (Android).
       from7To8: (m, schema) => m.createTable(schema.appLimit),
+      // v9: how far she has read, so going back keeps her progress.
+      from8To9: (m, schema) async {
+        await m.addColumn(schema.libraryItem, schema.libraryItem.furthest);
+        await m.database.customStatement(
+          'UPDATE library_item SET furthest = position',
+        );
+      },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

@@ -22,6 +22,9 @@ abstract final class SettingKeys {
   /// Walk: daily step goal (default 6,000).
   static const stepGoal = 'step_goal';
 
+  /// Walk: the walk she started and hasn't finished (`WalkDraft` JSON).
+  static const walkDraft = 'walk_draft';
+
   /// Weekly backup reminder: 1 (Monday) to 7 (Sunday, the default), or 0
   /// for off.
   static const backupDay = 'backup_day';

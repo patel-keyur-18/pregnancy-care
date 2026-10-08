@@ -235,6 +235,10 @@ class LibraryItems extends Table with BaseColumns {
   /// through a text.
   IntColumn get position => integer().withDefault(const Constant(0))();
 
+  /// The furthest she has read, in the same units as [position]. Only
+  /// goes up, so going back to an earlier page keeps "Finished" (v9).
+  IntColumn get furthest => integer().withDefault(const Constant(0))();
+
   /// PDF pages, or 1000 for a text, once opened.
   IntColumn get total => integer().nullable()();
   DateTimeColumn get lastOpenedAt => dateTime().nullable()();

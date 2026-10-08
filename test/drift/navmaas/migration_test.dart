@@ -8,6 +8,7 @@ import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
+import 'generated/schema_v8.dart' as v8;
 
 // After changing tables: bump `schemaVersion`, write the migration, then run
 // `dart run drift_dev make-migrations` to dump the new schema and helpers.
@@ -144,6 +145,33 @@ void main() {
     await verifier.migrateAndValidate(db, 8);
     expect((await db.select(db.waterLogs).getSingle()).glasses, 6);
     expect(await db.select(db.appLimits).get(), isEmpty);
+    await db.close();
+  });
+
+  test('v8 → v9 starts how far she has read at where she left off', () async {
+    final schema = await verifier.schemaAt(8);
+    final old = v8.DatabaseAtV8(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.libraryItem)
+        .insert(
+          v8.LibraryItemCompanion.insert(
+            id: 'b1',
+            createdAt: at,
+            updatedAt: at,
+            kind: 'pdf',
+            title: 'Stories',
+            fileName: 'b1.pdf',
+            position: const Value(1),
+            total: const Value(2),
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 9);
+    final item = await db.select(db.libraryItems).getSingle();
+    expect((item.position, item.furthest, item.total), (1, 1, 2));
     await db.close();
   });
 }
