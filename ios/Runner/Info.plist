@@ -2,36 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>audio</string>
-	</array>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Show your steps on the Walk screen. Navmaas only reads them, and they stay on this phone.</string>
-	<!-- App lock (M10b): Face ID, falling back to the passcode. -->
-	<key>NSFaceIDUsageDescription</key>
-	<string>Navmaas uses Face ID to unlock the app when app lock is on.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Take a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Choose a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
-	<key>LSApplicationQueriesSchemes</key>
-	<array>
-		<string>comgooglemaps</string>
-	</array>
-	<!-- The home-screen widget opens Today with navmaas://widget/today
-	     (Flutter deep linking hands /today to the router). -->
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.patelkeyur.navmaas</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>navmaas</string>
-			</array>
-		</dict>
-	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -52,10 +22,33 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.patelkeyur.navmaas</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>navmaas</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Take a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Navmaas uses Face ID to unlock the app when app lock is on.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Show your steps on the Walk screen. Navmaas only reads them, and they stay on this phone.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Choose a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -79,6 +72,10 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
