@@ -122,14 +122,22 @@ class LibraryRepository {
   Future<void> markOpened(String id) =>
       _write(id, LibraryItemsCompanion(lastOpenedAt: Value(clockNow())));
 
-  Future<void> setProgress(String id, {required int position, int? total}) =>
-      _write(
-        id,
-        LibraryItemsCompanion(
-          position: Value(position),
-          total: total == null ? const Value.absent() : Value(total),
-        ),
-      );
+  /// Saves where she left off; [LibraryItem.furthest] only goes up.
+  Future<void> setProgress(
+    String id, {
+    required int position,
+    int? total,
+  }) async {
+    final furthest = (await get(id))?.furthest ?? 0;
+    await _write(
+      id,
+      LibraryItemsCompanion(
+        position: Value(position),
+        furthest: Value(position > furthest ? position : furthest),
+        total: total == null ? const Value.absent() : Value(total),
+      ),
+    );
+  }
 
   Future<void> setDuration(String id, int seconds) =>
       _write(id, LibraryItemsCompanion(durationSec: Value(seconds)));

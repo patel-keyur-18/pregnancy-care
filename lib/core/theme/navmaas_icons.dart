@@ -140,6 +140,12 @@ enum NavmaasIcon {
     'M3.5 11.5h17a8.5 8.5 0 0 1-17 0z',
     'M9 20.5h6',
     'M9.5 8c0-1.2 1-1.6 1-2.8M13.5 8c0-1.2 1-1.6 1-2.8',
+  ]),
+  // Three dots: a library row's Rename / Remove.
+  more([
+    'M5.5 11.4a.6.6 0 1 0 0 1.2a.6.6 0 1 0 0-1.2z',
+    'M12 11.4a.6.6 0 1 0 0 1.2a.6.6 0 1 0 0-1.2z',
+    'M18.5 11.4a.6.6 0 1 0 0 1.2a.6.6 0 1 0 0-1.2z',
   ]);
 
   new(this.svg, {this.fill = false});

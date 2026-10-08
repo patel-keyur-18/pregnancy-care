@@ -83,11 +83,15 @@ void main() {
 
   testWidgets("Today's plan lists and ticks today's doses", (tester) async {
     await pumpApp(tester, seed: _seed);
-    expect(find.text('0 of 1 done'), findsOneWidget, reason: 'the walk');
+    expect(
+      find.text('0 of 2 done'),
+      findsOneWidget,
+      reason: 'reading and the walk',
+    );
     await _addIron(tester);
     await _tab(tester, 'Today');
     expect(find.text("Today's gentle plan"), findsOneWidget);
-    expect(find.text('0 of 2 done'), findsOneWidget);
+    expect(find.text('0 of 3 done'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.bySemanticsLabel('Mark done: Iron + folic acid'),
       200,
@@ -95,7 +99,7 @@ void main() {
     );
     await tester.tap(find.bySemanticsLabel('Mark done: Iron + folic acid'));
     await tester.pumpAndSettle();
-    expect(find.text('1 of 2 done'), findsOneWidget);
+    expect(find.text('1 of 3 done'), findsOneWidget);
   });
 
   testWidgets('See all: this week, edit and remove', (tester) async {

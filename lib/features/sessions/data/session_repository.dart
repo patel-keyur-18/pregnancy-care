@@ -1,8 +1,10 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/sessions/domain/walk_draft.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_repository.g.dart';
@@ -47,6 +49,15 @@ class SessionRepository {
         ),
       );
 
+  /// Soft-deletes a session (a reading she ticked by hand, then unticked).
+  Future<void> remove(String id) =>
+      (_db.update(_db.sessions)..where((t) => t.id.equals(id))).write(
+        SessionsCompanion(
+          deletedAt: Value(clockNow()),
+          updatedAt: Value(clockNow()),
+        ),
+      );
+
   /// Sessions started in [from, to), oldest first.
   Stream<List<Session>> watchBetween(
     String pregnancyId,
@@ -76,3 +87,10 @@ Stream<List<Session>> sessionsBetween(Ref ref, DateTime from, DateTime to) {
   if (id == null) return Stream.value(const []);
   return ref.watch(sessionRepositoryProvider).watchBetween(id, from, to);
 }
+
+/// The walk she started and hasn't finished, if any.
+@riverpod
+Stream<WalkDraft?> walkDraft(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.walkDraft)
+    .map(WalkDraft.decode);

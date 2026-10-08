@@ -5,6 +5,7 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/sessions/domain/walk_draft.dart';
 
 import '../../helpers.dart';
 
@@ -38,39 +39,70 @@ Finder _switch(String title) => find.descendant(
 );
 
 void main() {
-  testWidgets('a 20-minute walk is logged end to end', (tester) async {
+  testWidgets('a walk: Start, pause, leave, carry on, Finish logs it', (
+    tester,
+  ) async {
     final steps = FakeSteps();
     final db = await pumpApp(tester, seed: _seed, steps: steps);
-    // Today's plan: walking is always there.
+    // Today's plan: reading and walking are always there.
     await _show(tester, 'Gentle walk');
-    expect(find.text('0 of 1 done'), findsOneWidget);
+    expect(find.text('0 of 2 done'), findsOneWidget);
     await tester.tap(find.text('Gentle walk'));
     await tester.pumpAndSettle();
 
+    // Nothing runs until Start.
     expect(steps.asked, 1);
-    expect(find.text('WALKING'), findsOneWidget);
+    expect(find.text('READY'), findsOneWidget);
+    expect(find.text('Pause'), findsNothing);
+    await tester.pump(const Duration(minutes: 1));
     expect(find.text('0:00'), findsOneWidget);
-    expect(find.text('1,420'), findsOneWidget);
     expect(find.text('4,820'), findsOneWidget);
     expect(find.text('of 6,000 steps'), findsOneWidget);
 
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    expect(find.text('WALKING'), findsOneWidget);
+    expect(find.text('1,420'), findsOneWidget);
+    await tester.pump(const Duration(minutes: 2));
+    expect(find.text('2:00'), findsOneWidget);
     await tester.tap(find.text('Pause'));
     await tester.pump(const Duration(minutes: 2));
     expect(find.text('PAUSED'), findsOneWidget);
-    expect(find.text('0:00'), findsOneWidget);
+    expect(find.text('2:00'), findsOneWidget);
+
+    // Back while walking pauses; the walk waits on the Sessions tile.
     await tester.tap(find.text('Resume'));
-    await tester.pump(const Duration(minutes: 20));
+    await tester.pump(const Duration(minutes: 1));
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(minutes: 5));
+    await _tab(tester, 'Sessions');
+    await _show(tester, 'Paused · 3:00');
+
+    await tester.tap(find.text('Paused · 3:00'));
+    await tester.pumpAndSettle();
+    expect(find.text('PAUSED'), findsOneWidget);
+    expect(find.text('3:00'), findsOneWidget);
+    await tester.tap(find.text('Resume'));
+    await tester.pump(const Duration(minutes: 17));
     expect(find.text('20:00'), findsOneWidget);
+    expect(await _sessions(tester, db), isEmpty, reason: 'only Finish logs');
 
     await tester.tap(find.text('Finish walk'));
     await tester.pumpAndSettle();
     final walk = (await _sessions(tester, db)).single;
     expect(walk.type, SessionType.walk);
     expect(walk.durationSec, 20 * 60);
-    expect(walk.steps, 1420);
+    expect(walk.steps, 3 * 1420, reason: 'three stretches, no paused steps');
+    final draft = await tester.runAsync(
+      () => SettingsRepository(db).watch(SettingKeys.walkDraft).first,
+    );
+    expect(draft, isNull);
 
+    await _show(tester, '4,820 of 6,000 steps');
+    await _tab(tester, 'Today');
     await _show(tester, 'Gentle walk');
-    expect(find.text('1 of 1 done'), findsOneWidget);
+    expect(find.text('1 of 2 done'), findsOneWidget);
     await _tab(tester, 'Journey');
     await tester.scrollUntilVisible(
       find.text('walk logged'),
@@ -78,8 +110,29 @@ void main() {
       scrollable: _list,
     );
     expect(find.text('walk logged'), findsOneWidget);
+  });
+
+  testWidgets("a walk left from yesterday goes to yesterday's log", (
+    tester,
+  ) async {
+    final yesterday = DateTime(2026, 10, 4, 23, 40);
+    final db = await pumpApp(
+      tester,
+      seed: (db) async {
+        await _seed(db);
+        await SettingsRepository(db)
+            .put(SettingKeys.walkDraft, WalkDraft.start(yesterday).encode());
+      },
+    );
     await _tab(tester, 'Sessions');
-    await _show(tester, '4,820 of 6,000 steps');
+    await _show(tester, 'Walk');
+    await tester.tap(find.text('Walk'));
+    await tester.pumpAndSettle();
+    expect(find.text('READY'), findsOneWidget);
+    final walk = (await _sessions(tester, db)).single;
+    expect((walk.startedAt, walk.durationSec), (yesterday, 20 * 60));
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('walk without Health access: no steps, a way to allow', (
@@ -97,7 +150,8 @@ void main() {
     steps.access = true;
     await tester.tap(find.text('Allow'));
     await tester.pumpAndSettle();
-    expect(find.text('1,420'), findsOneWidget);
+    expect(find.text('0'), findsOneWidget, reason: 'not started yet');
+    expect(find.text('4,820'), findsOneWidget);
     expect(
       find.text('Steps from Health Connect / Apple Health'),
       findsOneWidget,
@@ -141,6 +195,14 @@ void main() {
     expect(find.text('Step 1 of 7'), findsOneWidget);
     expect(find.text('Seated breathing'), findsOneWidget);
     expect(find.text('1:00'), findsOneWidget);
+    // The timer waits for Start; Finish comes with it.
+    expect(find.text('Finish'), findsNothing);
+    await tester.pump(const Duration(seconds: 30));
+    expect(find.text('1:00'), findsOneWidget);
+    await tester.tap(find.text('Start'));
+    await tester.pump();
+    expect(find.text('Pause'), findsOneWidget);
+    expect(find.text('Finish'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.textContaining('is on in Me'),
       200,
@@ -150,6 +212,8 @@ void main() {
 
     await tester.pump(const Duration(seconds: 61));
     expect(find.text('Step 2 of 7'), findsOneWidget);
+    await tester.drag(find.byType(Scrollable).last, const Offset(0, 2000));
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Cat–cow stretch'), findsWidgets);
     await tester.tap(find.byTooltip('Previous move'));
     await tester.pump();
@@ -161,6 +225,7 @@ void main() {
     // Through to the end.
     await tester.pump(const Duration(minutes: 9));
     expect(find.text('Done. Rest a moment.'), findsOneWidget);
+    await tester.ensureVisible(find.text('Finish'));
     await tester.tap(find.text('Finish'));
     await tester.pumpAndSettle();
     final logged = (await _sessions(tester, db)).single;

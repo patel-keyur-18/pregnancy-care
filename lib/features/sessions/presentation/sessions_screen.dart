@@ -16,8 +16,10 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/library_actions.dart';
+import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -336,18 +338,26 @@ class _LibraryRow extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final total = item.total;
+    // Progress is how far she has read, not the page she is on (v9).
+    final read = item.kind == LibraryKind.pdf
+        ? item.furthest + 1
+        : item.furthest;
     final progress = total == null || total == 0
         ? null
-        : ((item.position + 1) / total).clamp(0.0, 1.0);
+        : (read / total).clamp(0.0, 1.0);
+    final finished = progress == 1;
     final detail = switch (item.kind) {
       LibraryKind.pdf when total != null => [
         l10n.libraryPdf,
-        l10n.libraryPage(item.position + 1, total),
+        if (finished) l10n.libraryFinished else l10n.libraryPage(read, total),
       ],
       LibraryKind.pdf => [l10n.libraryPdf],
       LibraryKind.text when total != null => [
         l10n.libraryText,
-        l10n.libraryPercent(item.position * 100 ~/ total),
+        if (finished)
+          l10n.libraryFinished
+        else
+          l10n.libraryPercent(read * 100 ~/ total),
       ],
       LibraryKind.text => [l10n.libraryText],
       LibraryKind.audio => [
@@ -366,7 +376,7 @@ class _LibraryRow extends ConsumerWidget {
         onTap: () => openLibraryItem(context, ref, item),
         onLongPress: () => showLibraryItemActions(context, ref, item),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
           child: Row(
             spacing: 12,
             children: [
@@ -435,6 +445,20 @@ class _LibraryRow extends ConsumerWidget {
                   ],
                 ),
               ),
+              // Its own node: the Card would merge it into the row.
+              Semantics(
+                container: true,
+                child: IconButton(
+                  tooltip: l10n.libraryItemActions,
+                  onPressed: () => showLibraryItemActions(context, ref, item),
+                  icon: NmIcon(
+                    NavmaasIcon.more,
+                    size: 22,
+                    strokeWidth: 2.6,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -467,6 +491,7 @@ class _MoveAndBreathe extends ConsumerWidget {
       highRisk: pregnancy?.highRisk ?? false,
     );
     final steps = ref.watch(todayStepsProvider).value;
+    final walk = ref.watch(walkDraftProvider).value;
     final goal = ref.watch(stepGoalProvider).value ?? defaultStepGoal;
 
     final tiles = [
@@ -475,7 +500,11 @@ class _MoveAndBreathe extends ConsumerWidget {
         background: scheme.primaryContainer,
         foreground: scheme.onPrimaryContainer,
         title: l10n.walkTile,
-        subtitle: steps != null && steps > 0
+        subtitle: walk != null
+            ? (walk.running ? l10n.walkTileWalking : l10n.walkTilePaused)(
+                clockText(walk.seconds(clockNow())),
+              )
+            : steps != null && steps > 0
             ? l10n.walkTileSteps(formatSteps(steps), formatSteps(goal))
             : l10n.walkEasy(walkGoalMinutes),
         onTap: () => context.push('/walk'),

@@ -140,3 +140,46 @@ final class SessionsBetweenFamily extends $Family
   @override
   String toString() => r'sessionsBetweenProvider';
 }
+
+/// The walk she started and hasn't finished, if any.
+
+@ProviderFor(walkDraft)
+final walkDraftProvider = WalkDraftProvider._();
+
+/// The walk she started and hasn't finished, if any.
+
+final class WalkDraftProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<WalkDraft?>,
+          WalkDraft?,
+          Stream<WalkDraft?>
+        >
+    with $FutureModifier<WalkDraft?>, $StreamProvider<WalkDraft?> {
+  /// The walk she started and hasn't finished, if any.
+  WalkDraftProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'walkDraftProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$walkDraftHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<WalkDraft?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<WalkDraft?> create(Ref ref) {
+    return walkDraft(ref);
+  }
+}
+
+String _$walkDraftHash() => r'740501d697f5d5513e894ec5cd4d1d068612b9a7';

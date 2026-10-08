@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -18,7 +21,8 @@ import 'package:navmaas/features/sessions/presentation/walk_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// "Today's gentle plan" (prototype Today): today's supplement doses, a
-/// reading session once there's a book, and a gentle walk.
+/// reading session (ticked by a session in the reader, or by hand for a
+/// printed book) and a gentle walk.
 class TodayPlanCard extends ConsumerWidget {
   const new({super.key});
 
@@ -42,6 +46,12 @@ class TodayPlanCard extends ConsumerWidget {
     final todaySessions =
         ref.watch(sessionsBetweenProvider(day, tomorrow)).value ?? const [];
     final readToday = todaySessions.any((s) => s.type == SessionType.reading);
+    // Reading ticked by hand (a printed book, Plan decision 55): a reading
+    // session with no library item.
+    final readByHand = todaySessions
+        .where((s) => s.type == SessionType.reading && s.libraryItemId == null)
+        .toList();
+    final pregnancyId = ref.watch(activePregnancyProvider).value?.id;
     final walkedToday = todaySessions.any((s) => s.type == SessionType.walk);
 
     final rows = <Widget>[
@@ -60,21 +70,44 @@ class TodayPlanCard extends ConsumerWidget {
                 taken: !taken.contains(slot.key),
               ),
         ),
-      if (book != null)
-        _PlanRow(
-          tile: IconTile(
-            background: scheme.tertiaryContainer,
-            child: NmIcon(
-              NavmaasIcon.book,
-              size: 20,
-              color: scheme.onTertiaryContainer,
-            ),
+      _PlanRow(
+        tile: IconTile(
+          background: scheme.tertiaryContainer,
+          child: NmIcon(
+            NavmaasIcon.book,
+            size: 20,
+            color: scheme.onTertiaryContainer,
           ),
-          title: l10n.planReading,
-          subtitle: l10n.minutesTitle(readGoalMinutes, book.title),
-          done: readToday,
-          onOpen: () => openLibraryItem(context, ref, book),
         ),
+        title: l10n.planReading,
+        subtitle: book == null
+            ? l10n.planReadingAnyBook(readGoalMinutes)
+            : l10n.minutesTitle(readGoalMinutes, book.title),
+        done: readToday,
+        onOpen: () => book == null
+            ? context.go('/sessions')
+            : openLibraryItem(context, ref, book),
+        // Read in the app, it stays ticked; by hand, it can be unticked.
+        onToggle: pregnancyId == null || (readToday && readByHand.isEmpty)
+            ? null
+            : () {
+                final sessions = ref.read(sessionRepositoryProvider);
+                if (readByHand.isEmpty) {
+                  unawaited(
+                    sessions.log(
+                      pregnancyId: pregnancyId,
+                      type: SessionType.reading,
+                      startedAt: clockNow(),
+                      durationSec: readGoalMinutes * 60,
+                    ),
+                  );
+                } else {
+                  for (final s in readByHand) {
+                    unawaited(sessions.remove(s.id));
+                  }
+                }
+              },
+      ),
       // Walking is always open (Plan decision 27).
       _PlanRow(
         tile: IconTile(
@@ -93,7 +126,7 @@ class TodayPlanCard extends ConsumerWidget {
     ];
     final done = [
       for (final s in slots) taken.contains(s.key),
-      if (book != null) readToday,
+      readToday,
       walkedToday,
     ].where((d) => d).length;
 
@@ -135,8 +168,9 @@ class TodayPlanCard extends ConsumerWidget {
   }
 }
 
-/// One plan item. [onToggle] ticks it by hand (supplements); without it
-/// the circle only shows whether it's done (reading is ticked by a session).
+/// One plan item. [onToggle] ticks it by hand (supplements, reading); without
+/// it the circle only shows whether it's done (the walk, or reading done in
+/// the reader).
 class _PlanRow extends StatelessWidget {
   const new({
     required this.tile,

@@ -4,13 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'package:navmaas/core/utils/clock.dart';
 
 /// A once-a-second clock for a timed session screen: [seconds] counts while
-/// not [paused]. In the background it stops, except for a walk
-/// ([countWhileHidden]), whose time away is added back on return.
+/// not [paused]. In the background it stops, except with
+/// [countWhileHidden], whose time away is added back on return.
 mixin SessionClock<T extends StatefulWidget> on State<T> {
   int seconds = 0;
   bool paused = false;
 
-  /// True for walks: the phone is in a pocket with the screen off.
+  /// True for the kick counter and contraction timer, which time on with
+  /// the screen off. (The walk keeps its own time in `WalkDraft`.)
   bool get countWhileHidden => false;
 
   /// Called on every counted second (inside setState).

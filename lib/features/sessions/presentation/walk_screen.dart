@@ -13,6 +13,7 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/domain/walk_draft.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -23,9 +24,12 @@ const walkGoalMinutes = 20;
 String formatSteps(int steps) =>
     NumberFormat.decimalPattern('en_IN').format(steps);
 
-/// Walk (prototype "Walk session"): a timer that keeps counting with the
-/// screen off, and steps from Apple Health / Health Connect. Always open
-/// (Plan decision 27). Leaving logs the walk from one minute.
+/// Walk (prototype "Walk session"): Start, then Pause / Resume and Finish
+/// walk. The walk is kept in `settings` until Finish, so leaving (which
+/// pauses it) and coming back carries on where she was; with the screen off
+/// it keeps counting. Steps come from Apple Health / Health Connect, counted
+/// only while she walks. Always open (Plan decision 27). Finish logs the
+/// walk from one minute.
 class WalkScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -33,28 +37,54 @@ class WalkScreen extends ConsumerStatefulWidget {
   ConsumerState<WalkScreen> createState() => _WalkScreenState();
 }
 
-class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
+class _WalkScreenState extends ConsumerState<WalkScreen> {
   late final SessionRepository _sessions;
+  late final SettingsRepository _settings;
   late final StepSource _steps;
   late final String? _pregnancyId;
-  final DateTime _startedAt = clockNow();
+  Timer? _tick;
   Timer? _poll;
+  WalkDraft? _draft;
+  bool _loaded = false;
   bool? _access;
   int? _walkSteps;
   int? _todaySteps;
 
   @override
-  bool get countWhileHidden => true;
-
-  @override
   void initState() {
     super.initState();
     _sessions = ref.read(sessionRepositoryProvider);
+    _settings = ref.read(settingsRepositoryProvider);
     _steps = ref.read(stepSourceProvider);
     _pregnancyId = ref.read(activePregnancyProvider).value?.id;
-    startClock();
+    // Carry on with a walk she left; once, from the saved draft.
+    ref.listenManual(walkDraftProvider, (_, next) {
+      if (_loaded || next is! AsyncData<WalkDraft?>) return;
+      _loaded = true;
+      unawaited(_load(next.value));
+    }, fireImmediately: true);
     unawaited(_askAndRead());
-    _poll = Timer.periodic(const Duration(seconds: 30), (_) => _readSteps());
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (_draft?.running ?? false) setState(() {});
+    });
+    _poll = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (_draft?.running ?? false) unawaited(_readSteps());
+    });
+  }
+
+  Future<void> _load(WalkDraft? saved) async {
+    var draft = saved;
+    final now = clockNow();
+    // A walk left from an earlier day goes to that day; today starts fresh.
+    if (draft != null &&
+        draft.startedBefore(DateTime(now.year, now.month, now.day))) {
+      await _log(draft.endOfItsDay());
+      await _settings.remove(SettingKeys.walkDraft);
+      draft = null;
+    }
+    if (!mounted) return;
+    setState(() => _draft = draft);
+    await _readSteps();
   }
 
   Future<void> _askAndRead() async {
@@ -64,10 +94,22 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
     await _readSteps();
   }
 
+  /// Steps over the stretches she walked; null without Health access.
+  Future<int?> _stepsOf(WalkDraft draft, DateTime now) async {
+    var total = 0;
+    for (final (from, to) in draft.stretches) {
+      final n = await _steps.steps(from, to ?? now);
+      if (n == null) return null;
+      total += n;
+    }
+    return total;
+  }
+
   Future<void> _readSteps() async {
     if (_access != true) return;
     final now = clockNow();
-    final walk = await _steps.steps(_startedAt, now);
+    final draft = _draft;
+    final walk = draft == null ? 0 : await _stepsOf(draft, now);
     final today = await _steps.steps(
       DateTime(now.year, now.month, now.day),
       now,
@@ -81,19 +123,45 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
     }
   }
 
+  void _save(WalkDraft draft) {
+    setState(() => _draft = draft);
+    unawaited(_settings.put(SettingKeys.walkDraft, draft.encode()));
+    unawaited(_readSteps());
+  }
+
+  /// Logs [draft] (a paused walk) from one minute.
+  Future<void> _log(WalkDraft draft) async {
+    final seconds = draft.seconds(clockNow());
+    if (seconds < 60 || _pregnancyId == null) return;
+    final steps = _access == false ? null : await _stepsOf(draft, clockNow());
+    await _sessions.log(
+      pregnancyId: _pregnancyId,
+      type: SessionType.walk,
+      startedAt: draft.startedAt,
+      durationSec: seconds,
+      steps: steps,
+    );
+  }
+
+  Future<void> _finish() async {
+    final draft = _draft?.pause(clockNow());
+    _draft = null;
+    if (draft != null) {
+      await _log(draft);
+      await _settings.remove(SettingKeys.walkDraft);
+    }
+    if (mounted) context.pop();
+  }
+
   @override
   void dispose() {
-    stopClock();
+    _tick?.cancel();
     _poll?.cancel();
-    if (seconds >= 60 && _pregnancyId != null) {
+    // Leaving pauses the walk; it waits for her in settings.
+    final draft = _draft;
+    if (draft != null && draft.running) {
       unawaited(
-        _sessions.log(
-          pregnancyId: _pregnancyId,
-          type: SessionType.walk,
-          startedAt: _startedAt,
-          durationSec: seconds,
-          steps: _walkSteps,
-        ),
+        _settings.put(SettingKeys.walkDraft, draft.pause(clockNow()).encode()),
       );
     }
     super.dispose();
@@ -124,6 +192,7 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final goal = ref.watch(stepGoalProvider).value ?? defaultStepGoal;
+    final draft = _draft;
     final caption = theme.textTheme.bodySmall!.copyWith(
       fontWeight: FontWeight.w700,
       color: scheme.outline,
@@ -215,7 +284,11 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
                         spacing: 4,
                         children: [
                           Text(
-                            paused ? l10n.pausedStatus : l10n.walkingStatus,
+                            switch (draft) {
+                              null => l10n.readyStatus,
+                              WalkDraft(running: true) => l10n.walkingStatus,
+                              _ => l10n.pausedStatus,
+                            },
                             style: theme.textTheme.bodySmall!.copyWith(
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.5,
@@ -225,7 +298,7 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
                           FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              clockText(seconds),
+                              clockText(draft?.seconds(clockNow()) ?? 0),
                               style: theme.textTheme.displayMedium!.copyWith(
                                 fontSize: 64,
                                 height: 72 / 64,
@@ -354,26 +427,31 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
               child: Row(
                 spacing: 10,
                 children: [
-                  Expanded(
-                    flex: 10,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(48, 56),
-                        backgroundColor: scheme.surface,
-                        side: BorderSide(
-                          width: 1.5,
-                          color: scheme.outlineVariant,
+                  if (draft != null)
+                    Expanded(
+                      flex: 10,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(48, 56),
+                          backgroundColor: scheme.surface,
+                          side: BorderSide(
+                            width: 1.5,
+                            color: scheme.outlineVariant,
+                          ),
+                          textStyle: theme.textTheme.labelLarge!.copyWith(
+                            fontSize: 16,
+                          ),
                         ),
-                        textStyle: theme.textTheme.labelLarge!.copyWith(
-                          fontSize: 16,
+                        onPressed: () => _save(
+                          draft.running
+                              ? draft.pause(clockNow())
+                              : draft.resume(clockNow()),
                         ),
-                      ),
-                      onPressed: () => setState(() => paused = !paused),
-                      child: Text(
-                        paused ? l10n.resumeButton : l10n.pauseButton,
+                        child: Text(
+                          draft.running ? l10n.pauseButton : l10n.resumeButton,
+                        ),
                       ),
                     ),
-                  ),
                   Expanded(
                     flex: 13,
                     child: FilledButton(
@@ -383,8 +461,13 @@ class _WalkScreenState extends ConsumerState<WalkScreen> with SessionClock {
                           fontSize: 16,
                         ),
                       ),
-                      onPressed: () => context.pop(),
-                      child: Text(l10n.finishWalk, textAlign: TextAlign.center),
+                      onPressed: draft == null
+                          ? () => _save(WalkDraft.start(clockNow()))
+                          : _finish,
+                      child: Text(
+                        draft == null ? l10n.startButton : l10n.finishWalk,
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
