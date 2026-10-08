@@ -41,6 +41,7 @@ part 'app_database.g.dart';
     SleepLogs,
     WaterLogs,
     AppLimits,
+    MediaLinks,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -62,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -112,6 +113,8 @@ class AppDatabase extends _$AppDatabase {
           'UPDATE library_item SET furthest = position',
         );
       },
+      // v10 (E2): links to YouTube, YouTube Music and Spotify.
+      from9To10: (m, schema) => m.createTable(schema.mediaLink),
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

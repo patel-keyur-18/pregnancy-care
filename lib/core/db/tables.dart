@@ -436,3 +436,16 @@ class DateOnlyConverter extends TypeConverter<DateTime, String> {
   @override
   String toSql(DateTime value) => value.toIso8601String().substring(0, 10);
 }
+
+/// A link she saved in the library (E2): YouTube, YouTube Music or Spotify.
+/// A tap opens it in that app, or the browser; Navmaas makes no network
+/// call. Not tied to a pregnancy.
+@DataClassName('MediaLink')
+class MediaLinks extends Table with BaseColumns {
+  @override
+  String get tableName => 'media_link';
+
+  TextColumn get title => text()();
+  TextColumn get url => text()();
+  DateTimeColumn get lastOpenedAt => dateTime().nullable()();
+}

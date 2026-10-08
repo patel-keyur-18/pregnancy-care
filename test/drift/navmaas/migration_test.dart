@@ -9,6 +9,7 @@ import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
 import 'generated/schema_v8.dart' as v8;
+import 'generated/schema_v9.dart' as v9;
 
 // After changing tables: bump `schemaVersion`, write the migration, then run
 // `dart run drift_dev make-migrations` to dump the new schema and helpers.
@@ -172,6 +173,31 @@ void main() {
     await verifier.migrateAndValidate(db, 9);
     final item = await db.select(db.libraryItems).getSingle();
     expect((item.position, item.furthest, item.total), (1, 1, 2));
+    await db.close();
+  });
+
+  test('v9 → v10 keeps the library and adds empty links', () async {
+    final schema = await verifier.schemaAt(9);
+    final old = v9.DatabaseAtV9(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.libraryItem)
+        .insert(
+          v9.LibraryItemCompanion.insert(
+            id: 'a1',
+            createdAt: at,
+            updatedAt: at,
+            kind: 'audio',
+            title: 'Om',
+            fileName: 'a1.mp3',
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 10);
+    expect((await db.select(db.libraryItems).getSingle()).title, 'Om');
+    expect(await db.select(db.mediaLinks).get(), isEmpty);
     await db.close();
   });
 }
