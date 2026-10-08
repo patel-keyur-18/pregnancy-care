@@ -18,6 +18,7 @@ import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
 import '../helpers.dart';
@@ -36,6 +37,10 @@ Future<void> _seed(AppDatabase db) async {
   await library.setProgress(book!.id, position: 420, total: 1000);
   final audio = await library.import('om_chanting.mp3', Stream.value([0]));
   await library.setDuration(audio!.id, 600);
+  await MediaLinkRepository(db).add(
+    title: 'Lullaby playlist',
+    url: Uri.parse('https://open.spotify.com/playlist/abc'),
+  );
 }
 
 /// A week of wellbeing logs, like the prototype's Wellbeing board.

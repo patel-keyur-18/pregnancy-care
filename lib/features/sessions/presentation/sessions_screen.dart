@@ -16,7 +16,9 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/domain/media_link.dart';
 import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
 import 'package:navmaas/features/sessions/presentation/library_actions.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
@@ -120,6 +122,12 @@ class _PathCard extends ConsumerWidget {
     final items = ref.watch(libraryItemsProvider).value ?? const [];
     final book = items.where((i) => i.kind != LibraryKind.audio).firstOrNull;
     final audio = items.where((i) => i.kind == LibraryKind.audio).firstOrNull;
+    final link = ref.watch(mediaLinksProvider).value?.firstOrNull;
+    // Listen: whichever of her audio and links she opened last (E2).
+    final listenLink =
+        link != null && (audio == null || _byRecency(link, audio) > 0)
+        ? link
+        : null;
     final activity = activityOfTheDay(
       ref.watch(activitiesProvider).value ?? const [],
       snapshot?.gaDays ?? 0,
@@ -179,7 +187,9 @@ class _PathCard extends ConsumerWidget {
               _PathTile(
                 icon: NavmaasIcon.headphones,
                 title: l10n.pathListen,
-                subtitle: audio == null
+                subtitle: listenLink != null
+                    ? listenLink.title
+                    : audio == null
                     ? l10n.addAudio
                     : switch (audio.durationSec) {
                         final s? => l10n.minutesTitle(
@@ -188,8 +198,10 @@ class _PathCard extends ConsumerWidget {
                         ),
                         null => audio.title,
                       },
-                onTap: () => audio == null
-                    ? addToLibrary(context, ref, audio: true)
+                onTap: () => listenLink != null
+                    ? openMediaLink(context, ref, listenLink)
+                    : audio == null
+                    ? showAddToLibrary(context, ref, listenOnly: true)
                     : openLibraryItem(context, ref, audio),
               ),
             ),
@@ -303,9 +315,15 @@ class _LibraryCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final items = ref.watch(libraryItemsProvider).value ?? const [];
+    final links = ref.watch(mediaLinksProvider).value ?? const [];
+    // Books, audio and links together, most recently opened first.
+    final rows = [
+      for (final i in items) (i as Object, _LibraryRow(i) as Widget),
+      for (final l in links) (l as Object, _LinkRow(l) as Widget),
+    ]..sort((a, b) => _byRecency(b.$1, a.$1));
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: items.isEmpty
+      child: rows.isEmpty
           ? Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
@@ -317,9 +335,9 @@ class _LibraryCard extends ConsumerWidget {
             )
           : Column(
               children: [
-                for (final (i, item) in items.indexed) ...[
+                for (final (i, (_, row)) in rows.indexed) ...[
                   if (i > 0) const Divider(height: 1),
-                  _LibraryRow(item),
+                  row,
                 ],
               ],
             ),
@@ -451,6 +469,107 @@ class _LibraryRow extends ConsumerWidget {
                 child: IconButton(
                   tooltip: l10n.libraryItemActions,
                   onPressed: () => showLibraryItemActions(context, ref, item),
+                  icon: NmIcon(
+                    NavmaasIcon.more,
+                    size: 22,
+                    strokeWidth: 2.6,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Orders like the library (a library item or a link): opened ones by when,
+/// above the never-opened by when they were added. Positive when [a] is
+/// the more recent.
+int _byRecency(Object a, Object b) {
+  (DateTime?, DateTime) times(Object row) => switch (row) {
+    LibraryItem(:final lastOpenedAt, :final createdAt) => (
+      lastOpenedAt,
+      createdAt,
+    ),
+    MediaLink(:final lastOpenedAt, :final createdAt) => (
+      lastOpenedAt,
+      createdAt,
+    ),
+    _ => throw ArgumentError(row),
+  };
+  final (openedA, madeA) = times(a);
+  final (openedB, madeB) = times(b);
+  if ((openedA == null) != (openedB == null)) return openedA == null ? -1 : 1;
+  return (openedA ?? madeA).compareTo(openedB ?? madeB);
+}
+
+/// A saved YouTube, YouTube Music or Spotify link: opens outside Navmaas.
+class _LinkRow extends ConsumerWidget {
+  const new(this.link);
+
+  final MediaLink link;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final service = switch (serviceOf(Uri.parse(link.url))) {
+      LinkService.youtubeMusic => l10n.serviceYoutubeMusic,
+      LinkService.spotify => l10n.serviceSpotify,
+      _ => l10n.serviceYoutube,
+    };
+    return Semantics(
+      customSemanticsActions: {
+        CustomSemanticsAction(label: l10n.libraryItemActions): () =>
+            showLinkActions(context, ref, link),
+      },
+      child: InkWell(
+        onTap: () => openMediaLink(context, ref, link),
+        onLongPress: () => showLinkActions(context, ref, link),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+          child: Row(
+            spacing: 12,
+            children: [
+              IconTile(
+                size: 44,
+                background: scheme.tertiaryContainer,
+                child: NmIcon(
+                  NavmaasIcon.external,
+                  size: 20,
+                  color: scheme.onTertiaryContainer,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      link.title,
+                      style: theme.textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      l10n.libraryLink(service),
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: scheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Its own node: the Card would merge it into the row.
+              Semantics(
+                container: true,
+                child: IconButton(
+                  tooltip: l10n.libraryItemActions,
+                  onPressed: () => showLinkActions(context, ref, link),
                   icon: NmIcon(
                     NavmaasIcon.more,
                     size: 22,

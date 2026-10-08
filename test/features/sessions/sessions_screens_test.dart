@@ -221,6 +221,137 @@ void main() {
     expect(find.text('short'), findsNothing);
   });
 
+  testWidgets('links: add, open in their app, edit and remove', (tester) async {
+    final opened = <Uri>[];
+    var canOpen = true;
+    final db = await pumpApp(
+      tester,
+      library: library,
+      seed: _seed(library),
+      openLink: (uri) async {
+        opened.add(uri);
+        return canOpen;
+      },
+    );
+    await _tab(tester, 'Sessions');
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    expect(find.text('YouTube, YouTube Music or Spotify'), findsOneWidget);
+    await tester.tap(find.text('A link'));
+    await tester.pumpAndSettle();
+    expect(find.text('Add a link'), findsOneWidget);
+
+    // Only YouTube, YouTube Music and Spotify, and a title.
+    await tester.enterText(find.byType(TextField).last, 'example.com/song');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Add a title.'), findsOneWidget);
+    expect(
+      find.text('Paste a YouTube, YouTube Music or Spotify link.'),
+      findsOneWidget,
+    );
+    await tester.enterText(find.byType(TextField).first, 'Lullaby playlist');
+    await tester.enterText(
+      find.byType(TextField).last,
+      'open.spotify.com/playlist/abc',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('Lullaby playlist'), findsNWidgets(2), reason: 'Listen');
+    expect(find.text('Spotify · opens outside Navmaas'), findsOneWidget);
+    var link = (await tester.runAsync(
+      () => db.select(db.mediaLinks).getSingle(),
+    ))!;
+    expect(link.url, 'https://open.spotify.com/playlist/abc');
+
+    // A tap opens it outside Navmaas.
+    await tester.tap(find.text('Spotify · opens outside Navmaas'));
+    await tester.pumpAndSettle();
+    expect(opened.single, Uri.parse('https://open.spotify.com/playlist/abc'));
+    canOpen = false;
+    await tester.tap(find.text('Lullaby playlist').first);
+    await tester.pumpAndSettle();
+    expect(find.text("Couldn't open this link."), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5)); // the snackbar goes
+    await tester.pumpAndSettle();
+
+    // ⋯ → Edit link.
+    await tester.tap(find.byTooltip('Rename or remove'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit link'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Evening raga');
+    await tester.enterText(
+      find.byType(TextField).last,
+      'https://music.youtube.com/playlist?list=x',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('YouTube Music · opens outside Navmaas'), findsOneWidget);
+    link = (await tester.runAsync(() => db.select(db.mediaLinks).getSingle()))!;
+    expect(link.title, 'Evening raga');
+
+    // ⋯ → Remove.
+    await tester.tap(find.byTooltip('Rename or remove'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Remove from library'));
+    await tester.pumpAndSettle();
+    expect(find.text('This removes the link from Navmaas.'), findsOneWidget);
+    await tester.tap(find.text('Remove from library').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Evening raga'), findsNothing);
+    expect(find.text('Add audio'), findsOneWidget);
+  });
+
+  testWidgets('Listen with nothing added offers audio or a link', (
+    tester,
+  ) async {
+    await pumpApp(tester, library: library, seed: _seed(library));
+    await _tab(tester, 'Sessions');
+    await tester.tap(find.text('Add audio'));
+    await tester.pumpAndSettle();
+    expect(find.text('Audio (MP3, M4A, AAC or WAV)'), findsOneWidget);
+    expect(find.text('A link'), findsOneWidget);
+    expect(find.text('A book (PDF or text)'), findsNothing);
+  });
+
+  testWidgets('audio: Replace file keeps the title, swaps the file', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      library: library,
+      seed: _seed(library, {'om_chanting.mp3': 'old'}),
+      pickFile: (extensions) async {
+        expect(extensions, ['mp3', 'm4a', 'aac', 'wav']);
+        return (name: 'new_take.m4a', bytes: Stream.value(utf8.encode('new')));
+      },
+    );
+    final before = (await tester.runAsync(
+      () => db.select(db.libraryItems).getSingle(),
+    ))!;
+    await _tab(tester, 'Sessions');
+    await tester.scrollUntilVisible(
+      find.text('om chanting').last,
+      200,
+      scrollable: _list,
+    );
+    await tester.longPress(find.text('om chanting').last);
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a new audio file; the title stays'), findsOne);
+    await tester.tap(find.text('Replace file'));
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
+    final after = (await tester.runAsync(
+      () => db.select(db.libraryItems).getSingle(),
+    ))!;
+    expect(after.title, 'om chanting');
+    expect(after.fileName, endsWith('.m4a'));
+    expect(after.durationSec, isNull);
+    expect(File('${library.path}/${after.fileName}').readAsStringSync(), 'new');
+    expect(File('${library.path}/${before.fileName}').existsSync(), isFalse);
+  });
+
   testWidgets('reader: night colours by switch, and the place is kept', (
     tester,
   ) async {

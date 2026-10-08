@@ -141,6 +141,12 @@ enum NavmaasIcon {
     'M9 20.5h6',
     'M9.5 8c0-1.2 1-1.6 1-2.8M13.5 8c0-1.2 1-1.6 1-2.8',
   ]),
+  // A box with an arrow out: a link that opens outside Navmaas (E2).
+  external([
+    'M14 4h6v6',
+    'M20 4l-9 9',
+    'M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10',
+  ]),
   // Three dots: a library row's Rename / Remove.
   more([
     'M5.5 11.4a.6.6 0 1 0 0 1.2a.6.6 0 1 0 0-1.2z',
