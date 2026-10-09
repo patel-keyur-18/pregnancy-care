@@ -29,6 +29,9 @@ abstract final class SettingKeys {
   /// for off.
   static const backupDay = 'backup_day';
 
+  /// Backups include voice letters (E3; default off, remembered).
+  static const backupVoice = 'backup_voice';
+
   /// Screen Rest rules (ARCHITECTURE §8). Bedtime rest switches quiet hours
   /// on or off (default on).
   static const quietOn = 'quiet_on';
@@ -180,3 +183,10 @@ Stream<int> backupDay(Ref ref) => ref
     .watch(settingsRepositoryProvider)
     .watch(SettingKeys.backupDay)
     .map((v) => int.tryParse(v ?? '') ?? DateTime.sunday);
+
+/// "Include voice letters" in backups (E3; default off).
+@riverpod
+Stream<bool> backupVoice(Ref ref) => ref
+    .watch(settingsRepositoryProvider)
+    .watch(SettingKeys.backupVoice)
+    .map((v) => v == 'true');

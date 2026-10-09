@@ -8291,6 +8291,28 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _voiceFileMeta = const VerificationMeta(
+    'voiceFile',
+  );
+  @override
+  late final GeneratedColumn<String> voiceFile = GeneratedColumn<String>(
+    'voice_file',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _voiceSecMeta = const VerificationMeta(
+    'voiceSec',
+  );
+  @override
+  late final GeneratedColumn<int> voiceSec = GeneratedColumn<int>(
+    'voice_sec',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -8299,6 +8321,8 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
     deletedAt,
     pregnancyId,
     body,
+    voiceFile,
+    voiceSec,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8352,6 +8376,18 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
     } else if (isInserting) {
       context.missing(_bodyMeta);
     }
+    if (data.containsKey('voice_file')) {
+      context.handle(
+        _voiceFileMeta,
+        voiceFile.isAcceptableOrUnknown(data['voice_file']!, _voiceFileMeta),
+      );
+    }
+    if (data.containsKey('voice_sec')) {
+      context.handle(
+        _voiceSecMeta,
+        voiceSec.isAcceptableOrUnknown(data['voice_sec']!, _voiceSecMeta),
+      );
+    }
     return context;
   }
 
@@ -8385,6 +8421,14 @@ class $LettersTable extends Letters with TableInfo<$LettersTable, Letter> {
         DriftSqlType.string,
         data['${effectivePrefix}body'],
       )!,
+      voiceFile: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}voice_file'],
+      ),
+      voiceSec: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}voice_sec'],
+      ),
     );
   }
 
@@ -8400,7 +8444,14 @@ class Letter extends DataClass implements Insertable<Letter> {
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final String pregnancyId;
+
+  /// Her words; empty for a letter that is only a voice note.
   final String body;
+
+  /// Its voice note (E3, v11): the encrypted file in `db/voice/` and its
+  /// length, or null.
+  final String? voiceFile;
+  final int? voiceSec;
   const Letter({
     required this.id,
     required this.createdAt,
@@ -8408,6 +8459,8 @@ class Letter extends DataClass implements Insertable<Letter> {
     this.deletedAt,
     required this.pregnancyId,
     required this.body,
+    this.voiceFile,
+    this.voiceSec,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -8420,6 +8473,12 @@ class Letter extends DataClass implements Insertable<Letter> {
     }
     map['pregnancy_id'] = Variable<String>(pregnancyId);
     map['body'] = Variable<String>(body);
+    if (!nullToAbsent || voiceFile != null) {
+      map['voice_file'] = Variable<String>(voiceFile);
+    }
+    if (!nullToAbsent || voiceSec != null) {
+      map['voice_sec'] = Variable<int>(voiceSec);
+    }
     return map;
   }
 
@@ -8433,6 +8492,12 @@ class Letter extends DataClass implements Insertable<Letter> {
           : Value(deletedAt),
       pregnancyId: Value(pregnancyId),
       body: Value(body),
+      voiceFile: voiceFile == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voiceFile),
+      voiceSec: voiceSec == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voiceSec),
     );
   }
 
@@ -8448,6 +8513,8 @@ class Letter extends DataClass implements Insertable<Letter> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
       body: serializer.fromJson<String>(json['body']),
+      voiceFile: serializer.fromJson<String?>(json['voiceFile']),
+      voiceSec: serializer.fromJson<int?>(json['voiceSec']),
     );
   }
   @override
@@ -8460,6 +8527,8 @@ class Letter extends DataClass implements Insertable<Letter> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'pregnancyId': serializer.toJson<String>(pregnancyId),
       'body': serializer.toJson<String>(body),
+      'voiceFile': serializer.toJson<String?>(voiceFile),
+      'voiceSec': serializer.toJson<int?>(voiceSec),
     };
   }
 
@@ -8470,6 +8539,8 @@ class Letter extends DataClass implements Insertable<Letter> {
     Value<DateTime?> deletedAt = const Value.absent(),
     String? pregnancyId,
     String? body,
+    Value<String?> voiceFile = const Value.absent(),
+    Value<int?> voiceSec = const Value.absent(),
   }) => Letter(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -8477,6 +8548,8 @@ class Letter extends DataClass implements Insertable<Letter> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     pregnancyId: pregnancyId ?? this.pregnancyId,
     body: body ?? this.body,
+    voiceFile: voiceFile.present ? voiceFile.value : this.voiceFile,
+    voiceSec: voiceSec.present ? voiceSec.value : this.voiceSec,
   );
   Letter copyWithCompanion(LettersCompanion data) {
     return Letter(
@@ -8488,6 +8561,8 @@ class Letter extends DataClass implements Insertable<Letter> {
           ? data.pregnancyId.value
           : this.pregnancyId,
       body: data.body.present ? data.body.value : this.body,
+      voiceFile: data.voiceFile.present ? data.voiceFile.value : this.voiceFile,
+      voiceSec: data.voiceSec.present ? data.voiceSec.value : this.voiceSec,
     );
   }
 
@@ -8499,14 +8574,24 @@ class Letter extends DataClass implements Insertable<Letter> {
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('pregnancyId: $pregnancyId, ')
-          ..write('body: $body')
+          ..write('body: $body, ')
+          ..write('voiceFile: $voiceFile, ')
+          ..write('voiceSec: $voiceSec')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, createdAt, updatedAt, deletedAt, pregnancyId, body);
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    body,
+    voiceFile,
+    voiceSec,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8516,7 +8601,9 @@ class Letter extends DataClass implements Insertable<Letter> {
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.pregnancyId == this.pregnancyId &&
-          other.body == this.body);
+          other.body == this.body &&
+          other.voiceFile == this.voiceFile &&
+          other.voiceSec == this.voiceSec);
 }
 
 class LettersCompanion extends UpdateCompanion<Letter> {
@@ -8526,6 +8613,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
   final Value<DateTime?> deletedAt;
   final Value<String> pregnancyId;
   final Value<String> body;
+  final Value<String?> voiceFile;
+  final Value<int?> voiceSec;
   final Value<int> rowid;
   const LettersCompanion({
     this.id = const Value.absent(),
@@ -8534,6 +8623,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
     this.deletedAt = const Value.absent(),
     this.pregnancyId = const Value.absent(),
     this.body = const Value.absent(),
+    this.voiceFile = const Value.absent(),
+    this.voiceSec = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LettersCompanion.insert({
@@ -8543,6 +8634,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
     this.deletedAt = const Value.absent(),
     required String pregnancyId,
     required String body,
+    this.voiceFile = const Value.absent(),
+    this.voiceSec = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : pregnancyId = Value(pregnancyId),
        body = Value(body);
@@ -8553,6 +8646,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
     Expression<DateTime>? deletedAt,
     Expression<String>? pregnancyId,
     Expression<String>? body,
+    Expression<String>? voiceFile,
+    Expression<int>? voiceSec,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -8562,6 +8657,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (pregnancyId != null) 'pregnancy_id': pregnancyId,
       if (body != null) 'body': body,
+      if (voiceFile != null) 'voice_file': voiceFile,
+      if (voiceSec != null) 'voice_sec': voiceSec,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8573,6 +8670,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
     Value<DateTime?>? deletedAt,
     Value<String>? pregnancyId,
     Value<String>? body,
+    Value<String?>? voiceFile,
+    Value<int?>? voiceSec,
     Value<int>? rowid,
   }) {
     return LettersCompanion(
@@ -8582,6 +8681,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
       deletedAt: deletedAt ?? this.deletedAt,
       pregnancyId: pregnancyId ?? this.pregnancyId,
       body: body ?? this.body,
+      voiceFile: voiceFile ?? this.voiceFile,
+      voiceSec: voiceSec ?? this.voiceSec,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8607,6 +8708,12 @@ class LettersCompanion extends UpdateCompanion<Letter> {
     if (body.present) {
       map['body'] = Variable<String>(body.value);
     }
+    if (voiceFile.present) {
+      map['voice_file'] = Variable<String>(voiceFile.value);
+    }
+    if (voiceSec.present) {
+      map['voice_sec'] = Variable<int>(voiceSec.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8622,6 +8729,8 @@ class LettersCompanion extends UpdateCompanion<Letter> {
           ..write('deletedAt: $deletedAt, ')
           ..write('pregnancyId: $pregnancyId, ')
           ..write('body: $body, ')
+          ..write('voiceFile: $voiceFile, ')
+          ..write('voiceSec: $voiceSec, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -20482,6 +20591,8 @@ typedef $$LettersTableCreateCompanionBuilder = LettersCompanion Function({
   Value<DateTime?> deletedAt,
   required String pregnancyId,
   required String body,
+  Value<String?> voiceFile,
+  Value<int?> voiceSec,
   Value<int> rowid,
 });
 typedef $$LettersTableUpdateCompanionBuilder = LettersCompanion Function({
@@ -20491,6 +20602,8 @@ typedef $$LettersTableUpdateCompanionBuilder = LettersCompanion Function({
   Value<DateTime?> deletedAt,
   Value<String> pregnancyId,
   Value<String> body,
+  Value<String?> voiceFile,
+  Value<int?> voiceSec,
   Value<int> rowid,
 });
 
@@ -20547,6 +20660,16 @@ class $$LettersTableFilterComposer
 
   ColumnFilters<String> get body => $composableBuilder(
     column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voiceFile => $composableBuilder(
+    column: $table.voiceFile,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get voiceSec => $composableBuilder(
+    column: $table.voiceSec,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20608,6 +20731,16 @@ class $$LettersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get voiceFile => $composableBuilder(
+    column: $table.voiceFile,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get voiceSec => $composableBuilder(
+    column: $table.voiceSec,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PregnanciesTableOrderingComposer get pregnancyId {
     final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -20655,6 +20788,12 @@ class $$LettersTableAnnotationComposer
 
   GeneratedColumn<String> get body =>
       $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get voiceFile =>
+      $composableBuilder(column: $table.voiceFile, builder: (column) => column);
+
+  GeneratedColumn<int> get voiceSec =>
+      $composableBuilder(column: $table.voiceSec, builder: (column) => column);
 
   $$PregnanciesTableAnnotationComposer get pregnancyId {
     final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
@@ -20714,6 +20853,8 @@ class $$LettersTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String> pregnancyId = const Value.absent(),
                 Value<String> body = const Value.absent(),
+                Value<String?> voiceFile = const Value.absent(),
+                Value<int?> voiceSec = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LettersCompanion(
                 id: id,
@@ -20722,6 +20863,8 @@ class $$LettersTableTableManager
                 deletedAt: deletedAt,
                 pregnancyId: pregnancyId,
                 body: body,
+                voiceFile: voiceFile,
+                voiceSec: voiceSec,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -20732,6 +20875,8 @@ class $$LettersTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 required String pregnancyId,
                 required String body,
+                Value<String?> voiceFile = const Value.absent(),
+                Value<int?> voiceSec = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LettersCompanion.insert(
                 id: id,
@@ -20740,6 +20885,8 @@ class $$LettersTableTableManager
                 deletedAt: deletedAt,
                 pregnancyId: pregnancyId,
                 body: body,
+                voiceFile: voiceFile,
+                voiceSec: voiceSec,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

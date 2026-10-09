@@ -165,7 +165,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 10));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 11));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -231,6 +231,32 @@ void main() {
     expect(File(kept.single.path).readAsStringSync(), 'Mine');
   });
 
+  test('voice letters go in only when she includes them', () async {
+    final voice = Directory(p.join(a.dataDir.path, 'voice'));
+    File(p.join(voice.path, 'note.bin'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync([1, 2, 3]);
+    expect((await a.service.sizes()).voice, 3);
+
+    var made = await a.service.create(
+      password: 'correct horse',
+      includeLibrary: false,
+    );
+    await b.service.restore(made.file, 'correct horse');
+    expect(Directory(p.join(b.dataDir.path, 'voice')).existsSync(), isFalse);
+
+    made = await a.service.create(
+      password: 'correct horse',
+      includeLibrary: false,
+      includeVoice: true,
+    );
+    await b.service.restore(made.file, 'correct horse');
+    expect(
+      File(p.join(b.dataDir.path, 'voice', 'note.bin')).readAsBytesSync(),
+      [1, 2, 3],
+    );
+  });
+
   test('a wrong password changes nothing', () async {
     final made = await a.service.create(
       password: 'correct horse',
@@ -280,7 +306,8 @@ void main() {
   });
 
   // Backups from before M5 (schema 5), M7 (schema 6), M11 (schema 7),
-  // reading progress (schema 8) and links (schema 9).
+  // reading progress (schema 8), links (schema 9) and voice letters
+  // (schema 10).
   const wellbeingTables = [
     'mood_entry',
     'symptom_entry',
@@ -303,6 +330,7 @@ void main() {
     (7, ['app_limit', 'media_link']),
     (8, ['media_link']),
     (9, ['media_link']),
+    (10, <String>[]),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -313,6 +341,10 @@ void main() {
         await a.db.customStatement(
           'ALTER TABLE library_item DROP COLUMN furthest',
         );
+      }
+      // v11 added a letter's voice note.
+      for (final column in ['voice_file', 'voice_sec']) {
+        await a.db.customStatement('ALTER TABLE letter DROP COLUMN $column');
       }
       await a.db.customStatement('PRAGMA user_version = $version');
       final file = File(p.join(a.root.path, 'old.navmaas'));

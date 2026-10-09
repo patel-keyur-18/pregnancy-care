@@ -286,3 +286,41 @@ final class BackupDayProvider
 }
 
 String _$backupDayHash() => r'124a1d5139936cf7d2bdfc973750c96e30322828';
+
+/// "Include voice letters" in backups (E3; default off).
+
+@ProviderFor(backupVoice)
+final backupVoiceProvider = BackupVoiceProvider._();
+
+/// "Include voice letters" in backups (E3; default off).
+
+final class BackupVoiceProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
+    with $FutureModifier<bool>, $StreamProvider<bool> {
+  /// "Include voice letters" in backups (E3; default off).
+  BackupVoiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupVoiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupVoiceHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<bool> create(Ref ref) {
+    return backupVoice(ref);
+  }
+}
+
+String _$backupVoiceHash() => r'58f4065aadba959c3edebfb09355b5e7405274ac';
