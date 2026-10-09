@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.13 — decided 2026-10-04, updated 2026-10-08 (motion in §5; M3–M11, E1 and E2 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08) |
+| **Status** | v1.14 — decided 2026-10-04, updated 2026-10-09 (motion in §5; M3–M11 and E1–E3 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -215,7 +215,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (E2)
+## 8. Implementation status (E3)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -234,10 +234,10 @@ Deliberate, permanent differences:
 | Past test windows | (not shown) | "Weeks 6–10", not "Due" | No guilt for a window that has passed |
 | Reader subtitle | "Chapter 6 · The little lamp" | PDF: "Page 42 of 120"; text: none (the library row shows "42% read") | PDFs don't reliably mark chapters |
 | Library row | "chapter 6 of 14" | "page 42 of 120" (PDF) or "42% read" (text), counting how far she has read; "Finished" once she reaches the end, even after going back (E1) | Same reason; progress never goes backwards (Plan decision 56) |
+| Letter text box | A plain box | The app's outlined text field, in the reading font | One text-field style across the app |
 | Link dialog | Each box's label above it | The label floats inside the outlined box, as in every form in the app | One text-field style across the app |
 | Listen chips | "Sleep timer · 10 min" and "Downloaded" | Sleep timer only (tap: off → 10 → 20 → 30 min); 48 dp tall | Everything is already on the phone |
 | Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
-| Letters to baby | (not drawn) | A list of letters (date, first lines in Literata) and a writing screen, in the Visit screens' card style | Talk to baby needed somewhere to write |
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
 | Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
 | Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
