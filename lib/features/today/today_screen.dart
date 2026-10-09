@@ -15,6 +15,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/core/widgets/notice_box.dart';
+import 'package:navmaas/features/today/mood_scene_card.dart';
 import 'package:navmaas/features/today/next_visit_card.dart';
 import 'package:navmaas/features/today/screen_rest_card.dart';
 import 'package:navmaas/features/today/today_plan_card.dart';
@@ -56,6 +57,8 @@ class TodayScreen extends ConsumerWidget {
               size: ref.watch(contentPackProvider).value?[snapshot.weeks]?.size,
             ),
           const SizedBox(height: 16),
+          // Today's mood scene, once she has picked a mood (E4).
+          const MoodSceneCard(),
           const TodayPlanCard(),
           const WellbeingCard(),
           const NextVisitCard(),
