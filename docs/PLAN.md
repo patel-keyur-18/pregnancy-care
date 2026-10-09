@@ -86,6 +86,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 65 | Recording a voice letter (E3) | While she records, **the screen stays on** (no dimming or auto-lock). Leaving Navmaas or locking the phone **stops the recording and keeps** what she said; it never records in the background. Recording and playing need a short-lived plain copy in the app's private temporary folder, deleted at once after recording and when the letter closes, and swept when the app starts (ADR 055) |
 | 66 | Mood scene motion (E4) | It moves gently for **about 12 seconds each time the app opens to Today** (not on every tab switch) and **again when tapped**, then rests; with reduce motion it is a still picture and a tap doesn't move it. This is the one exception to "nothing plays on its own" (DESIGN_SYSTEM §5) |
 | 67 | Release 1.2.0 | **Navmaas 1.2.0 (build 3)** carries E1–E4, released with E4 |
+| 68 | App icon | The **sprout** from the app-switcher cover, a little larger: dark sage on `primary-soft`, the same on iPhone and Android (Android 13+ themed icons get the sprout alone). It replaces Flutter's default icon; the moon stays the brand mark in the name's story and on the quiet page |
+| 69 | GitHub releases | Release tags follow the app's version: `v` + `version` in `pubspec.yaml` (first tag **v1.2.0**). Bumping the version in a PR and merging it publishes a GitHub release with the phone APK (`navmaas-<version>.apk`, debug-key signed, Arm only); merges that don't bump publish nothing |
 
 ### What these decisions change
 

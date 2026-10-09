@@ -83,3 +83,33 @@ jobs:
           name: navmaas-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
+
+  # A merge to main that bumps `version` in pubspec.yaml publishes a GitHub
+  # release: tag v<version> with the phone APK. Already tagged: nothing to do.
+  release:
+    needs: check-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: navmaas-release-apk
+
+      - name: Publish the release if this version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/^version: *\([0-9.]*\)+.*/\1/p' pubspec.yaml)
+          test -n "$version"
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "v$version is already released"
+            exit 0
+          fi
+          mv app-release.apk "navmaas-$version.apk"
+          gh release create "v$version" "navmaas-$version.apk" \
+            --target "$GITHUB_SHA" --title "Navmaas $version" --generate-notes

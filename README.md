@@ -47,6 +47,8 @@ keyAlias=navmaas
 keyPassword=<the password you chose>
 ```
 
+Or download `navmaas-<version>.apk` from [Releases](https://github.com/patel-keyur-18/pregnancy-care/releases): each version bump merged to `main` publishes one (debug-key signed, so it can't update a phone that has your release-signed app; remove that first after a backup).
+
 Build the phone APK (Arm only, about 66 MB) and install it with the phone connected over USB (USB debugging on):
 
 ```sh
