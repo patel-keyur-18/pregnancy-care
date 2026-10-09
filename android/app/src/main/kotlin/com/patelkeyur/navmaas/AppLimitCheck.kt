@@ -104,7 +104,7 @@ class AppLimitCheck(context: Context, params: WorkerParameters) : Worker(context
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val notice = NotificationCompat.Builder(context, CHANNEL)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.widget_sprout)
             .setContentTitle(limit.getString("title"))
             .setContentText(limit.getString("body"))
             .setStyle(NotificationCompat.BigTextStyle().bigText(limit.getString("body")))

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The widget's sprout, also the status-bar icon of every notification
+     (the launcher icon is opaque, so Android would draw it as a square). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
     <path android:pathData="M12,21v-8.5" android:strokeColor="@color/widget_on_primary_soft"
