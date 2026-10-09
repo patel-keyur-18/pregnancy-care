@@ -99,6 +99,10 @@ void main() {
     expect(utf8.decode(player.openedBytes.single), 'plain voice bytes');
     expect(player.opened.single, startsWith(voiceTemp.path));
     expect(find.byTooltip('Pause voice note'), findsOneWidget);
+    // As it plays, the time and the bar move with the player's position.
+    await player.seek(const Duration(seconds: 5));
+    await tester.pump();
+    expect(find.text('0:05 / 0:42'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Save'));
     await tester.tap(find.text('Save'));

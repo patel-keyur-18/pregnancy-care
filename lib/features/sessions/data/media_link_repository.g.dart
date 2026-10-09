@@ -135,4 +135,4 @@ final class OpenLinkProvider
   }
 }
 
-String _$openLinkHash() => r'c65b6bfe43064187a479c34035aca98d9d33430f';
+String _$openLinkHash() => r'4737fce6fab862fd9474664ea8268bb4d8cef88a';
