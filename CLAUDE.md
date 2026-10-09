@@ -26,6 +26,7 @@ dart run build_runner build           # drift (*.drift.dart) + riverpod (*.g.dar
 dart run drift_dev make-migrations    # after a schema change (see below)
 dart run tool/content_md.dart         # after editing assets/content/*.json (review copies in docs/content/)
 dart run tool/bell.dart               # regenerates assets/audio/bell.wav and quiet.wav (a test checks they match)
+flutter test tool/app_icon_test.dart  # regenerates the iPhone app icon from the sprout (Android's is a vector of the same path)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
 flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; backup_test backs up, restores and deletes all data, and app_flow_test runs onboarding, Taken and a PDF read then deletes all data, so both run only on an empty install)
 flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~66 MB, Arm only; what CI builds; CI fails it over 100 MB)
@@ -122,4 +123,5 @@ flutter build ios --release --no-codesign   # compile check; installs go through
 - **App lock** covers the app from `MaterialApp.builder`; never add per-screen lock checks or a lock route. Lifecycle in tests: step through every state (`inactive`, `hidden`, `paused` and back), as the engine does; the test binding doesn't fill them in, and `AppLifecycleListener` only calls `onHide` / `onShow` on those steps.
 - **App-limit notices** are decided in Dart (`limitRules`): the Kotlin check only follows the open windows, the day's room and the ready-made notice. Change a rule or a word in Dart, never in `AppLimitCheck.kt`.
 - **Integration tests that write from the background isolate** (`reminderActionInBackground`): the app's own drift streams don't see another connection's write until `markTablesUpdated` (the app does it on resume), so call it before checking.
-- **Version:** bump `version` in `pubspec.yaml` and `appVersion` in `backup_service.dart` together (a test checks they match); the widget extension takes the same version from Flutter's xcconfigs.
+- **Version:** bump `version` in `pubspec.yaml` and `appVersion` in `backup_service.dart` together (a test checks they match); the widget extension takes the same version from Flutter's xcconfigs. Merging a bump to `main` makes CI publish GitHub release `v<version>` with the APK (ADR 059).
+- **App icon:** opaque, so never use it as a notification's small icon; notifications (reminders, `AppLimitCheck`, audio_service) use `drawable/widget_sprout`.

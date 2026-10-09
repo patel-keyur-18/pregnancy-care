@@ -17,7 +17,7 @@ Pregnancy often brings tired eyes, headaches, nausea and sometimes changes in vi
 - **Red only for destructive actions.** Restore (which replaces data), delete and error messages are the only red elements, so red always means "this changes or loses data".
 - **Night reading.** A warm amber page with low blue light for bedtime Garbhasanskar sessions.
 
-The name comes from *maas* (month), which follows the moon. The logo is a sage crescent moon cradling a small rose seed.
+The name comes from *maas* (month), which follows the moon. The logo is a sage crescent moon cradling a small rose seed. The app icon is the sprout (Plan decision 68): `#2C4638` on `primary-soft` `#E2ECE5`, the 24-grid sprout at 60 % of the tile, stroke 2.
 
 ## 2. Colour tokens
 
@@ -280,6 +280,7 @@ Deliberate, permanent differences:
 | Me → App lock subtitle | "Face ID or your passcode to open Navmaas" | Same on iPhone; "Fingerprint or screen lock to open Navmaas" on Android | Each phone's own words |
 | Turning on app lock without a phone screen lock | (not drawn) | The switch stays off and a snackbar says "Set a screen lock on your phone first, then turn on app lock." | Otherwise she could lock herself out |
 | App switcher cover | (described in a canvas note) | The sprout in an 88 `primary-soft` circle on `bg` | — |
+| App icon | (not drawn; the moon logo) | The sprout filling 60 % of a `primary-soft` tile, `#2C4638`, stroke 2; Android's adaptive icon and themed (monochrome) icon use the same path | Owner's choice (Plan decision 68) |
 | Screen Rest's limits card while Usage access is off | (not drawn) | "Paused: Usage access is off" in `on-amber-soft` instead of the app rows, then Manage limits | A calm notice in amber (§2) |
 | Daily limit sheet | Minute chips in a three-column grid, 48 px | The same six choices as chips that wrap, 48 dp | They wrap at large text |
 | Limits for other apps, the notice preview | Always shown | Shown once she has a limit, for her first one | It previews her own notice |

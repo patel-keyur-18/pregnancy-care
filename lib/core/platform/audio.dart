@@ -84,6 +84,7 @@ class DeviceAudioPlayback extends BaseAudioHandler
         config: const AudioServiceConfig(
           androidNotificationChannelId: 'com.patelkeyur.navmaas.listening',
           androidNotificationChannelName: 'Listening',
+          androidNotificationIcon: 'drawable/widget_sprout',
           androidNotificationOngoing: true,
           fastForwardInterval: Duration(seconds: 15),
           rewindInterval: Duration(seconds: 15),
