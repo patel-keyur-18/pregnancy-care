@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.14 — decided 2026-10-04, updated 2026-10-09 (motion in §5; M3–M11 and E1–E3 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09) |
+| **Status** | v1.15 — decided 2026-10-04, updated 2026-10-09 (motion in §5; M3–M11 and E1–E4 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -107,12 +107,12 @@ Both fonts are SIL Open Font License and are **bundled with the app**; there is 
 
 ## 5. Motion
 
-- 250–350 ms ease-out fades and short slides. No bounce, no flashing, no auto-playing animation.
+- 250–350 ms ease-out fades and short slides. No bounce, no flashing, no auto-playing animation except the mood scene's 12 seconds (§5 table).
 - Respects "reduce motion" and the OS animation scale.
 
 ### Icon micro-interactions
 
-Small, calm feedback when an icon is tapped (owner request, M2), plus the breathing pace (M4b). Only these five exist; anything new is added here first.
+Small, calm feedback when an icon is tapped (owner request, M2), plus the breathing pace (M4b) and the mood scene (E4). Only these six exist; anything new is added here first.
 
 | Where | Trigger | What moves | Timing |
 |---|---|---|---|
@@ -120,9 +120,10 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Icon buttons: tab bar, theme toggle, cycle stepper | Finger down / up | Shrinks to 92 % while pressed, returns on release | 120 ms down, 200 ms ease-out up |
 | Theme toggle (Today) | Tap | Moon and sun cross-fade with a 30° turn | 300 ms, ease-out |
 | Checklist tick (Journey) | Item ticked | Box fills sage, then the check mark draws itself | 250 ms, ease-out |
+| Mood scene (Today, E4) | The app opens to Today with a mood picked, or a tap on the scene | Its small parts move softly (ripples widen, rays turn, flowers sway, clouds drift, stars twinkle, a heart beats), then rest on a still frame. With reduce motion it is a still picture and a tap doesn't move it | 12 s, smooth waves that start and end at rest |
 | Slow breathing circle (M4b) | Running | The inner circle grows from 60 % to 100 % over 4 s (in) and shrinks back over 6 s (out); only after she taps Start. With reduce motion it stays still and only the words change | Linear, one step a second |
 
-- No overshoot, no bounce, nothing plays on its own. The breathing circle repeats only while she is breathing with it.
+- No overshoot, no bounce, nothing plays on its own, with one exception: the mood scene moves for about 12 seconds when the app opens to Today, then rests (Plan decision 66). The breathing circle repeats only while she is breathing with it.
 - With reduce motion on, every state change is instant and nothing scales.
 
 ## 6. Components (as drawn in the prototype)
@@ -215,7 +216,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (E3)
+## 8. Implementation status (E4)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
