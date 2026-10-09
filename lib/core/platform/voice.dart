@@ -62,17 +62,30 @@ abstract interface class VoicePlayer {
 }
 
 class DeviceVoicePlayer implements VoicePlayer {
-  final _player = AudioPlayer();
+  // Like the background player: playback events only come on load, play,
+  // pause and the end, so the position stream (a tick about every 200 ms
+  // while playing) moves the time and the bar.
+  new() {
+    _player.playbackEventStream.listen((_) => _emit());
+    _player.playerStateStream.listen((_) => _emit());
+    _player.positionStream.listen((_) => _emit());
+  }
 
-  @override
-  Stream<VoicePlayback> get changes => _player.playbackEventStream.map(
-    (_) => (
+  final _player = AudioPlayer();
+  final _changes = StreamController<VoicePlayback>.broadcast();
+
+  void _emit() {
+    if (_changes.isClosed) return;
+    _changes.add((
       playing: _player.playing,
       completed: _player.processingState == ProcessingState.completed,
       position: _player.position,
       duration: _player.duration,
-    ),
-  );
+    ));
+  }
+
+  @override
+  Stream<VoicePlayback> get changes => _changes.stream;
 
   @override
   Future<Duration?> open(String path) => _player.setFilePath(path);
@@ -88,7 +101,10 @@ class DeviceVoicePlayer implements VoicePlayer {
   Future<void> seek(Duration position) => _player.seek(position);
 
   @override
-  Future<void> dispose() => _player.dispose();
+  Future<void> dispose() async {
+    await _player.dispose();
+    await _changes.close();
+  }
 }
 
 /// A new recorder for each letter screen.

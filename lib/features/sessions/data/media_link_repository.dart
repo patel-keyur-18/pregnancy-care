@@ -62,10 +62,26 @@ Stream<List<MediaLink>> mediaLinks(Ref ref) =>
 typedef OpenLink = Future<bool> Function(Uri uri);
 
 @riverpod
-OpenLink openLink(Ref ref) => (uri) async {
-  try {
-    return await launchUrl(uri, mode: LaunchMode.externalApplication);
-  } on Object {
-    return false;
+OpenLink openLink(Ref ref) =>
+    (uri) => openPreferringApp(uri, (u, mode) => launchUrl(u, mode: mode));
+
+/// The service's app first: `externalNonBrowserApplication` lets only a
+/// real app take the link (Android 11+ `FLAG_ACTIVITY_REQUIRE_NON_BROWSER`,
+/// iPhone universal links only) and fails when none is installed; then the
+/// browser. False when neither opened it.
+Future<bool> openPreferringApp(
+  Uri uri,
+  Future<bool> Function(Uri uri, LaunchMode mode) launch,
+) async {
+  for (final mode in [
+    LaunchMode.externalNonBrowserApplication,
+    LaunchMode.externalApplication,
+  ]) {
+    try {
+      if (await launch(uri, mode)) return true;
+    } on Object {
+      // Try the next way.
+    }
   }
-};
+  return false;
+}
