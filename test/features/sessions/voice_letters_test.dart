@@ -206,17 +206,22 @@ void main() {
     await tester.ensureVisible(find.text('Save'));
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
+    await _settleIo(tester);
+    await tester.pumpAndSettle();
     expect(files(voiceDir), hasLength(1));
 
     // Remove the voice note: the words stay, the file goes on Save.
     await tester.tap(find.text('Hello, little one.'));
     await tester.pumpAndSettle();
+    await _settleIo(tester);
     await tester.ensureVisible(find.bySemanticsLabel('Remove voice note'));
     await tester.tap(find.bySemanticsLabel('Remove voice note'));
     await tester.pumpAndSettle();
     expect(find.text('Record'), findsOneWidget);
     await tester.ensureVisible(find.text('Save'));
     await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
     await tester.pumpAndSettle();
     await _settleIo(tester);
     expect(files(voiceDir), isEmpty);
@@ -228,6 +233,7 @@ void main() {
     // Record once more, save, then remove the whole letter.
     await tester.tap(find.text('Hello, little one.'));
     await tester.pumpAndSettle();
+    await _settleIo(tester);
     await tester.ensureVisible(find.text('Record'));
     await tester.tap(find.text('Record'));
     await _settleIo(tester);
@@ -237,8 +243,11 @@ void main() {
     await tester.ensureVisible(find.text('Save'));
     await tester.tap(find.text('Save'));
     await tester.pumpAndSettle();
+    await _settleIo(tester);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Hello, little one.'));
     await tester.pumpAndSettle();
+    await _settleIo(tester);
     await tester.ensureVisible(find.text('Remove letter'));
     await tester.tap(find.text('Remove letter'));
     await tester.pumpAndSettle();
