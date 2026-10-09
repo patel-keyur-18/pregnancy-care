@@ -762,7 +762,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 | **E1 Sessions fixes** ✅ 2026-10-08 (PR #28) | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
 | **E2 Links** ✅ 2026-10-08 (PR #29) | Add, edit and remove links to YouTube, YouTube Music and Spotify in the library; a tap opens the service's app, or the browser without it; the empty Listen tile offers audio or a link; Replace file for audio | v10 |
 | **E3 Voice letters** ✅ 2026-10-09 (PR #30) | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
-| **E4 Mood scenes on Today** ✅ 2026-10-09 | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
+| **E4 Mood scenes on Today** ✅ 2026-10-09 (PR #31) | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
 
 **E1 done when** (all met): a finished book stays "Finished" after going back (repository and widget tests); the ⋯ button opens Rename / Remove; nothing runs before Start on Walk or a routine; a walk paused by leaving carries on from the same time and is logged only at Finish walk with the steps of the stretches walked; a walk left from an earlier day goes to that day; Today's reading tick logs and removes a 15-minute session; the v8 → v9 migration fills `furthest` from `position`, and a schema 8 backup restores.
 
@@ -778,7 +778,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 
 **E4 done when** (all met): no card without today's mood (a mood from yesterday shows none); each mood shows its own scene and line, and changing today's mood changes it; it moves for 12 seconds when Today opens, when tapped and when the app comes back, then rests; with reduce motion it never moves; screen readers hear the scene and its line (widget tests); goldens of Today with a scene and of all five scenes, light and dark; the content test covers the lines; version 1.2.0 (build 3) in `pubspec.yaml` and `appVersion`.
 
-**Status:** **E4 ✅ 2026-10-09**: `MoodSceneCard` and `MoodScenePainter` (`lib/features/today/mood_scene_card.dart`, a 120 × 100 grid drawn from the prototype's shapes), `moodSceneLine*` / `moodSceneArt*` in `app_en.arb`, DESIGN_SYSTEM §5's mood-scene motion, Navmaas **1.2.0 (build 3)**; prototype boards for Today with a scene and all five scenes.
+**Status:** **E4 ✅ 2026-10-09 (PR #31)**: `MoodSceneCard` and `MoodScenePainter` (`lib/features/today/mood_scene_card.dart`, a 120 × 100 grid drawn from the prototype's shapes), `moodSceneLine*` / `moodSceneArt*` in `app_en.arb`, DESIGN_SYSTEM §5's mood-scene motion, Navmaas **1.2.0 (build 3)**; prototype boards for Today with a scene and all five scenes.
 
 ### Out of scope
 
