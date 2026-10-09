@@ -2,12 +2,12 @@
 
 | | |
 |---|---|
-| **Status** | v14 — approved 2026-10-04, updated 2026-10-08 (MVP built, M1–M6; owner decisions 12–64; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1 Sessions fixes and E2 links built) |
+| **Status** | v14 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–65; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1 Sessions fixes, E2 links and E3 voice letters built) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
 | **Cost** | Free — no subscription, no ads, no paid developer account |
-| **Last updated** | 2026-10-08 |
+| **Last updated** | 2026-10-09 |
 
 Related: [Design system](DESIGN_SYSTEM.md) · [Architecture](ARCHITECTURE.md) · [Interactive prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) (private link — share it from its Share menu)
 
@@ -80,9 +80,10 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 59 | Exercise timer (E1) | Every routine (Gentle flow, Pelvic floor, Seated stretches) waits for **Start**, then Pause / Resume and **Finish**. Leaving without Finish still logs it from one minute |
 | 60 | Library actions (E1) | A visible **⋯** button on each library row opens Rename / Remove; long press still works |
 | 61 | Links (E2) | She can add, edit and remove links to **YouTube, YouTube Music and Spotify** (her own title) in the library: `youtube.com` / `youtu.be`, `music.youtube.com`, `open.spotify.com` and `spotify.link`, with `https://` added when missing; anything else is refused. A tap opens the **service's app**, or the browser when the app isn't there; Navmaas itself still makes no network calls and logs no listening time for links. With nothing added, the Listen tile offers audio or a link; otherwise it shows whatever she opened last
-| 62 | Voice letters (E3) | Talk to baby takes a voice note recorded with the microphone, as well as or instead of text (`record` package and microphone permission approved). Voice notes are **encrypted** like prescription photos. Backups include them only when a switch is on (**off by default**) |
+| 62 | Voice letters (E3) | Talk to baby takes a **voice note** recorded with the microphone, as well as or instead of words (`record` package and microphone permission approved): **one per letter, up to 10 minutes**. Letters opens with **Write** and **Speak**; Speak opens the letter with Record ready, never recording by itself. Voice notes are **encrypted** like prescription photos. Backups include them only when Backup & restore's **"Include voice letters"** switch is on (**off by default**, remembered). Restoring a backup without them keeps the letters' words and says "This voice note isn't on this phone"
 | 63 | Mood scenes on Today (E4) | Each of the five mood words gets its **own gentle scene** on Today for the rest of the day, so no mood is marked as bad. Tired and Low get a baby scene with a line such as "You and baby, together today" that promises nothing. Drawn originally in Flutter (no Lottie or downloaded animation), and a still picture when the phone asks to reduce motion |
 | 64 | Replace file (E2) | An audio file's ⋯ offers **Replace file** next to Rename and Remove: she picks a new audio file, the title stays and the length is read again (playing, it stops first) |
+| 65 | Recording a voice letter (E3) | While she records, **the screen stays on** (no dimming or auto-lock). Leaving Navmaas or locking the phone **stops the recording and keeps** what she said; it never records in the background. Recording and playing need a short-lived plain copy in the app's private temporary folder, deleted at once after recording and when the letter closes, and swept when the app starts (ADR 055) |
 
 ### What these decisions change
 
@@ -112,7 +113,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Onboarding & pregnancy engine** | Due date from last period (with cycle length), conception date, IVF transfer or scan. Shows weeks + days, the month ("Month 6") and the trimester. Optional first name, editable in Me. Twins flag, high-risk flag ★, "doctor cleared me for exercise" ★ | MVP |
 | **Today (home)** | Week ring, baby size (Indian fruit and vegetable comparisons), today's plan (supplements, session, walk), next visit, Screen Rest status | MVP |
 | **Journey (trimester-wise)** | Trimester tabs, week picker, baby and body notes per week, weekly checklist, trimester progress from her own logs | MVP |
-| **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books (PDF, text; EPUB in P2) and audio, plus links to YouTube, YouTube Music and Spotify (E2), reading sessions with timer and night-reading mode, audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP; EPUB P2 (M9) |
+| **Garbhasanskar** | Daily path (read · listen · activity · talk to baby), library of **imported** books (PDF, text; EPUB in P2) and audio, plus links to YouTube, YouTube Music and Spotify (E2), reading sessions with timer and night-reading mode, voice letters to baby (E3), audio that keeps playing with the screen off, "Letters to baby" journal ★ | MVP; EPUB P2 (M9) |
 | **Screen Rest** | Screen-free hours, meal-time rest, eye-rest nudge, wind-down audio. P2: opt-in limits on other apps (**Android only**) | MVP → P2 (M11a ✅ 2026-10-06, Android) |
 | **Supplements** | Quick-pick of common names, dose as prescribed, schedule, on-time reminders with Taken / Snooze, mark taken, weekly adherence, refill alerts ★, personal notes | MVP |
 | **Vaccines & tests** ★ | India template (tests, scans, vaccines with week windows); book a date, mark done; gentle reminders | MVP |
@@ -134,7 +135,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 
 ## 4. Interactive prototype
 
-The prototype covers 29 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards, and the M11 Screen Rest limits card, Limits for other apps and Usage access boards, were added on 2026-10-06, ADR 043; on 2026-10-08 E1 updated Walk and Exercise before Start, the library's ⋯ button and Today's reading tick; E2 added the Add sheet with links, the link dialog, the audio and link ⋯ sheets and a link row on Sessions): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
+The prototype covers 29 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards, and the M11 Screen Rest limits card, Limits for other apps and Usage access boards, were added on 2026-10-06, ADR 043; on 2026-10-08 E1 updated Walk and Exercise before Start, the library's ⋯ button and Today's reading tick; E2 added the Add sheet with links, the link dialog, the audio and link ⋯ sheets and a link row on Sessions; E3 added Letters to baby with Write and Speak, the letter's voice note before, during and after recording, and the "Include voice letters" switch on Backup & restore): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
 
 Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Backup & restore · Me & settings · Wellbeing · Mood check-in · Symptom log · Sleep entry · Water · Meditation timer.
 
@@ -175,5 +176,5 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
 | **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release ✅ 2026-10-06 (M11a limits; M11b the Phase 2 release, Navmaas 1.1.0, without the deferred M8 and M9). The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
 | **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
-| **Enhancements (E1–E4)** | The owner's requests of 2026-10-08 (decisions 55–64): E1 Sessions fixes ✅ 2026-10-08, PR #28 (reading progress, ⋯ on library rows, walk and exercise Start / Finish, reading ticked by hand) · E2 links ✅ 2026-10-08, PR #29 (YouTube, YouTube Music and Spotify links that open in their apps; Replace file for audio) · E3 voice letters · E4 mood scenes on Today and Navmaas 1.2.0. Scope: [Architecture §15](ARCHITECTURE.md#enhancements-e1e4) |
+| **Enhancements (E1–E4)** | The owner's requests of 2026-10-08 (decisions 55–65): E1 Sessions fixes ✅ 2026-10-08, PR #28 (reading progress, ⋯ on library rows, walk and exercise Start / Finish, reading ticked by hand) · E2 links ✅ 2026-10-08, PR #29 (YouTube, YouTube Music and Spotify links that open in their apps; Replace file for audio) · E3 voice letters ✅ 2026-10-09, PR #30 (record a voice note for baby, encrypted; optional in backups) · E4 mood scenes on Today and Navmaas 1.2.0. Scope: [Architecture §15](ARCHITECTURE.md#enhancements-e1e4) |
 | Out of scope | Family sharing (decision 37) |

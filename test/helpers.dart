@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/delete_all_data.dart';
 import 'package:navmaas/core/platform/app_usage.dart';
 import 'package:navmaas/core/platform/audio.dart';
@@ -16,6 +18,7 @@ import 'package:navmaas/core/platform/authenticator.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/platform/home_widget.dart';
+import 'package:navmaas/core/platform/voice.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -163,11 +166,94 @@ class FakeSteps implements StepSource {
   }
 }
 
+/// Records nothing: [stop] writes [bytes] where the recording would be.
+class FakeRecorder implements VoiceRecorder {
+  bool permission = true;
+  List<int> bytes = utf8.encode('plain voice bytes');
+  final started = <String>[];
+  String? _path;
+
+  @override
+  Future<bool> requestPermission() async => permission;
+
+  @override
+  Future<void> start(String path) async {
+    started.add(path);
+    _path = path;
+  }
+
+  @override
+  Future<String?> stop() async {
+    final path = _path;
+    _path = null;
+    if (path != null) File(path).writeAsBytesSync(bytes);
+    return path;
+  }
+
+  @override
+  Future<void> dispose() async {}
+}
+
+/// Plays nothing: records what was opened and reports play / pause.
+class FakeVoicePlayer implements VoicePlayer {
+  final opened = <String>[];
+
+  /// What each opened file held (it is deleted when the screen closes).
+  final openedBytes = <List<int>>[];
+  final _changes = StreamController<VoicePlayback>.broadcast();
+  VoicePlayback _now = (
+    playing: false,
+    completed: false,
+    position: Duration.zero,
+    duration: null,
+  );
+
+  void _set(VoicePlayback now) => _changes.add(_now = now);
+
+  @override
+  Stream<VoicePlayback> get changes => _changes.stream;
+
+  @override
+  Future<Duration?> open(String path) async {
+    opened.add(path);
+    openedBytes.add(File(path).readAsBytesSync());
+    return null;
+  }
+
+  @override
+  Future<void> play() async => _set((
+    playing: true,
+    completed: false,
+    position: _now.position,
+    duration: _now.duration,
+  ));
+
+  @override
+  Future<void> pause() async => _set((
+    playing: false,
+    completed: false,
+    position: _now.position,
+    duration: _now.duration,
+  ));
+
+  @override
+  Future<void> seek(Duration position) async => _set((
+    playing: _now.playing,
+    completed: false,
+    position: position,
+    duration: _now.duration,
+  ));
+
+  @override
+  Future<void> dispose() async {}
+}
+
 /// Backups without files or crypto: records what the screens ask for.
 /// [password] opens its one backup; anything else is "wrong password".
 class FakeBackupService implements BackupService {
   String password = 'correct horse';
-  final created = <({String password, bool includeLibrary})>[];
+  final created =
+      <({String password, bool includeLibrary, bool includeVoice})>[];
   final shared = <File>[];
   int restores = 0;
 
@@ -182,8 +268,13 @@ class FakeBackupService implements BackupService {
   Future<BackupResult> create({
     required String password,
     required bool includeLibrary,
+    bool includeVoice = false,
   }) async {
-    created.add((password: password, includeLibrary: includeLibrary));
+    created.add((
+      password: password,
+      includeLibrary: includeLibrary,
+      includeVoice: includeVoice,
+    ));
     return (
       file: File('navmaas-backup-2026-10-05.navmaas'),
       sizeBytes: 2516582,
@@ -193,8 +284,8 @@ class FakeBackupService implements BackupService {
   }
 
   @override
-  Future<({int base, int library})> sizes() async =>
-      (base: 2516582, library: 191260672);
+  Future<({int base, int library, int voice})> sizes() async =>
+      (base: 2516582, library: 191260672, voice: 6291456);
 
   @override
   Future<({File file, int size})> receive(Stream<List<int>> bytes) async {
@@ -301,6 +392,11 @@ Future<AppDatabase> pumpApp(
   Directory? library,
   PickFile? pickFile,
   OpenLink? openLink,
+  FakeRecorder? recorder,
+  FakeVoicePlayer? voicePlayer,
+  List<bool>? screenOn,
+  Directory? voiceDir,
+  Directory? voiceTemp,
   DateTime? buildExpiry,
   FakeBackupService? backup,
   ShareFile? share,
@@ -373,6 +469,26 @@ Future<AppDatabase> pumpApp(
         ),
         pickFileProvider.overrideWithValue(pickFile ?? (_) async => null),
         openLinkProvider.overrideWithValue(openLink ?? (_) async => true),
+        newVoiceRecorderProvider.overrideWithValue(
+          () => recorder ?? FakeRecorder(),
+        ),
+        newVoicePlayerProvider.overrideWithValue(
+          () => voicePlayer ?? FakeVoicePlayer(),
+        ),
+        keepScreenOnProvider.overrideWithValue(
+          ({required on}) async => screenOn?.add(on),
+        ),
+        voiceStoreProvider.overrideWith(
+          (_) async => AttachmentStore(
+            directory:
+                voiceDir ?? Directory.systemTemp.createTempSync('navmaas_vo'),
+            key: () async => List.filled(32, 7),
+          ),
+        ),
+        voiceTempDirProvider.overrideWith(
+          (_) async =>
+              voiceTemp ?? Directory.systemTemp.createTempSync('navmaas_vt'),
+        ),
         buildExpiryProvider.overrideWith((_) async => buildExpiry),
         backupServiceProvider.overrideWith(
           (_) async => backup ?? FakeBackupService(),

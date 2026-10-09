@@ -63,7 +63,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +115,11 @@ class AppDatabase extends _$AppDatabase {
       },
       // v10 (E2): links to YouTube, YouTube Music and Spotify.
       from9To10: (m, schema) => m.createTable(schema.mediaLink),
+      // v11 (E3): a voice note on a letter.
+      from10To11: (m, schema) async {
+        await m.addColumn(schema.letter, schema.letter.voiceFile);
+        await m.addColumn(schema.letter, schema.letter.voiceSec);
+      },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

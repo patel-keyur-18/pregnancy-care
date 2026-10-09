@@ -22,6 +22,8 @@
         tools:ignore="ProtectedPermissions" />
     <!-- Walk: read steps from Health Connect (read only, never written). -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <!-- Voice letters (E3): the microphone, only when she taps Record. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:label="Navmaas"

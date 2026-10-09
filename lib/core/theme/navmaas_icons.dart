@@ -147,6 +147,14 @@ enum NavmaasIcon {
     'M20 4l-9 9',
     'M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10',
   ]),
+  // A microphone: record a voice letter (E3).
+  mic([
+    'M12 3.5a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0v-5a3 3 0 0 0-3-3z',
+    'M5.5 11a6.5 6.5 0 0 0 13 0',
+    'M12 17.5v3',
+  ]),
+  // A filled square: stop recording (E3).
+  stop(['M7.5 7.5h9v9h-9z'], fill: true),
   // Three dots: a library row's Rename / Remove.
   more([
     'M5.5 11.4a.6.6 0 1 0 0 1.2a.6.6 0 1 0 0-1.2z',

@@ -35,14 +35,16 @@ typedef RestoreResult = ({DateTime madeAt, int entries, int photos});
 /// Creates and restores `.navmaas` backups (ARCHITECTURE §11).
 abstract interface class BackupService {
   /// Encrypts a snapshot of everything into a new file, ready to share.
+  /// Voice letters go in only with [includeVoice] (E3).
   Future<BackupResult> create({
     required String password,
     required bool includeLibrary,
+    bool includeVoice = false,
   });
 
-  /// Roughly how big a backup will be: everything but the library, and
-  /// the library.
-  Future<({int base, int library})> sizes();
+  /// Roughly how big a backup will be: everything but the library and
+  /// voice letters, the library, and the voice letters.
+  Future<({int base, int library, int voice})> sizes();
 
   /// Copies a picked backup onto the phone, so it can be read in pieces.
   Future<({File file, int size})> receive(Stream<List<int>> bytes);
@@ -82,11 +84,13 @@ class DeviceBackupService implements BackupService {
 
   Directory get _attachments => Directory(p.join(dataDir.path, 'attachments'));
   Directory get _library => Directory(p.join(dataDir.path, 'library'));
+  Directory get _voice => Directory(p.join(dataDir.path, 'voice'));
 
   @override
   Future<BackupResult> create({
     required String password,
     required bool includeLibrary,
+    bool includeVoice = false,
   }) async {
     final db = database();
     if (workDir.existsSync()) await workDir.delete(recursive: true);
@@ -99,6 +103,7 @@ class DeviceBackupService implements BackupService {
       (name: 'navmaas.db', file: File(snapshot)),
       ...await _filesIn(_attachments, 'attachments'),
       if (includeLibrary) ...await _filesIn(_library, 'library'),
+      if (includeVoice) ...await _filesIn(_voice, 'voice'),
     ];
     final now = clockNow();
     final out = File(
@@ -145,7 +150,7 @@ class DeviceBackupService implements BackupService {
   }
 
   @override
-  Future<({int base, int library})> sizes() async {
+  Future<({int base, int library, int voice})> sizes() async {
     Future<int> sum(Directory dir) async => !dir.existsSync()
         ? 0
         : [
@@ -156,6 +161,7 @@ class DeviceBackupService implements BackupService {
     return (
       base: (db.existsSync() ? await db.length() : 0) + await sum(_attachments),
       library: await sum(_library),
+      voice: await sum(_voice),
     );
   }
 
@@ -316,7 +322,7 @@ Future<BackupService> backupService(Ref ref) async {
 
 /// How big a backup will be, with and without the library.
 @riverpod
-Future<({int base, int library})> backupSizes(Ref ref) async {
+Future<({int base, int library, int voice})> backupSizes(Ref ref) async {
   final service = await ref.watch(backupServiceProvider.future);
   return await service.sizes();
 }

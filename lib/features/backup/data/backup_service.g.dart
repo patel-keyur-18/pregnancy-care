@@ -58,13 +58,13 @@ final backupSizesProvider = BackupSizesProvider._();
 final class BackupSizesProvider
     extends
         $FunctionalProvider<
-          AsyncValue<({int base, int library})>,
-          ({int base, int library}),
-          FutureOr<({int base, int library})>
+          AsyncValue<({int base, int library, int voice})>,
+          ({int base, int library, int voice}),
+          FutureOr<({int base, int library, int voice})>
         >
     with
-        $FutureModifier<({int base, int library})>,
-        $FutureProvider<({int base, int library})> {
+        $FutureModifier<({int base, int library, int voice})>,
+        $FutureProvider<({int base, int library, int voice})> {
   /// How big a backup will be, with and without the library.
   BackupSizesProvider._()
     : super(
@@ -82,17 +82,17 @@ final class BackupSizesProvider
 
   @$internal
   @override
-  $FutureProviderElement<({int base, int library})> $createElement(
+  $FutureProviderElement<({int base, int library, int voice})> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<({int base, int library})> create(Ref ref) {
+  FutureOr<({int base, int library, int voice})> create(Ref ref) {
     return backupSizes(ref);
   }
 }
 
-String _$backupSizesHash() => r'734844e6cff4e30debcaecccbd8d85d5a4fcb872';
+String _$backupSizesHash() => r'03a23087df18024948d6a06cebe60c48b2f8cb59';
 
 @ProviderFor(shareFile)
 final shareFileProvider = ShareFileProvider._();

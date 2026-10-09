@@ -6,6 +6,7 @@ import 'package:navmaas/core/db/app_database.dart';
 
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
+import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
 import 'generated/schema_v8.dart' as v8;
@@ -198,6 +199,46 @@ void main() {
     await verifier.migrateAndValidate(db, 10);
     expect((await db.select(db.libraryItems).getSingle()).title, 'Om');
     expect(await db.select(db.mediaLinks).get(), isEmpty);
+    await db.close();
+  });
+
+  test('v10 → v11 keeps her letters, with no voice notes yet', () async {
+    final schema = await verifier.schemaAt(10);
+    final old = v10.DatabaseAtV10(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.pregnancy)
+        .insert(
+          v10.PregnancyCompanion.insert(
+            id: 'p1',
+            createdAt: at,
+            updatedAt: at,
+            status: 'active',
+            datingMethod: 'lmp',
+            startDate: '2026-04-15',
+            dueDate: '2027-01-20',
+          ),
+        );
+    await old
+        .into(old.letter)
+        .insert(
+          v10.LetterCompanion.insert(
+            id: 'l1',
+            createdAt: at,
+            updatedAt: at,
+            pregnancyId: 'p1',
+            body: 'Dear little one',
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 11);
+    final letter = await db.select(db.letters).getSingle();
+    expect(
+      (letter.body, letter.voiceFile, letter.voiceSec),
+      ('Dear little one', null, null),
+    );
     await db.close();
   });
 }

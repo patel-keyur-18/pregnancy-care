@@ -156,17 +156,32 @@ void main() {
     await tester.pump();
     expect(find.bySemanticsLabel('Hide password'), findsOneWidget);
 
-    await tester.ensureVisible(find.byType(Switch));
-    await tester.tap(find.byType(Switch));
+    await tester.ensureVisible(find.byType(Switch).first);
+    await tester.tap(find.byType(Switch).first);
     await tester.pumpAndSettle();
     expect(
       find.text('Backup about 184.8 MB — includes imported books and audio'),
+      findsOneWidget,
+    );
+    // Voice letters: off by default, and remembered once on (E3).
+    expect(
+      find.textContaining('their voice notes stay on this phone'),
+      findsOne,
+    );
+    await tester.ensureVisible(find.byType(Switch).last);
+    await tester.tap(find.byType(Switch).last);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'About 6.0 MB more; the voice notes stay encrypted inside the backup',
+      ),
       findsOneWidget,
     );
     await _tapText(tester, 'Create encrypted backup');
     expect(backup.created.single, (
       password: 'correct horse',
       includeLibrary: true,
+      includeVoice: true,
     ));
     expect(find.text('Backup ready'), findsOneWidget);
     expect(find.text('navmaas-backup-2026-10-05.navmaas'), findsOneWidget);

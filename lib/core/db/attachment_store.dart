@@ -102,3 +102,15 @@ Future<AttachmentStore> attachmentStore(Ref ref) async {
     key: () => readOrCreateAttachmentKey(secureStorage),
   );
 }
+
+/// Voice letters (E3), sealed like attachments with the same key, in their
+/// own `db/voice/` folder (skipped by OS backups; in a `.navmaas` backup only
+/// when "Include voice letters" is on).
+@Riverpod(keepAlive: true)
+Future<AttachmentStore> voiceStore(Ref ref) async {
+  final support = await getApplicationSupportDirectory();
+  return AttachmentStore(
+    directory: Directory(p.join(support.path, 'db', 'voice')),
+    key: () => readOrCreateAttachmentKey(secureStorage),
+  );
+}

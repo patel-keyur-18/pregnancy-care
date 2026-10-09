@@ -9,6 +9,7 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/third_trimester/data/third_trimester_repository.dart';
@@ -44,6 +45,13 @@ Future<void> _seed(AppDatabase db) async {
   final om = await library.import('om_chanting.mp3', Stream.value([0]));
   // Played once, so Listen shows it rather than the saved link below.
   await library.markOpened(om!.id);
+  // A letter with a voice note, so the list chip and player are checked.
+  await LetterRepository(db).save(
+    (await db.select(db.pregnancies).getSingle()).id,
+    'Today you kicked right on the beat.',
+    voiceFile: 'note.bin',
+    voiceSec: 48,
+  );
   // A saved link, so its row and sheet are checked (E2).
   await MediaLinkRepository(db).add(
     title: 'Lullaby playlist',
@@ -428,8 +436,34 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
     (t) async {
       await _tab(t, 'Sessions');
       await _tapText(t, 'Talk to baby');
-      await t.tap(find.text('Write a letter'));
+      await t.tap(find.text('Write'));
       await t.pumpAndSettle();
+    },
+  ),
+  'letters with a voice note': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Talk to baby');
+    },
+  ),
+  'letter, voice note': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Talk to baby');
+      await _tapText(t, 'Today you kicked right on the beat.');
+    },
+  ),
+  'letter, recording': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Talk to baby');
+      await t.tap(find.text('Speak'));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Record'));
+      await _settleIo(t);
     },
   ),
   'add to library': (

@@ -269,7 +269,14 @@ class Letters extends Table with BaseColumns {
   String get tableName => 'letter';
 
   TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+
+  /// Her words; empty for a letter that is only a voice note.
   TextColumn get body => text()();
+
+  /// Its voice note (E3, v11): the encrypted file in `db/voice/` and its
+  /// length, or null.
+  TextColumn get voiceFile => text().nullable()();
+  IntColumn get voiceSec => integer().nullable()();
 }
 
 /// A kick-counter session: movements counted from the first tap to the last.

@@ -39,5 +39,17 @@ import flutter_local_notifications
           result(FlutterError(code: "exclude_failed", message: error.localizedDescription, details: nil))
         }
       }
+
+    // Keeps the screen on while she records a voice letter (E3).
+    let screen = engineBridge.pluginRegistry.registrar(forPlugin: "NavmaasScreen")!
+    FlutterMethodChannel(name: "navmaas/screen", binaryMessenger: screen.messenger())
+      .setMethodCallHandler { call, result in
+        guard call.method == "keepOn", let on = call.arguments as? Bool else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        UIApplication.shared.isIdleTimerDisabled = on
+        result(nil)
+      }
   }
 }
