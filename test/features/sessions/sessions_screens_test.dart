@@ -447,7 +447,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Talk to your baby in writing'), findsOneWidget);
 
-    await tester.tap(find.text('Write a letter'));
+    await tester.tap(find.text('Write'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Dear little one, hello.');
     await tester.tap(find.text('Save'));

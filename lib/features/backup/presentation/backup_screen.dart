@@ -99,6 +99,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       final made = await (await _service).create(
         password: _password.text,
         includeLibrary: _includeLibrary,
+        includeVoice: ref.read(backupVoiceProvider).value ?? false,
       );
       if (mounted) setState(() => _made = made);
     } on Object catch (e) {
@@ -358,6 +359,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
         ? (l10n.passwordsDiffer, scheme.error)
         : (l10n.passwordTooShort, scheme.outline);
     final sizes = ref.watch(backupSizesProvider).value;
+    final includeVoice = ref.watch(backupVoiceProvider).value ?? false;
 
     return _card([
       Column(
@@ -456,6 +458,42 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
               onChanged: _working
                   ? null
                   : (v) => setState(() => _includeLibrary = v),
+            ),
+          ],
+        ),
+      ),
+      // Voice letters (E3): off by default, remembered.
+      MergeSemantics(
+        child: Row(
+          spacing: 12,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.includeVoice,
+                    style: text.bodyLarge!.copyWith(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    includeVoice
+                        ? l10n.includeVoiceOn(formatBytes(sizes?.voice ?? 0))
+                        : l10n.includeVoiceOff,
+                    style: text.bodySmall!.copyWith(color: scheme.outline),
+                  ),
+                ],
+              ),
+            ),
+            Switch(
+              value: includeVoice,
+              onChanged: _working
+                  ? null
+                  : (v) => ref
+                        .read(settingsRepositoryProvider)
+                        .put(SettingKeys.backupVoice, '$v'),
             ),
           ],
         ),

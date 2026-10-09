@@ -17,6 +17,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
+import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
@@ -155,6 +156,48 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/screen_rest_$name.png'),
+        );
+      });
+
+      testWidgets('letters $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            final id = (await db.select(db.pregnancies).getSingle()).id;
+            final letters = LetterRepository(db);
+            await letters.save(
+              id,
+              'We painted your room a soft green this weekend.',
+            );
+            await letters.save(
+              id,
+              'Today you kicked right on the beat of a song.',
+              voiceFile: 'note.bin',
+              voiceSec: 48,
+            );
+          },
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Sessions');
+        await tester.scrollUntilVisible(find.text('Talk to baby'), 200);
+        await tester.ensureVisible(find.text('Talk to baby'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Talk to baby'));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/letters_$name.png'),
+        );
+        await tester.ensureVisible(find.textContaining('Today you kicked'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.textContaining('Today you kicked'));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/letter_voice_$name.png'),
         );
       });
 

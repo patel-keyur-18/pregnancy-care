@@ -140,8 +140,10 @@ GoRouter router(Ref ref) {
                 routes: [
                   GoRoute(
                     path: 'edit',
-                    builder: (_, state) =>
-                        EditLetterScreen(letterId: state.extra as String?),
+                    builder: (_, state) => EditLetterScreen(
+                      letterId: state.extra as String?,
+                      speak: state.uri.queryParameters['speak'] == '1',
+                    ),
                   ),
                 ],
               ),

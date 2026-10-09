@@ -47,6 +47,8 @@
 	<string>Navmaas uses Face ID to unlock the app when app lock is on.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Show your steps on the Walk screen. Navmaas only reads them, and they stay on this phone.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Navmaas records voice letters to your baby only when you tap Record. They stay encrypted on this phone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Choose a photo of a prescription to keep it with the visit. It stays encrypted on this phone.</string>
 	<key>UIApplicationSceneManifest</key>

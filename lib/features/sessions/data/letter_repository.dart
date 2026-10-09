@@ -6,7 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'letter_repository.g.dart';
 
-/// Letters to baby, kept in the encrypted database.
+/// Letters to baby, kept in the encrypted database; their voice notes are
+/// files in `db/voice/` (the letter screen saves and deletes them).
 class LetterRepository {
   const new(this._db);
 
@@ -21,8 +22,15 @@ class LetterRepository {
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .watch();
 
-  /// Adds a letter, or rewrites letter [id].
-  Future<void> save(String pregnancyId, String body, {String? id}) async {
+  /// Adds a letter, or rewrites letter [id]: her words and its voice note
+  /// ([voiceFile] in `db/voice/`, [voiceSec] long), either may be empty.
+  Future<void> save(
+    String pregnancyId,
+    String body, {
+    String? id,
+    String? voiceFile,
+    int? voiceSec,
+  }) async {
     if (id == null) {
       await _db
           .into(_db.letters)
@@ -30,12 +38,19 @@ class LetterRepository {
             LettersCompanion.insert(
               pregnancyId: pregnancyId,
               body: body.trim(),
+              voiceFile: Value(voiceFile),
+              voiceSec: Value(voiceSec),
             ),
           );
       return;
     }
     await (_db.update(_db.letters)..where((t) => t.id.equals(id))).write(
-      LettersCompanion(body: Value(body.trim()), updatedAt: Value(clockNow())),
+      LettersCompanion(
+        body: Value(body.trim()),
+        voiceFile: Value(voiceFile),
+        voiceSec: Value(voiceSec),
+        updatedAt: Value(clockNow()),
+      ),
     );
   }
 
