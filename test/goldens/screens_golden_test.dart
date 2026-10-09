@@ -16,10 +16,12 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
+import 'package:navmaas/features/today/mood_scene_card.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
 import '../helpers.dart';
@@ -110,6 +112,46 @@ final String? _dir = Platform.isMacOS
     : null;
 
 void main() {
+  // All five mood scenes at rest, as drawn on the prototype's board.
+  for (final brightness in Brightness.values) {
+    testWidgets('mood scenes ${brightness.name}', skip: _dir == null, (
+      tester,
+    ) async {
+      final theme = brightness == Brightness.light
+          ? AppTheme.light
+          : AppTheme.dark;
+      tester.view
+        ..physicalSize = const Size(240, 1000)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Column(
+              children: [
+                for (final mood in MoodWord.values)
+                  CustomPaint(
+                    size: const Size(240, 200),
+                    painter: MoodScenePainter(
+                      mood,
+                      t: 0,
+                      scheme: theme.colorScheme,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('$_dir/mood_scenes_${brightness.name}.png'),
+      );
+    });
+  }
+
   for (final brightness in Brightness.values) {
     for (final scale in [1.0, 2.0]) {
       final name = '${brightness.name}_${scale}x';
@@ -156,6 +198,26 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/screen_rest_$name.png'),
+        );
+      });
+
+      testWidgets('mood scene $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            final id = (await db.select(db.pregnancies).getSingle()).id;
+            await WellbeingRepository(db)
+                .setMood(pregnancyId: id, day: testToday, mood: MoodWord.tired);
+          },
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/today_mood_$name.png'),
         );
       });
 

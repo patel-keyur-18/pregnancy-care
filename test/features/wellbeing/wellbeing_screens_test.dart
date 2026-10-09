@@ -240,6 +240,12 @@ void main() {
           await repo.addWater(pregnancyId: id, day: testToday, delta: 3);
         },
       );
+      // Below today's mood scene (E4).
+      await tester.scrollUntilVisible(
+        find.text('How are you today?'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(card(), findsOneWidget, reason: 'one glass to go');
       await _tap(tester, find.byTooltip('Add a glass'));
       expect(card(), findsNothing);
