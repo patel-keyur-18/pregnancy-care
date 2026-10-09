@@ -761,7 +761,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 |---|---|---|
 | **E1 Sessions fixes** ✅ 2026-10-08 (PR #28) | Reading progress that only goes up ("Finished" stays when she goes back), a visible ⋯ on library rows, Walk with Start / Pause / Finish walk and an unfinished walk she can carry on later, routines with Start / Pause / Finish, reading ticked by hand on Today | v9 |
 | **E2 Links** ✅ 2026-10-08 (PR #29) | Add, edit and remove links to YouTube, YouTube Music and Spotify in the library; a tap opens the service's app, or the browser without it; the empty Listen tile offers audio or a link; Replace file for audio | v10 |
-| **E3 Voice letters** ✅ 2026-10-09 | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
+| **E3 Voice letters** ✅ 2026-10-09 (PR #30) | Record a voice note in Talk to baby (`record`, microphone permission), encrypted like attachments; in backups only when a switch is on (off by default) | v11 |
 | **E4 Mood scenes on Today** | A gentle original scene for each mood for the rest of the day (a baby scene for Tired and Low); still under reduce motion; Navmaas 1.2.0 | No change |
 
 **E1 done when** (all met): a finished book stays "Finished" after going back (repository and widget tests); the ⋯ button opens Rename / Remove; nothing runs before Start on Walk or a routine; a walk paused by leaving carries on from the same time and is logged only at Finish walk with the steps of the stretches walked; a walk left from an earlier day goes to that day; Today's reading tick logs and removes a 15-minute session; the v8 → v9 migration fills `furthest` from `position`, and a schema 8 backup restores.
@@ -774,7 +774,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 
 **E3 done when** (all met): a recording is sealed the moment she stops, with no readable audio left on disk, and the player gets a plain copy only while the letter is open (widget test with the real store and temporary folder); the microphone-off line shows; recording stops by itself at 10:00 and when Navmaas leaves the screen, keeping what was said; the screen-on switch turns on and off with recording; Record again, Remove voice note and Remove letter delete the sealed files; a voice note missing after a restore says so; backups carry `db/voice/` only with the switch on (two-phone unit test); the v10 → v11 migration keeps letters, and a schema 10 backup restores.
 
-**Status:** **E3 ✅ 2026-10-09**: schema v11 (`letter.voice_file`, `voice_sec`), `record` 7.1.1, `VoiceRecorder` / `VoicePlayer` / `KeepScreenOn` adapters (`lib/core/platform/voice.dart`, faked in `pumpApp`), the `voiceStore` (attachment key, `db/voice/`), the `navmaas/screen` channel, Letters with Write and Speak, the letter's voice note card, the backup switch and `backup_voice`; prototype boards for Letters, the voice note before, during and after recording, and the backup switch.
+**Status:** **E3 ✅ 2026-10-09 (PR #30)**: schema v11 (`letter.voice_file`, `voice_sec`), `record` 7.1.1, `VoiceRecorder` / `VoicePlayer` / `KeepScreenOn` adapters (`lib/core/platform/voice.dart`, faked in `pumpApp`), the `voiceStore` (attachment key, `db/voice/`), the `navmaas/screen` channel, Letters with Write and Speak, the letter's voice note card, the backup switch and `backup_voice`; prototype boards for Letters, the voice note before, during and after recording, and the backup switch.
 
 ### Out of scope
 
