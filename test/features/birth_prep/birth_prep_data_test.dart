@@ -5,6 +5,7 @@ import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/birth_prep/data/bag_repository.dart';
 import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
 
@@ -142,5 +143,21 @@ void main() {
       answer: '  ',
     );
     expect(await plan.watch(pregnancyId).first, isEmpty);
+  });
+
+  test('removing her own bag item stamps when it changed', () async {
+    await bag.addOwn(
+      pregnancyId: pregnancyId,
+      label: 'Her shawl',
+      section: BagSection.forMe,
+    );
+    final id = (await db.select(db.bagItems).getSingle()).id;
+    final later = DateTime(2026, 10, 6, 8);
+    clockNow = () => later;
+    addTearDown(() => clockNow = DateTime.now);
+    await bag.deleteOwn(id);
+    final row = await db.select(db.bagItems).getSingle();
+    expect(row.deletedAt, later);
+    expect(row.updatedAt, later);
   });
 }

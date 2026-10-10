@@ -283,6 +283,11 @@ void main() {
           platformBrightness: brightness,
           textScale: scale,
         );
+        // Today from week 32: the Hospital bag card under the week card.
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/today_week33_$name.png'),
+        );
         await _tab(tester, 'Care');
         await expectLater(
           find.byType(MaterialApp),

@@ -702,6 +702,28 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pumpAndSettle();
     },
   ),
+  // Today from week 32: the Hospital bag card under the week card.
+  'today, week 33': (
+    true,
+    (t) async {
+      final db = ProviderScope.containerOf(
+        t.element(find.byType(NavmaasTabBar)),
+      ).read(appDatabaseProvider);
+      await t.runAsync(
+        () =>
+            PregnancyRepository(db)
+                .saveDating(method: .lmp, date: DateTime.utc(2026, 2, 16)),
+      );
+      await t.pumpAndSettle();
+      // Under the week card: below the fold on the small screen.
+      await t.scrollUntilVisible(
+        find.text('Hospital bag'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await t.pumpAndSettle();
+    },
+  ),
   'blood sugar': (true, (t) => _go(t, '/care/blood-sugar')),
   'log blood sugar': (
     true,

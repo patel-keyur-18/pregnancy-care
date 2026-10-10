@@ -17,6 +17,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.5.0** puts the hospital bag one tap away on Today from week 32 (how much is packed, or "All packed"), keeps a blood-sugar time at now or earlier, and fixes small things from M8.
+>
 > **Release 1.4.0** (M8b) shows the meals you log in [Nourishly](https://github.com/patel-keyur-18/nourishly) on Care → Nutrition: each day's meals and six totals (energy, protein, iron, calcium, folate, fibre) as plain numbers, never judged. Turn on Settings → Your data → Share with Navmaas in Nourishly; the link stays on the phone, and Navmaas keeps no copy.
 >
 > **Release 1.3.0** (M8a) adds blood sugar to Vitals (mg/dL, when it was taken and a note, never judged), Care → Nutrition with the foods you avoid, a hospital bag checklist with your own items and a reminder, and a birth plan in your own words. The contraction timer shows on Care from week 28, the hospital bag and birth plan from week 32.

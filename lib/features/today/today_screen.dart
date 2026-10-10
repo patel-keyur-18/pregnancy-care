@@ -15,6 +15,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/core/widgets/notice_box.dart';
+import 'package:navmaas/features/today/bag_card.dart';
 import 'package:navmaas/features/today/mood_scene_card.dart';
 import 'package:navmaas/features/today/next_visit_card.dart';
 import 'package:navmaas/features/today/screen_rest_card.dart';
@@ -23,7 +24,8 @@ import 'package:navmaas/features/today/wellbeing_card.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Today: header, the iPhone build-expiry banner when it's close, the week
-/// hero card, today's plan, the next visit and Screen Rest.
+/// hero card, the hospital bag from week 32, today's plan, the next visit
+/// and Screen Rest.
 class TodayScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -57,6 +59,8 @@ class TodayScreen extends ConsumerWidget {
               size: ref.watch(contentPackProvider).value?[snapshot.weeks]?.size,
             ),
           const SizedBox(height: 16),
+          // Hospital bag, one tap away from week 32 (M8 follow-up).
+          const BagCard(),
           // Today's mood scene, once she has picked a mood (E4).
           const MoodSceneCard(),
           const TodayPlanCard(),

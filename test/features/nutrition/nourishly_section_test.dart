@@ -6,6 +6,7 @@ import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
+import 'package:navmaas/features/nutrition/presentation/nourishly_section.dart';
 
 import '../../helpers.dart';
 
@@ -204,5 +205,24 @@ void main() {
     );
     expect(tester.getSize(chip).width, greaterThanOrEqualTo(48));
     semantics.dispose();
+  });
+
+  test('back on the current week, the strip follows today again', () {
+    final today = DateTime.utc(2026, 10, 5);
+    final earlier = stepWeek(null, -7, today);
+    expect(earlier, DateTime.utc(2026, 9, 28));
+    expect(stepWeek(earlier, -7, today), DateTime.utc(2026, 9, 21));
+    // Null means "today", so after midnight the strip moves with the date.
+    expect(stepWeek(earlier, 7, today), isNull);
+    expect(stepWeek(DateTime.utc(2026, 10, 2), 7, today), isNull);
+  });
+
+  test("tapping today's chip keeps the selection on today", () {
+    final today = DateTime.utc(2026, 10, 5);
+    expect(pickDay(today, today), isNull);
+    expect(
+      pickDay(DateTime.utc(2026, 10, 4), today),
+      DateTime.utc(2026, 10, 4),
+    );
   });
 }

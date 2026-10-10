@@ -108,10 +108,12 @@ class BagRepository {
         );
   }
 
-  Future<void> deleteOwn(String id) =>
-      (_db.update(_db.bagItems)..where((t) => t.id.equals(id))).write(
-        BagItemsCompanion(deletedAt: Value(clockNow())),
-      );
+  Future<void> deleteOwn(String id) {
+    final now = clockNow();
+    return (_db.update(_db.bagItems)..where((t) => t.id.equals(id))).write(
+      BagItemsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+    );
+  }
 }
 
 @riverpod

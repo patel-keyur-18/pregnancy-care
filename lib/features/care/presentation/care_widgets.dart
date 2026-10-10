@@ -14,6 +14,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/vitals_repository.dart';
+import 'package:navmaas/features/care/domain/blood_sugar_time.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -349,6 +350,9 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
   /// Shown after Save on a value that isn't whole mg/dL.
   String? _error;
 
+  /// Shown when she picks a time that hasn't come yet.
+  String? _timeError;
+
   @override
   void dispose() {
     _value.dispose();
@@ -378,10 +382,15 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(_at),
     );
-    if (t == null) return;
-    setState(
-      () => _at = DateTime(_at.year, _at.month, _at.day, t.hour, t.minute),
-    );
+    if (t == null || !mounted) return;
+    // Now or earlier today; a time still to come keeps the old one.
+    final at = sugarTimeToday(clockNow(), t.hour, t.minute);
+    setState(() {
+      _timeError = at == null
+          ? AppLocalizations.of(context).bloodSugarFutureTime
+          : null;
+      if (at != null) _at = at;
+    });
   }
 
   @override
@@ -449,6 +458,16 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
                 ],
               ),
             ),
+            if (_timeError case final error?)
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  error,
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ),
             TextField(
               controller: _note,
               inputFormatters: [LengthLimitingTextInputFormatter(120)],

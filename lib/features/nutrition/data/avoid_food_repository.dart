@@ -54,10 +54,12 @@ class AvoidFoodRepository {
     }
   }
 
-  Future<void> delete(String id) =>
-      (_db.update(_db.avoidFoods)..where((t) => t.id.equals(id))).write(
-        AvoidFoodsCompanion(deletedAt: Value(clockNow())),
-      );
+  Future<void> delete(String id) {
+    final now = clockNow();
+    return (_db.update(_db.avoidFoods)..where((t) => t.id.equals(id))).write(
+      AvoidFoodsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+    );
+  }
 }
 
 @riverpod

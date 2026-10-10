@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
 
 void main() {
@@ -44,4 +45,17 @@ void main() {
       expect(await repo.watch(pregnancyId).first, isEmpty);
     },
   );
+
+  test('removing a food stamps when it changed', () async {
+    final repo = AvoidFoodRepository(db);
+    await repo.save(pregnancyId: pregnancyId, name: 'Papaya');
+    final id = (await repo.watch(pregnancyId).first).single.id;
+    final later = DateTime(2026, 10, 6, 8);
+    clockNow = () => later;
+    addTearDown(() => clockNow = DateTime.now);
+    await repo.delete(id);
+    final row = await db.select(db.avoidFoods).getSingle();
+    expect(row.deletedAt, later);
+    expect(row.updatedAt, later);
+  });
 }
