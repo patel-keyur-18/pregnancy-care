@@ -3,10 +3,12 @@ import 'package:drift/native.dart';
 import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/tables.dart';
 
 import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v10.dart' as v10;
+import 'generated/schema_v11.dart' as v11;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
 import 'generated/schema_v8.dart' as v8;
@@ -239,6 +241,51 @@ void main() {
       (letter.body, letter.voiceFile, letter.voiceSec),
       ('Dear little one', null, null),
     );
+    await db.close();
+  });
+
+  test('v11 → v12 keeps her vitals and adds empty birth-prep tables', () async {
+    final schema = await verifier.schemaAt(11);
+    final old = v11.DatabaseAtV11(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.pregnancy)
+        .insert(
+          v11.PregnancyCompanion.insert(
+            id: 'p1',
+            createdAt: at,
+            updatedAt: at,
+            status: 'active',
+            datingMethod: 'lmp',
+            startDate: '2026-04-15',
+            dueDate: '2027-01-20',
+          ),
+        );
+    await old
+        .into(old.vitalReading)
+        .insert(
+          v11.VitalReadingCompanion.insert(
+            id: 'v1',
+            createdAt: at,
+            updatedAt: at,
+            pregnancyId: 'p1',
+            kind: 'weight',
+            value1: 61.5,
+            at: at,
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 12);
+    final v = await db.select(db.vitalReadings).getSingle();
+    expect(
+      (v.kind, v.value1, v.context, v.note),
+      (VitalKind.weight, 61.5, null, null),
+    );
+    expect(await db.select(db.avoidFoods).get(), isEmpty);
+    expect(await db.select(db.bagItems).get(), isEmpty);
+    expect(await db.select(db.birthPlanAnswers).get(), isEmpty);
     await db.close();
   });
 }

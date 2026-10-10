@@ -6360,6 +6360,24 @@ class $VitalReadingsTable extends VitalReadings
     requiredDuringInsert: true,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<BloodSugarContext?, String>
+  context = GeneratedColumn<String>(
+    'context',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<BloodSugarContext?>($VitalReadingsTable.$convertercontextn);
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     createdAt,
@@ -6370,6 +6388,8 @@ class $VitalReadingsTable extends VitalReadings
     value1,
     value2,
     at,
+    context,
+    note,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -6434,6 +6454,12 @@ class $VitalReadingsTable extends VitalReadings
     } else if (isInserting) {
       context.missing(_atMeta);
     }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
     return context;
   }
 
@@ -6481,6 +6507,16 @@ class $VitalReadingsTable extends VitalReadings
         DriftSqlType.dateTime,
         data['${effectivePrefix}at'],
       )!,
+      context: $VitalReadingsTable.$convertercontextn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}context'],
+        ),
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
     );
   }
 
@@ -6491,6 +6527,12 @@ class $VitalReadingsTable extends VitalReadings
 
   static JsonTypeConverter2<VitalKind, String, String> $converterkind =
       const EnumNameConverter<VitalKind>(VitalKind.values);
+  static JsonTypeConverter2<BloodSugarContext, String, String>
+  $convertercontext = const EnumNameConverter<BloodSugarContext>(
+    BloodSugarContext.values,
+  );
+  static JsonTypeConverter2<BloodSugarContext?, String?, String?>
+  $convertercontextn = JsonTypeConverter2.asNullable($convertercontext);
 }
 
 class VitalReading extends DataClass implements Insertable<VitalReading> {
@@ -6503,6 +6545,10 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
   final double value1;
   final double? value2;
   final DateTime at;
+
+  /// Blood sugar only (v12).
+  final BloodSugarContext? context;
+  final String? note;
   const VitalReading({
     required this.id,
     required this.createdAt,
@@ -6513,6 +6559,8 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
     required this.value1,
     this.value2,
     required this.at,
+    this.context,
+    this.note,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6534,6 +6582,14 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
       map['value2'] = Variable<double>(value2);
     }
     map['at'] = Variable<DateTime>(at);
+    if (!nullToAbsent || context != null) {
+      map['context'] = Variable<String>(
+        $VitalReadingsTable.$convertercontextn.toSql(context),
+      );
+    }
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
     return map;
   }
 
@@ -6552,6 +6608,10 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
           ? const Value.absent()
           : Value(value2),
       at: Value(at),
+      context: context == null && nullToAbsent
+          ? const Value.absent()
+          : Value(context),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
     );
   }
 
@@ -6572,6 +6632,10 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
       value1: serializer.fromJson<double>(json['value1']),
       value2: serializer.fromJson<double?>(json['value2']),
       at: serializer.fromJson<DateTime>(json['at']),
+      context: $VitalReadingsTable.$convertercontextn.fromJson(
+        serializer.fromJson<String?>(json['context']),
+      ),
+      note: serializer.fromJson<String?>(json['note']),
     );
   }
   @override
@@ -6589,6 +6653,10 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
       'value1': serializer.toJson<double>(value1),
       'value2': serializer.toJson<double?>(value2),
       'at': serializer.toJson<DateTime>(at),
+      'context': serializer.toJson<String?>(
+        $VitalReadingsTable.$convertercontextn.toJson(context),
+      ),
+      'note': serializer.toJson<String?>(note),
     };
   }
 
@@ -6602,6 +6670,8 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
     double? value1,
     Value<double?> value2 = const Value.absent(),
     DateTime? at,
+    Value<BloodSugarContext?> context = const Value.absent(),
+    Value<String?> note = const Value.absent(),
   }) => VitalReading(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -6612,6 +6682,8 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
     value1: value1 ?? this.value1,
     value2: value2.present ? value2.value : this.value2,
     at: at ?? this.at,
+    context: context.present ? context.value : this.context,
+    note: note.present ? note.value : this.note,
   );
   VitalReading copyWithCompanion(VitalReadingsCompanion data) {
     return VitalReading(
@@ -6626,6 +6698,8 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
       value1: data.value1.present ? data.value1.value : this.value1,
       value2: data.value2.present ? data.value2.value : this.value2,
       at: data.at.present ? data.at.value : this.at,
+      context: data.context.present ? data.context.value : this.context,
+      note: data.note.present ? data.note.value : this.note,
     );
   }
 
@@ -6640,7 +6714,9 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
           ..write('kind: $kind, ')
           ..write('value1: $value1, ')
           ..write('value2: $value2, ')
-          ..write('at: $at')
+          ..write('at: $at, ')
+          ..write('context: $context, ')
+          ..write('note: $note')
           ..write(')'))
         .toString();
   }
@@ -6656,6 +6732,8 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
     value1,
     value2,
     at,
+    context,
+    note,
   );
   @override
   bool operator ==(Object other) =>
@@ -6669,7 +6747,9 @@ class VitalReading extends DataClass implements Insertable<VitalReading> {
           other.kind == this.kind &&
           other.value1 == this.value1 &&
           other.value2 == this.value2 &&
-          other.at == this.at);
+          other.at == this.at &&
+          other.context == this.context &&
+          other.note == this.note);
 }
 
 class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
@@ -6682,6 +6762,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
   final Value<double> value1;
   final Value<double?> value2;
   final Value<DateTime> at;
+  final Value<BloodSugarContext?> context;
+  final Value<String?> note;
   final Value<int> rowid;
   const VitalReadingsCompanion({
     this.id = const Value.absent(),
@@ -6693,6 +6775,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
     this.value1 = const Value.absent(),
     this.value2 = const Value.absent(),
     this.at = const Value.absent(),
+    this.context = const Value.absent(),
+    this.note = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   VitalReadingsCompanion.insert({
@@ -6705,6 +6789,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
     required double value1,
     this.value2 = const Value.absent(),
     required DateTime at,
+    this.context = const Value.absent(),
+    this.note = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : pregnancyId = Value(pregnancyId),
        kind = Value(kind),
@@ -6720,6 +6806,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
     Expression<double>? value1,
     Expression<double>? value2,
     Expression<DateTime>? at,
+    Expression<String>? context,
+    Expression<String>? note,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6732,6 +6820,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
       if (value1 != null) 'value1': value1,
       if (value2 != null) 'value2': value2,
       if (at != null) 'at': at,
+      if (context != null) 'context': context,
+      if (note != null) 'note': note,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6746,6 +6836,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
     Value<double>? value1,
     Value<double?>? value2,
     Value<DateTime>? at,
+    Value<BloodSugarContext?>? context,
+    Value<String?>? note,
     Value<int>? rowid,
   }) {
     return VitalReadingsCompanion(
@@ -6758,6 +6850,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
       value1: value1 ?? this.value1,
       value2: value2 ?? this.value2,
       at: at ?? this.at,
+      context: context ?? this.context,
+      note: note ?? this.note,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6794,6 +6888,14 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
     if (at.present) {
       map['at'] = Variable<DateTime>(at.value);
     }
+    if (context.present) {
+      map['context'] = Variable<String>(
+        $VitalReadingsTable.$convertercontextn.toSql(context.value),
+      );
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6812,6 +6914,8 @@ class VitalReadingsCompanion extends UpdateCompanion<VitalReading> {
           ..write('value1: $value1, ')
           ..write('value2: $value2, ')
           ..write('at: $at, ')
+          ..write('context: $context, ')
+          ..write('note: $note, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -13339,6 +13443,1517 @@ class MediaLinksCompanion extends UpdateCompanion<MediaLink> {
   }
 }
 
+class $AvoidFoodsTable extends AvoidFoods
+    with TableInfo<$AvoidFoodsTable, AvoidFood> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AvoidFoodsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    name,
+    reason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'avoid_food';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AvoidFood> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AvoidFood map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AvoidFood(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+    );
+  }
+
+  @override
+  $AvoidFoodsTable createAlias(String alias) {
+    return $AvoidFoodsTable(attachedDatabase, alias);
+  }
+}
+
+class AvoidFood extends DataClass implements Insertable<AvoidFood> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+  final String name;
+  final String? reason;
+  const AvoidFood({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    required this.name,
+    this.reason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    return map;
+  }
+
+  AvoidFoodsCompanion toCompanion(bool nullToAbsent) {
+    return AvoidFoodsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      name: Value(name),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+    );
+  }
+
+  factory AvoidFood.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AvoidFood(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      name: serializer.fromJson<String>(json['name']),
+      reason: serializer.fromJson<String?>(json['reason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'name': serializer.toJson<String>(name),
+      'reason': serializer.toJson<String?>(reason),
+    };
+  }
+
+  AvoidFood copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    String? name,
+    Value<String?> reason = const Value.absent(),
+  }) => AvoidFood(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    name: name ?? this.name,
+    reason: reason.present ? reason.value : this.reason,
+  );
+  AvoidFood copyWithCompanion(AvoidFoodsCompanion data) {
+    return AvoidFood(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      name: data.name.present ? data.name.value : this.name,
+      reason: data.reason.present ? data.reason.value : this.reason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AvoidFood(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('name: $name, ')
+          ..write('reason: $reason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    name,
+    reason,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AvoidFood &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.name == this.name &&
+          other.reason == this.reason);
+}
+
+class AvoidFoodsCompanion extends UpdateCompanion<AvoidFood> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<String> name;
+  final Value<String?> reason;
+  final Value<int> rowid;
+  const AvoidFoodsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AvoidFoodsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    required String name,
+    this.reason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       name = Value(name);
+  static Insertable<AvoidFood> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<String>? name,
+    Expression<String>? reason,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (name != null) 'name': name,
+      if (reason != null) 'reason': reason,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AvoidFoodsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<String>? name,
+    Value<String?>? reason,
+    Value<int>? rowid,
+  }) {
+    return AvoidFoodsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      name: name ?? this.name,
+      reason: reason ?? this.reason,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AvoidFoodsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('name: $name, ')
+          ..write('reason: $reason, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BagItemsTable extends BagItems with TableInfo<$BagItemsTable, BagItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BagItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _templateKeyMeta = const VerificationMeta(
+    'templateKey',
+  );
+  @override
+  late final GeneratedColumn<String> templateKey = GeneratedColumn<String>(
+    'template_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<BagSection, String> section =
+      GeneratedColumn<String>(
+        'section',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<BagSection>($BagItemsTable.$convertersection);
+  static const VerificationMeta _packedMeta = const VerificationMeta('packed');
+  @override
+  late final GeneratedColumn<bool> packed = GeneratedColumn<bool>(
+    'packed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("packed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    templateKey,
+    label,
+    section,
+    packed,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'bag_item';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BagItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('template_key')) {
+      context.handle(
+        _templateKeyMeta,
+        templateKey.isAcceptableOrUnknown(
+          data['template_key']!,
+          _templateKeyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    }
+    if (data.containsKey('packed')) {
+      context.handle(
+        _packedMeta,
+        packed.isAcceptableOrUnknown(data['packed']!, _packedMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {pregnancyId, templateKey},
+  ];
+  @override
+  BagItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BagItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      templateKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}template_key'],
+      ),
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      ),
+      section: $BagItemsTable.$convertersection.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}section'],
+        )!,
+      ),
+      packed: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}packed'],
+      )!,
+    );
+  }
+
+  @override
+  $BagItemsTable createAlias(String alias) {
+    return $BagItemsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<BagSection, String, String> $convertersection =
+      const EnumNameConverter<BagSection>(BagSection.values);
+}
+
+class BagItem extends DataClass implements Insertable<BagItem> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+
+  /// `BagTemplateItem.key` from `hospital_bag.json`; null for her own items
+  /// (SQLite lets many NULLs share the unique key).
+  final String? templateKey;
+  final String? label;
+  final BagSection section;
+  final bool packed;
+  const BagItem({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    this.templateKey,
+    this.label,
+    required this.section,
+    required this.packed,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    if (!nullToAbsent || templateKey != null) {
+      map['template_key'] = Variable<String>(templateKey);
+    }
+    if (!nullToAbsent || label != null) {
+      map['label'] = Variable<String>(label);
+    }
+    {
+      map['section'] = Variable<String>(
+        $BagItemsTable.$convertersection.toSql(section),
+      );
+    }
+    map['packed'] = Variable<bool>(packed);
+    return map;
+  }
+
+  BagItemsCompanion toCompanion(bool nullToAbsent) {
+    return BagItemsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      templateKey: templateKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(templateKey),
+      label: label == null && nullToAbsent
+          ? const Value.absent()
+          : Value(label),
+      section: Value(section),
+      packed: Value(packed),
+    );
+  }
+
+  factory BagItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BagItem(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      templateKey: serializer.fromJson<String?>(json['templateKey']),
+      label: serializer.fromJson<String?>(json['label']),
+      section: $BagItemsTable.$convertersection.fromJson(
+        serializer.fromJson<String>(json['section']),
+      ),
+      packed: serializer.fromJson<bool>(json['packed']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'templateKey': serializer.toJson<String?>(templateKey),
+      'label': serializer.toJson<String?>(label),
+      'section': serializer.toJson<String>(
+        $BagItemsTable.$convertersection.toJson(section),
+      ),
+      'packed': serializer.toJson<bool>(packed),
+    };
+  }
+
+  BagItem copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    Value<String?> templateKey = const Value.absent(),
+    Value<String?> label = const Value.absent(),
+    BagSection? section,
+    bool? packed,
+  }) => BagItem(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    templateKey: templateKey.present ? templateKey.value : this.templateKey,
+    label: label.present ? label.value : this.label,
+    section: section ?? this.section,
+    packed: packed ?? this.packed,
+  );
+  BagItem copyWithCompanion(BagItemsCompanion data) {
+    return BagItem(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      templateKey: data.templateKey.present
+          ? data.templateKey.value
+          : this.templateKey,
+      label: data.label.present ? data.label.value : this.label,
+      section: data.section.present ? data.section.value : this.section,
+      packed: data.packed.present ? data.packed.value : this.packed,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BagItem(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('templateKey: $templateKey, ')
+          ..write('label: $label, ')
+          ..write('section: $section, ')
+          ..write('packed: $packed')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    templateKey,
+    label,
+    section,
+    packed,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BagItem &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.templateKey == this.templateKey &&
+          other.label == this.label &&
+          other.section == this.section &&
+          other.packed == this.packed);
+}
+
+class BagItemsCompanion extends UpdateCompanion<BagItem> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<String?> templateKey;
+  final Value<String?> label;
+  final Value<BagSection> section;
+  final Value<bool> packed;
+  final Value<int> rowid;
+  const BagItemsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.templateKey = const Value.absent(),
+    this.label = const Value.absent(),
+    this.section = const Value.absent(),
+    this.packed = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BagItemsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    this.templateKey = const Value.absent(),
+    this.label = const Value.absent(),
+    required BagSection section,
+    this.packed = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       section = Value(section);
+  static Insertable<BagItem> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<String>? templateKey,
+    Expression<String>? label,
+    Expression<String>? section,
+    Expression<bool>? packed,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (templateKey != null) 'template_key': templateKey,
+      if (label != null) 'label': label,
+      if (section != null) 'section': section,
+      if (packed != null) 'packed': packed,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BagItemsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<String?>? templateKey,
+    Value<String?>? label,
+    Value<BagSection>? section,
+    Value<bool>? packed,
+    Value<int>? rowid,
+  }) {
+    return BagItemsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      templateKey: templateKey ?? this.templateKey,
+      label: label ?? this.label,
+      section: section ?? this.section,
+      packed: packed ?? this.packed,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (templateKey.present) {
+      map['template_key'] = Variable<String>(templateKey.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (section.present) {
+      map['section'] = Variable<String>(
+        $BagItemsTable.$convertersection.toSql(section.value),
+      );
+    }
+    if (packed.present) {
+      map['packed'] = Variable<bool>(packed.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BagItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('templateKey: $templateKey, ')
+          ..write('label: $label, ')
+          ..write('section: $section, ')
+          ..write('packed: $packed, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BirthPlanAnswersTable extends BirthPlanAnswers
+    with TableInfo<$BirthPlanAnswersTable, BirthPlanAnswer> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BirthPlanAnswersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: newId,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: clockNow,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  static const VerificationMeta _promptKeyMeta = const VerificationMeta(
+    'promptKey',
+  );
+  @override
+  late final GeneratedColumn<String> promptKey = GeneratedColumn<String>(
+    'prompt_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _answerMeta = const VerificationMeta('answer');
+  @override
+  late final GeneratedColumn<String> answer = GeneratedColumn<String>(
+    'answer',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    promptKey,
+    answer,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'birth_plan_answer';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BirthPlanAnswer> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pregnancyIdMeta);
+    }
+    if (data.containsKey('prompt_key')) {
+      context.handle(
+        _promptKeyMeta,
+        promptKey.isAcceptableOrUnknown(data['prompt_key']!, _promptKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_promptKeyMeta);
+    }
+    if (data.containsKey('answer')) {
+      context.handle(
+        _answerMeta,
+        answer.isAcceptableOrUnknown(data['answer']!, _answerMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_answerMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {pregnancyId, promptKey},
+  ];
+  @override
+  BirthPlanAnswer map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BirthPlanAnswer(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      )!,
+      promptKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}prompt_key'],
+      )!,
+      answer: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answer'],
+      )!,
+    );
+  }
+
+  @override
+  $BirthPlanAnswersTable createAlias(String alias) {
+    return $BirthPlanAnswersTable(attachedDatabase, alias);
+  }
+}
+
+class BirthPlanAnswer extends DataClass implements Insertable<BirthPlanAnswer> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String pregnancyId;
+  final String promptKey;
+  final String answer;
+  const BirthPlanAnswer({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.pregnancyId,
+    required this.promptKey,
+    required this.answer,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['pregnancy_id'] = Variable<String>(pregnancyId);
+    map['prompt_key'] = Variable<String>(promptKey);
+    map['answer'] = Variable<String>(answer);
+    return map;
+  }
+
+  BirthPlanAnswersCompanion toCompanion(bool nullToAbsent) {
+    return BirthPlanAnswersCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      pregnancyId: Value(pregnancyId),
+      promptKey: Value(promptKey),
+      answer: Value(answer),
+    );
+  }
+
+  factory BirthPlanAnswer.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BirthPlanAnswer(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      pregnancyId: serializer.fromJson<String>(json['pregnancyId']),
+      promptKey: serializer.fromJson<String>(json['promptKey']),
+      answer: serializer.fromJson<String>(json['answer']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'pregnancyId': serializer.toJson<String>(pregnancyId),
+      'promptKey': serializer.toJson<String>(promptKey),
+      'answer': serializer.toJson<String>(answer),
+    };
+  }
+
+  BirthPlanAnswer copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? pregnancyId,
+    String? promptKey,
+    String? answer,
+  }) => BirthPlanAnswer(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    pregnancyId: pregnancyId ?? this.pregnancyId,
+    promptKey: promptKey ?? this.promptKey,
+    answer: answer ?? this.answer,
+  );
+  BirthPlanAnswer copyWithCompanion(BirthPlanAnswersCompanion data) {
+    return BirthPlanAnswer(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      promptKey: data.promptKey.present ? data.promptKey.value : this.promptKey,
+      answer: data.answer.present ? data.answer.value : this.answer,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BirthPlanAnswer(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('promptKey: $promptKey, ')
+          ..write('answer: $answer')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    pregnancyId,
+    promptKey,
+    answer,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BirthPlanAnswer &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.pregnancyId == this.pregnancyId &&
+          other.promptKey == this.promptKey &&
+          other.answer == this.answer);
+}
+
+class BirthPlanAnswersCompanion extends UpdateCompanion<BirthPlanAnswer> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> pregnancyId;
+  final Value<String> promptKey;
+  final Value<String> answer;
+  final Value<int> rowid;
+  const BirthPlanAnswersCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.promptKey = const Value.absent(),
+    this.answer = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BirthPlanAnswersCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String pregnancyId,
+    required String promptKey,
+    required String answer,
+    this.rowid = const Value.absent(),
+  }) : pregnancyId = Value(pregnancyId),
+       promptKey = Value(promptKey),
+       answer = Value(answer);
+  static Insertable<BirthPlanAnswer> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pregnancyId,
+    Expression<String>? promptKey,
+    Expression<String>? answer,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (promptKey != null) 'prompt_key': promptKey,
+      if (answer != null) 'answer': answer,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BirthPlanAnswersCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? pregnancyId,
+    Value<String>? promptKey,
+    Value<String>? answer,
+    Value<int>? rowid,
+  }) {
+    return BirthPlanAnswersCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      promptKey: promptKey ?? this.promptKey,
+      answer: answer ?? this.answer,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (promptKey.present) {
+      map['prompt_key'] = Variable<String>(promptKey.value);
+    }
+    if (answer.present) {
+      map['answer'] = Variable<String>(answer.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BirthPlanAnswersCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('promptKey: $promptKey, ')
+          ..write('answer: $answer, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -13367,6 +14982,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WaterLogsTable waterLogs = $WaterLogsTable(this);
   late final $AppLimitsTable appLimits = $AppLimitsTable(this);
   late final $MediaLinksTable mediaLinks = $MediaLinksTable(this);
+  late final $AvoidFoodsTable avoidFoods = $AvoidFoodsTable(this);
+  late final $BagItemsTable bagItems = $BagItemsTable(this);
+  late final $BirthPlanAnswersTable birthPlanAnswers = $BirthPlanAnswersTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13396,6 +15016,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     waterLogs,
     appLimits,
     mediaLinks,
+    avoidFoods,
+    bagItems,
+    birthPlanAnswers,
   ];
   @override
   DriftDatabaseOptions get options =>
@@ -13694,6 +15317,63 @@ final class $$PregnanciesTableReferences
     ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_waterLogsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$AvoidFoodsTable, List<AvoidFood>>
+  _avoidFoodsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.avoidFoods,
+    aliasName: 'pregnancy__id__avoid_food__pregnancy_id',
+  );
+
+  $$AvoidFoodsTableProcessedTableManager get avoidFoodsRefs {
+    final manager = $$AvoidFoodsTableTableManager(
+      $_db,
+      $_db.avoidFoods,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_avoidFoodsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$BagItemsTable, List<BagItem>> _bagItemsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.bagItems,
+    aliasName: 'pregnancy__id__bag_item__pregnancy_id',
+  );
+
+  $$BagItemsTableProcessedTableManager get bagItemsRefs {
+    final manager = $$BagItemsTableTableManager(
+      $_db,
+      $_db.bagItems,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_bagItemsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$BirthPlanAnswersTable, List<BirthPlanAnswer>>
+  _birthPlanAnswersRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.birthPlanAnswers,
+    aliasName: 'pregnancy__id__birth_plan_answer__pregnancy_id',
+  );
+
+  $$BirthPlanAnswersTableProcessedTableManager get birthPlanAnswersRefs {
+    final manager = $$BirthPlanAnswersTableTableManager(
+      $_db,
+      $_db.birthPlanAnswers,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _birthPlanAnswersRefsTable($_db),
+    );
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -14131,6 +15811,81 @@ class $$PregnanciesTableFilterComposer
           }) => $$WaterLogsTableFilterComposer(
             $db: $db,
             $table: $db.waterLogs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> avoidFoodsRefs(
+    Expression<bool> Function($$AvoidFoodsTableFilterComposer f) f,
+  ) {
+    final $$AvoidFoodsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.avoidFoods,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AvoidFoodsTableFilterComposer(
+            $db: $db,
+            $table: $db.avoidFoods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> bagItemsRefs(
+    Expression<bool> Function($$BagItemsTableFilterComposer f) f,
+  ) {
+    final $$BagItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.bagItems,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BagItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.bagItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> birthPlanAnswersRefs(
+    Expression<bool> Function($$BirthPlanAnswersTableFilterComposer f) f,
+  ) {
+    final $$BirthPlanAnswersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.birthPlanAnswers,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BirthPlanAnswersTableFilterComposer(
+            $db: $db,
+            $table: $db.birthPlanAnswers,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -14639,6 +16394,81 @@ class $$PregnanciesTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> avoidFoodsRefs<T extends Object>(
+    Expression<T> Function($$AvoidFoodsTableAnnotationComposer a) f,
+  ) {
+    final $$AvoidFoodsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.avoidFoods,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AvoidFoodsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.avoidFoods,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> bagItemsRefs<T extends Object>(
+    Expression<T> Function($$BagItemsTableAnnotationComposer a) f,
+  ) {
+    final $$BagItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.bagItems,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BagItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.bagItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> birthPlanAnswersRefs<T extends Object>(
+    Expression<T> Function($$BirthPlanAnswersTableAnnotationComposer a) f,
+  ) {
+    final $$BirthPlanAnswersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.birthPlanAnswers,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BirthPlanAnswersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.birthPlanAnswers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PregnanciesTableTableManager
@@ -14669,6 +16499,9 @@ class $$PregnanciesTableTableManager
             bool symptomEntriesRefs,
             bool sleepLogsRefs,
             bool waterLogsRefs,
+            bool avoidFoodsRefs,
+            bool bagItemsRefs,
+            bool birthPlanAnswersRefs,
           })
         > {
   $$PregnanciesTableTableManager(_$AppDatabase db, $PregnanciesTable table)
@@ -14778,6 +16611,9 @@ class $$PregnanciesTableTableManager
                 symptomEntriesRefs = false,
                 sleepLogsRefs = false,
                 waterLogsRefs = false,
+                avoidFoodsRefs = false,
+                bagItemsRefs = false,
+                birthPlanAnswersRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -14796,6 +16632,9 @@ class $$PregnanciesTableTableManager
                     if (symptomEntriesRefs) db.symptomEntries,
                     if (sleepLogsRefs) db.sleepLogs,
                     if (waterLogsRefs) db.waterLogs,
+                    if (avoidFoodsRefs) db.avoidFoods,
+                    if (bagItemsRefs) db.bagItems,
+                    if (birthPlanAnswersRefs) db.birthPlanAnswers,
                   ],
                   addJoins: null,
                   getPrefetchedDataCallback: (items) async {
@@ -15094,6 +16933,69 @@ class $$PregnanciesTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (avoidFoodsRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          AvoidFood
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._avoidFoodsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).avoidFoodsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (bagItemsRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          BagItem
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._bagItemsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).bagItemsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (birthPlanAnswersRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          BirthPlanAnswer
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._birthPlanAnswersRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).birthPlanAnswersRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -15129,6 +17031,9 @@ typedef $$PregnanciesTableProcessedTableManager =
         bool symptomEntriesRefs,
         bool sleepLogsRefs,
         bool waterLogsRefs,
+        bool avoidFoodsRefs,
+        bool bagItemsRefs,
+        bool birthPlanAnswersRefs,
       })
     >;
 typedef $$SettingsTableCreateCompanionBuilder = SettingsCompanion Function({
@@ -19240,6 +21145,8 @@ typedef $$VitalReadingsTableCreateCompanionBuilder =
       required double value1,
       Value<double?> value2,
       required DateTime at,
+      Value<BloodSugarContext?> context,
+      Value<String?> note,
       Value<int> rowid,
     });
 typedef $$VitalReadingsTableUpdateCompanionBuilder =
@@ -19253,6 +21160,8 @@ typedef $$VitalReadingsTableUpdateCompanionBuilder =
       Value<double> value1,
       Value<double?> value2,
       Value<DateTime> at,
+      Value<BloodSugarContext?> context,
+      Value<String?> note,
       Value<int> rowid,
     });
 
@@ -19332,6 +21241,17 @@ class $$VitalReadingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<BloodSugarContext?, BloodSugarContext, String>
+  get context => $composableBuilder(
+    column: $table.context,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$PregnanciesTableFilterComposer get pregnancyId {
     final $$PregnanciesTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -19405,6 +21325,16 @@ class $$VitalReadingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get context => $composableBuilder(
+    column: $table.context,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$PregnanciesTableOrderingComposer get pregnancyId {
     final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -19461,6 +21391,12 @@ class $$VitalReadingsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get at =>
       $composableBuilder(column: $table.at, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<BloodSugarContext?, String> get context =>
+      $composableBuilder(column: $table.context, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
 
   $$PregnanciesTableAnnotationComposer get pregnancyId {
     final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
@@ -19523,6 +21459,8 @@ class $$VitalReadingsTableTableManager
                 Value<double> value1 = const Value.absent(),
                 Value<double?> value2 = const Value.absent(),
                 Value<DateTime> at = const Value.absent(),
+                Value<BloodSugarContext?> context = const Value.absent(),
+                Value<String?> note = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VitalReadingsCompanion(
                 id: id,
@@ -19534,6 +21472,8 @@ class $$VitalReadingsTableTableManager
                 value1: value1,
                 value2: value2,
                 at: at,
+                context: context,
+                note: note,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -19547,6 +21487,8 @@ class $$VitalReadingsTableTableManager
                 required double value1,
                 Value<double?> value2 = const Value.absent(),
                 required DateTime at,
+                Value<BloodSugarContext?> context = const Value.absent(),
+                Value<String?> note = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => VitalReadingsCompanion.insert(
                 id: id,
@@ -19558,6 +21500,8 @@ class $$VitalReadingsTableTableManager
                 value1: value1,
                 value2: value2,
                 at: at,
+                context: context,
+                note: note,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -23971,6 +25915,1109 @@ typedef $$MediaLinksTableProcessedTableManager =
       MediaLink,
       PrefetchHooks Function()
     >;
+typedef $$AvoidFoodsTableCreateCompanionBuilder = AvoidFoodsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String pregnancyId,
+  required String name,
+  Value<String?> reason,
+  Value<int> rowid,
+});
+typedef $$AvoidFoodsTableUpdateCompanionBuilder = AvoidFoodsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> pregnancyId,
+  Value<String> name,
+  Value<String?> reason,
+  Value<int> rowid,
+});
+
+final class $$AvoidFoodsTableReferences
+    extends BaseReferences<_$AppDatabase, $AvoidFoodsTable, AvoidFood> {
+  $$AvoidFoodsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('avoid_food__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AvoidFoodsTableFilterComposer
+    extends Composer<_$AppDatabase, $AvoidFoodsTable> {
+  $$AvoidFoodsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AvoidFoodsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AvoidFoodsTable> {
+  $$AvoidFoodsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AvoidFoodsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AvoidFoodsTable> {
+  $$AvoidFoodsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AvoidFoodsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AvoidFoodsTable,
+          AvoidFood,
+          $$AvoidFoodsTableFilterComposer,
+          $$AvoidFoodsTableOrderingComposer,
+          $$AvoidFoodsTableAnnotationComposer,
+          $$AvoidFoodsTableCreateCompanionBuilder,
+          $$AvoidFoodsTableUpdateCompanionBuilder,
+          (AvoidFood, $$AvoidFoodsTableReferences),
+          AvoidFood,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$AvoidFoodsTableTableManager(_$AppDatabase db, $AvoidFoodsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AvoidFoodsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AvoidFoodsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AvoidFoodsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AvoidFoodsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                name: name,
+                reason: reason,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                required String name,
+                Value<String?> reason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AvoidFoodsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                name: name,
+                reason: reason,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AvoidFoodsTable, AvoidFood>(table),
+                  $$AvoidFoodsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$AvoidFoodsTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$AvoidFoodsTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AvoidFoodsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AvoidFoodsTable,
+      AvoidFood,
+      $$AvoidFoodsTableFilterComposer,
+      $$AvoidFoodsTableOrderingComposer,
+      $$AvoidFoodsTableAnnotationComposer,
+      $$AvoidFoodsTableCreateCompanionBuilder,
+      $$AvoidFoodsTableUpdateCompanionBuilder,
+      (AvoidFood, $$AvoidFoodsTableReferences),
+      AvoidFood,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
+typedef $$BagItemsTableCreateCompanionBuilder = BagItemsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String pregnancyId,
+  Value<String?> templateKey,
+  Value<String?> label,
+  required BagSection section,
+  Value<bool> packed,
+  Value<int> rowid,
+});
+typedef $$BagItemsTableUpdateCompanionBuilder = BagItemsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> pregnancyId,
+  Value<String?> templateKey,
+  Value<String?> label,
+  Value<BagSection> section,
+  Value<bool> packed,
+  Value<int> rowid,
+});
+
+final class $$BagItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $BagItemsTable, BagItem> {
+  $$BagItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('bag_item__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BagItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $BagItemsTable> {
+  $$BagItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get templateKey => $composableBuilder(
+    column: $table.templateKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<BagSection, BagSection, String> get section =>
+      $composableBuilder(
+        column: $table.section,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<bool> get packed => $composableBuilder(
+    column: $table.packed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BagItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $BagItemsTable> {
+  $$BagItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get templateKey => $composableBuilder(
+    column: $table.templateKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get section => $composableBuilder(
+    column: $table.section,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get packed => $composableBuilder(
+    column: $table.packed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BagItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BagItemsTable> {
+  $$BagItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get templateKey => $composableBuilder(
+    column: $table.templateKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<BagSection, String> get section =>
+      $composableBuilder(column: $table.section, builder: (column) => column);
+
+  GeneratedColumn<bool> get packed =>
+      $composableBuilder(column: $table.packed, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BagItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BagItemsTable,
+          BagItem,
+          $$BagItemsTableFilterComposer,
+          $$BagItemsTableOrderingComposer,
+          $$BagItemsTableAnnotationComposer,
+          $$BagItemsTableCreateCompanionBuilder,
+          $$BagItemsTableUpdateCompanionBuilder,
+          (BagItem, $$BagItemsTableReferences),
+          BagItem,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$BagItemsTableTableManager(_$AppDatabase db, $BagItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BagItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BagItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BagItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<String?> templateKey = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                Value<BagSection> section = const Value.absent(),
+                Value<bool> packed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BagItemsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                templateKey: templateKey,
+                label: label,
+                section: section,
+                packed: packed,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                Value<String?> templateKey = const Value.absent(),
+                Value<String?> label = const Value.absent(),
+                required BagSection section,
+                Value<bool> packed = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BagItemsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                templateKey: templateKey,
+                label: label,
+                section: section,
+                packed: packed,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BagItemsTable, BagItem>(table),
+                  $$BagItemsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$BagItemsTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$BagItemsTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BagItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BagItemsTable,
+      BagItem,
+      $$BagItemsTableFilterComposer,
+      $$BagItemsTableOrderingComposer,
+      $$BagItemsTableAnnotationComposer,
+      $$BagItemsTableCreateCompanionBuilder,
+      $$BagItemsTableUpdateCompanionBuilder,
+      (BagItem, $$BagItemsTableReferences),
+      BagItem,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
+typedef $$BirthPlanAnswersTableCreateCompanionBuilder =
+    BirthPlanAnswersCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String pregnancyId,
+      required String promptKey,
+      required String answer,
+      Value<int> rowid,
+    });
+typedef $$BirthPlanAnswersTableUpdateCompanionBuilder =
+    BirthPlanAnswersCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> pregnancyId,
+      Value<String> promptKey,
+      Value<String> answer,
+      Value<int> rowid,
+    });
+
+final class $$BirthPlanAnswersTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $BirthPlanAnswersTable, BirthPlanAnswer> {
+  $$BirthPlanAnswersTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) => db.pregnancies
+      .createAlias('birth_plan_answer__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id')!;
+
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$BirthPlanAnswersTableFilterComposer
+    extends Composer<_$AppDatabase, $BirthPlanAnswersTable> {
+  $$BirthPlanAnswersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get promptKey => $composableBuilder(
+    column: $table.promptKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answer => $composableBuilder(
+    column: $table.answer,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BirthPlanAnswersTableOrderingComposer
+    extends Composer<_$AppDatabase, $BirthPlanAnswersTable> {
+  $$BirthPlanAnswersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get promptKey => $composableBuilder(
+    column: $table.promptKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answer => $composableBuilder(
+    column: $table.answer,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BirthPlanAnswersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BirthPlanAnswersTable> {
+  $$BirthPlanAnswersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get promptKey =>
+      $composableBuilder(column: $table.promptKey, builder: (column) => column);
+
+  GeneratedColumn<String> get answer =>
+      $composableBuilder(column: $table.answer, builder: (column) => column);
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$BirthPlanAnswersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BirthPlanAnswersTable,
+          BirthPlanAnswer,
+          $$BirthPlanAnswersTableFilterComposer,
+          $$BirthPlanAnswersTableOrderingComposer,
+          $$BirthPlanAnswersTableAnnotationComposer,
+          $$BirthPlanAnswersTableCreateCompanionBuilder,
+          $$BirthPlanAnswersTableUpdateCompanionBuilder,
+          (BirthPlanAnswer, $$BirthPlanAnswersTableReferences),
+          BirthPlanAnswer,
+          PrefetchHooks Function({bool pregnancyId})
+        > {
+  $$BirthPlanAnswersTableTableManager(
+    _$AppDatabase db,
+    $BirthPlanAnswersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BirthPlanAnswersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BirthPlanAnswersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BirthPlanAnswersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> pregnancyId = const Value.absent(),
+                Value<String> promptKey = const Value.absent(),
+                Value<String> answer = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BirthPlanAnswersCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                promptKey: promptKey,
+                answer: answer,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String pregnancyId,
+                required String promptKey,
+                required String answer,
+                Value<int> rowid = const Value.absent(),
+              }) => BirthPlanAnswersCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                pregnancyId: pregnancyId,
+                promptKey: promptKey,
+                answer: answer,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$BirthPlanAnswersTable, BirthPlanAnswer>(table),
+                  $$BirthPlanAnswersTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({pregnancyId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (pregnancyId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.pregnancyId,
+                        referencedTable: $$BirthPlanAnswersTableReferences
+                            ._pregnancyIdTable(db),
+                        referencedColumn: $$BirthPlanAnswersTableReferences
+                            ._pregnancyIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$BirthPlanAnswersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BirthPlanAnswersTable,
+      BirthPlanAnswer,
+      $$BirthPlanAnswersTableFilterComposer,
+      $$BirthPlanAnswersTableOrderingComposer,
+      $$BirthPlanAnswersTableAnnotationComposer,
+      $$BirthPlanAnswersTableCreateCompanionBuilder,
+      $$BirthPlanAnswersTableUpdateCompanionBuilder,
+      (BirthPlanAnswer, $$BirthPlanAnswersTableReferences),
+      BirthPlanAnswer,
+      PrefetchHooks Function({bool pregnancyId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -24023,4 +27070,10 @@ class $AppDatabaseManager {
       $$AppLimitsTableTableManager(_db, _db.appLimits);
   $$MediaLinksTableTableManager get mediaLinks =>
       $$MediaLinksTableTableManager(_db, _db.mediaLinks);
+  $$AvoidFoodsTableTableManager get avoidFoods =>
+      $$AvoidFoodsTableTableManager(_db, _db.avoidFoods);
+  $$BagItemsTableTableManager get bagItems =>
+      $$BagItemsTableTableManager(_db, _db.bagItems);
+  $$BirthPlanAnswersTableTableManager get birthPlanAnswers =>
+      $$BirthPlanAnswersTableTableManager(_db, _db.birthPlanAnswers);
 }

@@ -165,7 +165,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 11));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 12));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -306,8 +306,9 @@ void main() {
   });
 
   // Backups from before M5 (schema 5), M7 (schema 6), M11 (schema 7),
-  // reading progress (schema 8), links (schema 9) and voice letters
-  // (schema 10).
+  // reading progress (schema 8), links (schema 9), voice letters (schema 10)
+  // and birth prep (schema 11).
+  const birthPrepTables = ['avoid_food', 'bag_item', 'birth_plan_answer'];
   const wellbeingTables = [
     'mood_entry',
     'symptom_entry',
@@ -324,13 +325,15 @@ void main() {
         ...wellbeingTables,
         'app_limit',
         'media_link',
+        ...birthPrepTables,
       ],
     ),
-    (6, [...wellbeingTables, 'app_limit', 'media_link']),
-    (7, ['app_limit', 'media_link']),
-    (8, ['media_link']),
-    (9, ['media_link']),
-    (10, <String>[]),
+    (6, [...wellbeingTables, 'app_limit', 'media_link', ...birthPrepTables]),
+    (7, ['app_limit', 'media_link', ...birthPrepTables]),
+    (8, ['media_link', ...birthPrepTables]),
+    (9, ['media_link', ...birthPrepTables]),
+    (10, birthPrepTables),
+    (11, birthPrepTables),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -343,8 +346,16 @@ void main() {
         );
       }
       // v11 added a letter's voice note.
-      for (final column in ['voice_file', 'voice_sec']) {
-        await a.db.customStatement('ALTER TABLE letter DROP COLUMN $column');
+      if (version < 11) {
+        for (final column in ['voice_file', 'voice_sec']) {
+          await a.db.customStatement('ALTER TABLE letter DROP COLUMN $column');
+        }
+      }
+      // v12 added a blood-sugar reading's context and note.
+      for (final column in ['context', 'note']) {
+        await a.db.customStatement(
+          'ALTER TABLE vital_reading DROP COLUMN $column',
+        );
       }
       await a.db.customStatement('PRAGMA user_version = $version');
       final file = File(p.join(a.root.path, 'old.navmaas'));
