@@ -80,4 +80,29 @@ void main() {
     final left = await tester.runAsync(() => SettingsRepository(db).getAll());
     expect(left![SettingKeys.bagRemindAt], isNull);
   });
+
+  testWidgets('birth plan: answer a prompt, edit it, others stay empty', (
+    tester,
+  ) async {
+    await pumpApp(tester, seed: _seed);
+    await _open(tester, '/care/birth-plan');
+    expect(find.text('Talk this through with your doctor.'), findsOneWidget);
+    final prompts = parseBirthPlan(
+      File('assets/content/birth_plan.json').readAsStringSync(),
+    );
+    expect(find.text('Add your thoughts'), findsWidgets);
+    await tester.tap(find.text(prompts.first.title));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'My husband');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('My husband'), findsOneWidget);
+
+    await tester.tap(find.text('My husband'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'My husband and my mother');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+    expect(find.text('My husband and my mother'), findsOneWidget);
+  });
 }

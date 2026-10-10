@@ -248,6 +248,7 @@ void main() {
         'avoidFood',
         'bag',
         'reminderBag',
+        'birthPlan',
       ];
       final text =
           [
