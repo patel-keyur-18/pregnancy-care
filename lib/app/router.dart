@@ -13,6 +13,7 @@ import 'package:navmaas/features/care/presentation/supplements_screen.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
+import 'package:navmaas/features/nutrition/presentation/nutrition_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
 import 'package:navmaas/features/screen_rest/presentation/app_limits_screen.dart';
 import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart';
@@ -158,6 +159,10 @@ GoRouter router(Ref ref) {
               GoRoute(
                 path: 'blood-sugar',
                 builder: (_, _) => const BloodSugarScreen(),
+              ),
+              GoRoute(
+                path: 'nutrition',
+                builder: (_, _) => const NutritionScreen(),
               ),
               GoRoute(
                 path: 'visit',

@@ -244,6 +244,8 @@ void main() {
         'noteOptional',
         'meditation',
         'bloodSugar',
+        'nutrition',
+        'avoidFood',
       ];
       final text =
           [

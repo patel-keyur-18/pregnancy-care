@@ -141,6 +141,21 @@ enum NavmaasIcon {
     'M9 20.5h6',
     'M9.5 8c0-1.2 1-1.6 1-2.8M13.5 8c0-1.2 1-1.6 1-2.8',
   ]),
+  // A plate with steam: Care → Nutrition (M8a).
+  meal([
+    'M3.5 11.5h17a8.5 8.5 0 0 1-17 0z',
+    'M8.5 20.5h7M12.5 8c.3-2 1.7-3.6 3.8-4.2M10 8.5C9.6 7 8.3 6 6.6 5.8',
+  ]),
+  // Care → Hospital bag (M8a).
+  bag([
+    'M6.5 8h11A2.5 2.5 0 0 1 20 10.5v7.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18v-7.5A2.5 2.5 0 0 1 6.5 8z',
+    'M9 8V6a3 3 0 0 1 6 0v2M4 13h16',
+  ]),
+  // A page with a folded corner: Care → Birth plan (M8a).
+  birthPlan([
+    'M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z',
+    'M14 3.5V8h4M9 13h6M9 16.5h4',
+  ]),
   // A box with an arrow out: a link that opens outside Navmaas (E2).
   external([
     'M14 4h6v6',
