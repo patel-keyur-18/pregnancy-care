@@ -12,6 +12,14 @@ import 'package:navmaas/features/nutrition/data/nourishly_meals.dart';
 import 'package:navmaas/features/nutrition/domain/nourishly_share.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
+/// The strip's last day after moving [days] from [end] (null: [today]).
+/// Reaching today gives null again, so the strip follows the date past
+/// midnight while Nutrition stays open.
+DateTime? stepWeek(DateTime? end, int days, DateTime today) {
+  final next = addDays(end ?? today, days);
+  return next.isBefore(today) ? next : null;
+}
+
 /// Care → Nutrition → From Nourishly (M8b): the meals and day totals she
 /// logged in Nourishly, a week at a time. Values only; nothing is stored.
 class NourishlySection extends ConsumerStatefulWidget {
@@ -35,8 +43,8 @@ class _NourishlySectionState extends ConsumerState<NourishlySection> {
   }
 
   void _week(int days, DateTime today) {
-    final end = addDays(_end ?? today, days);
-    setState(() => _end = _selected = end.isAfter(today) ? today : end);
+    final end = stepWeek(_end, days, today);
+    setState(() => _end = _selected = end);
   }
 
   @override
