@@ -459,10 +459,13 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
               ),
             ),
             if (_timeError case final error?)
-              Text(
-                error,
-                style: theme.textTheme.bodySmall!.copyWith(
-                  color: theme.colorScheme.error,
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  error,
+                  style: theme.textTheme.bodySmall!.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
                 ),
               ),
             TextField(

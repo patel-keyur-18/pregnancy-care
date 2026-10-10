@@ -158,6 +158,16 @@ void main() {
 
     await pick('10', '30');
     expect(find.text('Pick a time that has passed'), findsOneWidget);
+    // Screen readers hear it: focus returns to the Time button otherwise.
+    expect(
+      find.ancestor(
+        of: find.text('Pick a time that has passed'),
+        matching: find.byWidgetPredicate(
+          (w) => w is Semantics && (w.properties.liveRegion ?? false),
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Today, 9:00 am'), findsOneWidget);
     await pick('7', '40');
     expect(find.text('Pick a time that has passed'), findsNothing);

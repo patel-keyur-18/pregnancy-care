@@ -216,4 +216,13 @@ void main() {
     expect(stepWeek(earlier, 7, today), isNull);
     expect(stepWeek(DateTime.utc(2026, 10, 2), 7, today), isNull);
   });
+
+  test("tapping today's chip keeps the selection on today", () {
+    final today = DateTime.utc(2026, 10, 5);
+    expect(pickDay(today, today), isNull);
+    expect(
+      pickDay(DateTime.utc(2026, 10, 4), today),
+      DateTime.utc(2026, 10, 4),
+    );
+  });
 }

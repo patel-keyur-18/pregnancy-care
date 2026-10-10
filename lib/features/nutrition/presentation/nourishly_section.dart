@@ -20,6 +20,10 @@ DateTime? stepWeek(DateTime? end, int days, DateTime today) {
   return next.isBefore(today) ? next : null;
 }
 
+/// The day shown after tapping [day]: null for [today], so the selection
+/// follows the date past midnight like the strip.
+DateTime? pickDay(DateTime day, DateTime today) => day == today ? null : day;
+
 /// Care → Nutrition → From Nourishly (M8b): the meals and day totals she
 /// logged in Nourishly, a week at a time. Values only; nothing is stored.
 class NourishlySection extends ConsumerStatefulWidget {
@@ -94,7 +98,7 @@ class _NourishlySectionState extends ConsumerState<NourishlySection> {
             today: today,
             end: _end ?? today,
             selected: _selected ?? today,
-            onPick: (day) => setState(() => _selected = day),
+            onPick: (day) => setState(() => _selected = pickDay(day, today)),
             onWeek: (days) => _week(days, today),
           ),
           _ => const SizedBox.shrink(),

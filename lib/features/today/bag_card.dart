@@ -23,6 +23,8 @@ class BagCard extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final brand = context.navmaas;
     final bag = ref.watch(bagProvider).value ?? const [];
+    // Still loading (or no template): nothing rather than "0 of 0 packed".
+    if (bag.isEmpty) return const SizedBox.shrink();
     final packed = bag.where((r) => r.packed).length;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -55,7 +57,7 @@ class BagCard extends ConsumerWidget {
                         ),
                       ),
                       Text(
-                        bag.isNotEmpty && packed == bag.length
+                        packed == bag.length
                             ? l10n.bagAllPacked
                             : l10n.bagPacked(packed, bag.length),
                         style: theme.textTheme.bodyMedium!.copyWith(
