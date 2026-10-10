@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | v1.15 — decided 2026-10-04, updated 2026-10-09 (motion in §5; M3–M11 and E1–E4 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -216,7 +216,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (E4)
+## 8. Implementation status (M8a)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -241,6 +241,9 @@ Deliberate, permanent differences:
 | Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
 | Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
+| Blood sugar tile (Care) | Reading and "Log blood sugar" side by side | Side by side when they fit; at large text the button moves under the reading | No overflow at 2.0× text |
+| Hospital bag reminder | "Change" and "Clear" | "Set" when no reminder is set; "Change" and "Clear" once one is | Nothing to change or clear yet |
+| M8a dialogs | Each box's label above it | The label floats inside the outlined box | One text-field style across the app |
 | Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
 | Walk screen | "Evening walk" | "Gentle walk"; the Sessions tile shows "Paused · 12:30" while a walk waits to be carried on (E1); steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
 | Exercise header | "2nd trimester · step 2 of 4" | "Step 2 of 7" (the trimester is on the Sessions tile) | Shorter at large text |
