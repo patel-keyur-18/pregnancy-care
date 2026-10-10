@@ -132,6 +132,38 @@ void main() {
     );
   });
 
+  testWidgets('blood sugar time: now at first, earlier is fine, never later', (
+    tester,
+  ) async {
+    await pumpApp(tester, seed: _seed);
+    await _tab(tester, 'Care');
+    await _tapText(tester, 'Log blood sugar');
+    // The clock is pinned to 9:00 am.
+    expect(find.text('Today, 9:00 am'), findsOneWidget);
+    Future<void> pick(String hour, String minute) async {
+      await tester.tap(find.text('Time'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Switch to text input mode'));
+      await tester.pumpAndSettle();
+      final fields = find.descendant(
+        of: find.byType(TimePickerDialog),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(fields.at(0), hour);
+      await tester.enterText(fields.at(1), minute);
+      await tester.tap(find.text('AM'));
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    }
+
+    await pick('10', '30');
+    expect(find.text('Pick a time that has passed'), findsOneWidget);
+    expect(find.text('Today, 9:00 am'), findsOneWidget);
+    await pick('7', '40');
+    expect(find.text('Pick a time that has passed'), findsNothing);
+    expect(find.text('Today, 7:40 am'), findsOneWidget);
+  });
+
   testWidgets(
     'blood sugar: whole mg/dL only, logged with when, listed by day',
     (tester) async {
