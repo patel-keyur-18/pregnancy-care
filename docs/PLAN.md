@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–76; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0; 2026-10-10: one signing key for both apps, Navmaas 1.2.1; M8a built: blood sugar, foods I avoid, hospital bag and birth plan, Navmaas 1.3.0; M8b built: meals from Nourishly, Navmaas 1.4.0) |
+| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–77; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0; 2026-10-10: one signing key for both apps, Navmaas 1.2.1; M8a built: blood sugar, foods I avoid, hospital bag and birth plan, Navmaas 1.3.0; M8b built: meals from Nourishly, Navmaas 1.4.0; M8 follow-ups: the hospital bag on Today, Navmaas 1.5.0) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -95,6 +95,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 74 | Care by week | The kick counter shows at every week; the contraction timer joins it from week 28; Hospital bag and Birth plan show from week 32 and not before, twins included. Before week 28 the kick counter spans the row (owner, 2026-10-10; changes the M5a layout, where the contraction timer was always shown) |
 | 75 | Blood sugar | Whole mg/dL from 1 to 999 (a decimal, as from a mmol/L meter, saves nothing rather than turning 5.6 into 56), when it was taken (fasting, before a meal, 1 h or 2 h after a meal, bedtime), a time today and a note; listed by day with no ranges, colours or labels. **Navmaas 1.3.0 (build 5)** |
 | 76 | M8b meals from Nourishly | Care → Nutrition shows "From Nourishly" above Foods I avoid: a week of days (‹ › move a week, back as far as she likes, never past today; a dot marks days with meals), each meal with its items and amounts, then the day totals in a fixed order (energy, protein, iron, calcium, folate, fibre). A nutrient Nourishly had no data for is left out, never shown as 0; "{nutrients}: some foods had no data" marks partial ones. "Updated" shows the time Nourishly wrote the file, with its date when that isn't today, as written (never converted). Not shared: one calm line; a file it can't read: amber, never red. Care's Nutrition tile says "Today: N meals from Nourishly", or the foods-you-avoid count when there are none. Unit strings (kcal, g, mg, µg) are exempt from the word check as food measurements, not doses. Read on open and resume; nothing stored (owner approved the boards 2026-10-10). **Navmaas 1.4.0 (build 6)** |
+| 77 | M8 follow-ups | Today shows a Hospital bag card under the week card from week 32 (like Care's Getting ready): how much is packed, or "All packed", one tap to the bag; it stays once everything is packed. A notification tap still opens the default screen. A blood-sugar time is now or earlier today, never later ("Pick a time that has passed"). Back on the current week, Nutrition's strip follows the date past midnight (owner, 2026-10-10). Planned enhancements, not built: water and weight shared from Nourishly (new optional share-file fields, still version 1) and an "Open Nourishly" button (Nourishly's launch intent on Android, a `nourishly://` URL scheme on iPhone); the contract's "Planned additions" in Nourishly's `docs/navmaas-share.md` say what each takes. **Navmaas 1.5.0 (build 7)** |
 
 ### What these decisions change
 
@@ -138,6 +139,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Pregnancy loss handling** ★ | Pause tracking, baby has arrived, or end tracking (never asks why); one quiet page; immediately stops baby content and pregnancy reminders | MVP |
 | **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 (M7) |
 | **Nutrition** ★ | "Foods I avoid", her own list with her own reasons (M8a); the meals she logs in Nourishly, read on the phone (M8b). No food advice | P2 (M8a ✅ / M8b ✅) |
+| **Nourishly link, more** | Water and weight from Nourishly; an "Open Nourishly" button (decision 77) | Planned enhancement (both apps) |
 | **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 (M9) |
 | **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10 ✅ 2026-10-06) |
 | **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10b ✅ 2026-10-06) |
