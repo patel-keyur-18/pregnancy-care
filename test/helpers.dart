@@ -18,6 +18,7 @@ import 'package:navmaas/core/platform/authenticator.dart';
 import 'package:navmaas/core/platform/build_info.dart';
 import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/platform/home_widget.dart';
+import 'package:navmaas/core/platform/nourishly.dart';
 import 'package:navmaas/core/platform/voice.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
@@ -325,6 +326,81 @@ class FakeAuthenticator implements Authenticator {
   }
 }
 
+/// Nourishly's share file as the platform would hand it over.
+class FakeNourishly implements NourishlySource {
+  new([this.text]);
+
+  /// Null: not shared.
+  String? text;
+
+  /// Thrown instead, like a platform error.
+  Exception? error;
+  int reads = 0;
+
+  @override
+  Future<String?> readShare() async {
+    reads++;
+    if (error case final e?) throw e;
+    return text;
+  }
+}
+
+/// A share file (version 1) for [testToday] and the day before, written at
+/// 8:40 that morning.
+String nourishlyJson({int version = 1}) => jsonEncode({
+  'format': 'nourishly-share',
+  'version': version,
+  'generatedAt': '2026-10-05T08:40:00.000+05:30',
+  'days': [
+    {
+      'date': '2026-10-05',
+      'meals': [
+        {
+          'slot': 'Breakfast',
+          'items': [
+            {'name': 'Poha', 'amount': '1 katori · 150 g'},
+          ],
+        },
+      ],
+      'totals': {
+        'energy': 245,
+        'protein': 4.6,
+        'iron': 2.1,
+        'calcium': 18,
+        'fibre': 2.4,
+      },
+      'partial': <String>[],
+    },
+    {
+      'date': '2026-10-04',
+      'meals': [
+        {
+          'slot': 'Lunch',
+          'items': [
+            {'name': 'Dal tadka', 'amount': '1 katori · 150 g'},
+            {'name': 'Phulka', 'amount': '2 × 1 piece · 60 g'},
+          ],
+        },
+        {
+          'slot': 'Dinner',
+          'items': [
+            {'name': 'Khichdi', 'amount': '1 bowl · 250 g'},
+          ],
+        },
+      ],
+      'totals': {
+        'energy': 1120,
+        'protein': 38.2,
+        'iron': 9.4,
+        'calcium': 310.0,
+        'folate': 180,
+        'fibre': 21.5,
+      },
+      'partial': ['folate'],
+    },
+  ],
+});
+
 /// Android's Usage access stand-in: [supported] is the phone being
 /// Android, [access] whether she allowed it; [minutes] is today's use per
 /// package; [rules] the last rules handed to the check.
@@ -389,6 +465,7 @@ Future<AppDatabase> pumpApp(
   FakeWidgetPublisher? widget,
   FakeAuthenticator? authenticator,
   FakeAppUsage? appUsage,
+  FakeNourishly? nourishly,
   Directory? library,
   PickFile? pickFile,
   OpenLink? openLink,
@@ -460,6 +537,7 @@ Future<AppDatabase> pumpApp(
         appUsageProvider.overrideWithValue(
           appUsage ?? FakeAppUsage(supported: false),
         ),
+        nourishlySourceProvider.overrideWithValue(nourishly ?? FakeNourishly()),
         libraryRepositoryProvider.overrideWith(
           (ref) => LibraryRepository(
             ref.watch(appDatabaseProvider),

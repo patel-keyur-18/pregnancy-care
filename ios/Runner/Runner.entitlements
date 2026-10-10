@@ -7,10 +7,12 @@
 	<true/>
 	<key>com.apple.developer.healthkit.access</key>
 	<array/>
-	<!-- Home-screen widget: the snapshot it shows (available to a free Apple ID). -->
+	<!-- Home-screen widget: the snapshot it shows; Nourishly: the meals it
+	     shares (M8b). Both work with a free Apple ID. -->
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.com.patelkeyur.navmaas</string>
+		<string>group.com.patelkeyur.share</string>
 	</array>
 </dict>
 </plist>
