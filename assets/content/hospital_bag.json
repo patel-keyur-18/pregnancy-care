@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "key": "bag-me-nightwear",
+      "section": "forMe",
+      "label": "Two or three loose, front-opening nightwear sets"
+    },
+    {
+      "key": "bag-me-stole",
+      "section": "forMe",
+      "label": "A light shawl or stole"
+    },
+    {
+      "key": "bag-me-slippers",
+      "section": "forMe",
+      "label": "Comfortable slippers with a good grip"
+    },
+    {
+      "key": "bag-me-socks",
+      "section": "forMe",
+      "label": "Warm socks"
+    },
+    {
+      "key": "bag-me-innerwear",
+      "section": "forMe",
+      "label": "Comfortable innerwear and a few nursing bras"
+    },
+    {
+      "key": "bag-me-pads",
+      "section": "forMe",
+      "label": "Maternity pads, a big pack"
+    },
+    {
+      "key": "bag-me-toiletries",
+      "section": "forMe",
+      "label": "Toothbrush, toothpaste, soap, comb and hair ties"
+    },
+    {
+      "key": "bag-me-towel",
+      "section": "forMe",
+      "label": "A towel and a small hand towel"
+    },
+    {
+      "key": "bag-me-lip-balm",
+      "section": "forMe",
+      "label": "Lip balm and moisturiser"
+    },
+    {
+      "key": "bag-me-bottle",
+      "section": "forMe",
+      "label": "A water bottle with a straw"
+    },
+    {
+      "key": "bag-me-snacks",
+      "section": "forMe",
+      "label": "Light snacks you like"
+    },
+    {
+      "key": "bag-me-phone",
+      "section": "forMe",
+      "label": "Phone, charger and a long cable"
+    },
+    {
+      "key": "bag-me-glasses",
+      "section": "forMe",
+      "label": "Glasses or a contact lens case, if you use them"
+    },
+    {
+      "key": "bag-me-going-home",
+      "section": "forMe",
+      "label": "A loose, comfortable outfit for going home"
+    },
+    {
+      "key": "bag-baby-clothes",
+      "section": "forBaby",
+      "label": "Four or five soft cotton jhablas or onesies"
+    },
+    {
+      "key": "bag-baby-caps",
+      "section": "forBaby",
+      "label": "Soft caps and mittens"
+    },
+    {
+      "key": "bag-baby-socks",
+      "section": "forBaby",
+      "label": "Booties or socks"
+    },
+    {
+      "key": "bag-baby-swaddle",
+      "section": "forBaby",
+      "label": "Two or three swaddle cloths"
+    },
+    {
+      "key": "bag-baby-blanket",
+      "section": "forBaby",
+      "label": "A soft blanket or baby shawl"
+    },
+    {
+      "key": "bag-baby-nappies",
+      "section": "forBaby",
+      "label": "Newborn nappies and a few cloth langots"
+    },
+    {
+      "key": "bag-baby-wipes",
+      "section": "forBaby",
+      "label": "Soft cotton or baby wipes"
+    },
+    {
+      "key": "bag-baby-sheet",
+      "section": "forBaby",
+      "label": "A waterproof sheet"
+    },
+    {
+      "key": "bag-baby-going-home",
+      "section": "forBaby",
+      "label": "An outfit for going home"
+    },
+    {
+      "key": "bag-baby-car-seat",
+      "section": "forBaby",
+      "label": "A car seat, if you'll travel home by car"
+    },
+    {
+      "key": "bag-doc-id",
+      "section": "documents",
+      "label": "Your ID proof (Aadhaar or another) and a copy"
+    },
+    {
+      "key": "bag-doc-file",
+      "section": "documents",
+      "label": "Your pregnancy file: reports, scans and prescriptions"
+    },
+    {
+      "key": "bag-doc-mcp",
+      "section": "documents",
+      "label": "Your mother and child protection (MCP) card, if you have one"
+    },
+    {
+      "key": "bag-doc-insurance",
+      "section": "documents",
+      "label": "Health insurance card and papers"
+    },
+    {
+      "key": "bag-doc-hospital",
+      "section": "documents",
+      "label": "Hospital registration papers"
+    },
+    {
+      "key": "bag-doc-contacts",
+      "section": "documents",
+      "label": "A written list of important phone numbers"
+    },
+    {
+      "key": "bag-doc-payment",
+      "section": "documents",
+      "label": "Some cash and a card for payments"
+    }
+  ]
+}

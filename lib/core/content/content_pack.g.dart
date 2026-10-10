@@ -93,6 +93,88 @@ final class CareTemplateProvider
 
 String _$careTemplateHash() => r'683d498e975d8a54505c17ad7ead2c83176aff55';
 
+@ProviderFor(hospitalBag)
+final hospitalBagProvider = HospitalBagProvider._();
+
+final class HospitalBagProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BagTemplateItem>>,
+          List<BagTemplateItem>,
+          FutureOr<List<BagTemplateItem>>
+        >
+    with
+        $FutureModifier<List<BagTemplateItem>>,
+        $FutureProvider<List<BagTemplateItem>> {
+  HospitalBagProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'hospitalBagProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$hospitalBagHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<BagTemplateItem>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<BagTemplateItem>> create(Ref ref) {
+    return hospitalBag(ref);
+  }
+}
+
+String _$hospitalBagHash() => r'996d2f609de4de7c8deb499d9895ef748521ab0a';
+
+@ProviderFor(birthPlanPrompts)
+final birthPlanPromptsProvider = BirthPlanPromptsProvider._();
+
+final class BirthPlanPromptsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<BirthPlanPrompt>>,
+          List<BirthPlanPrompt>,
+          FutureOr<List<BirthPlanPrompt>>
+        >
+    with
+        $FutureModifier<List<BirthPlanPrompt>>,
+        $FutureProvider<List<BirthPlanPrompt>> {
+  BirthPlanPromptsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'birthPlanPromptsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$birthPlanPromptsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<BirthPlanPrompt>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<BirthPlanPrompt>> create(Ref ref) {
+    return birthPlanPrompts(ref);
+  }
+}
+
+String _$birthPlanPromptsHash() => r'a78b23cc3f8f21c362597544d83a8620d994bd7c';
+
 @ProviderFor(activities)
 final activitiesProvider = ActivitiesProvider._();
 

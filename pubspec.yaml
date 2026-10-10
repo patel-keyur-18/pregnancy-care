@@ -64,6 +64,8 @@ flutter:
     - assets/content/care_template_in.json
     - assets/content/activities.json
     - assets/content/routines.json
+    - assets/content/hospital_bag.json
+    - assets/content/birth_plan.json
     # Meditation's original bell and quiet clip (tool/bell.dart).
     - assets/audio/bell.wav
     - assets/audio/quiet.wav
