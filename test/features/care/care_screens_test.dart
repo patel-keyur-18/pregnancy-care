@@ -132,6 +132,48 @@ void main() {
     );
   });
 
+  testWidgets(
+    'blood sugar: whole mg/dL only, logged with when, listed by day',
+    (tester) async {
+      await pumpApp(tester, seed: _seed);
+      await _tab(tester, 'Care');
+      await _tapText(tester, 'Log blood sugar');
+      final value = find.widgetWithText(TextField, 'mg/dL');
+      // A mmol/L habit or a zero is refused: Save does nothing.
+      for (final typed in ['5.6', '0']) {
+        await tester.enterText(value, typed);
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsOneWidget, reason: typed);
+      }
+      await tester.enterText(value, '96');
+      await tester.tap(find.text('Fasting'));
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Note (optional)'),
+        'after a walk',
+      );
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+      expect(find.byType(AlertDialog), findsNothing);
+      await tester.scrollUntilVisible(
+        find.text('96 mg/dL'),
+        200,
+        scrollable: _list,
+      );
+
+      await _tapText(tester, 'Blood sugar');
+      expect(find.text('96'), findsOneWidget);
+      expect(find.text('Fasting'), findsOneWidget);
+      expect(find.text('after a walk'), findsOneWidget);
+      expect(
+        find.textContaining(
+          RegExp(r'\b(high|low|normal|range)\b', caseSensitive: false),
+        ),
+        findsNothing,
+      );
+    },
+  );
+
   testWidgets('vitals: log weight and blood pressure', (tester) async {
     await pumpApp(tester, seed: _seed);
     await _tab(tester, 'Care');

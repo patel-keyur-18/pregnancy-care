@@ -5,6 +5,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/backup/presentation/backup_screen.dart';
+import 'package:navmaas/features/care/presentation/blood_sugar_screen.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_visit_screen.dart';
@@ -154,6 +155,10 @@ GoRouter router(Ref ref) {
             (_) => const CareScreen(),
             routes: [
               GoRoute(path: 'tests', builder: (_, _) => const TestsScreen()),
+              GoRoute(
+                path: 'blood-sugar',
+                builder: (_, _) => const BloodSugarScreen(),
+              ),
               GoRoute(
                 path: 'visit',
                 builder: (_, state) =>

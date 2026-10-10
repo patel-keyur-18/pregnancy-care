@@ -193,7 +193,7 @@ void main() {
 
   // Plan decisions 39–43: the symptom pick-list and the mood words are a log,
   // never advice or a warning list, and Wellbeing has no good/bad wording.
-  group('wellbeing words (app_en.arb)', () {
+  group('wellbeing and vitals words (app_en.arb)', () {
     final arb = (jsonDecode(
       File('lib/l10n/app_en.arb').readAsStringSync(),
     ) as Map<String, dynamic>).map((k, v) => MapEntry(k, v.toString()));
@@ -218,6 +218,12 @@ void main() {
       expect(labels('moodWord').values.toSet(), hasLength(5));
     });
 
+    test('every blood-sugar context has a word', () {
+      expect(labels('bloodSugarContext').keys.toSet(), {
+        for (final c in BloodSugarContext.values) cap(c.name),
+      });
+    });
+
     test('hard lines: no advice, warning, verdict or good/bad words', () {
       const prefixes = [
         'wellbeing',
@@ -237,11 +243,18 @@ void main() {
         'goal',
         'noteOptional',
         'meditation',
+        'bloodSugar',
       ];
-      final text = [
-        for (final MapEntry(:key, :value) in arb.entries)
-          if (!key.startsWith('@') && prefixes.any(key.startsWith)) value,
-      ].join('\n');
+      final text =
+          [
+                for (final MapEntry(:key, :value) in arb.entries)
+                  if (!key.startsWith('@') && prefixes.any(key.startsWith))
+                    value,
+              ]
+              .join('\n')
+              // Blood sugar's unit is a measurement, not a dose; "mg" alone
+              // stays banned.
+              .replaceAll('mg/dL', '');
       expect(text, contains('Heartburn'), reason: 'the words are checked');
       final forbidden = RegExp(
         r'\b(warn\w*|serious|severe|urgent\w*|abnormal|normal|risk\w*|'

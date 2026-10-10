@@ -494,42 +494,132 @@ class _VitalsRow extends ConsumerWidget {
     final change = weights.length < 2
         ? null
         : weights.last.value1 - weights.first.value1;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 10,
-        children: [
-          Expanded(
-            child: _VitalTile(
-              label: l10n.weight,
-              value: weights.isEmpty
-                  ? null
-                  : l10n.weightKg(kg(weights.last.value1)),
-              detail: change == null
-                  ? (weights.isEmpty
-                        ? l10n.notLoggedYet
-                        : l10n.loggedOn(formatShortDate(weights.last.at)))
-                  : l10n.weightChange(
-                      '${change >= 0 ? '+' : '−'}${kg(change.abs())}',
-                    ),
-              action: l10n.logWeight,
-              onLog: () => logVital(context, ref, VitalKind.weight),
-            ),
+    return Column(
+      spacing: 10,
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 10,
+            children: [
+              Expanded(
+                child: _VitalTile(
+                  label: l10n.weight,
+                  value: weights.isEmpty
+                      ? null
+                      : l10n.weightKg(kg(weights.last.value1)),
+                  detail: change == null
+                      ? (weights.isEmpty
+                            ? l10n.notLoggedYet
+                            : l10n.loggedOn(formatShortDate(weights.last.at)))
+                      : l10n.weightChange(
+                          '${change >= 0 ? '+' : '−'}${kg(change.abs())}',
+                        ),
+                  action: l10n.logWeight,
+                  onLog: () => logVital(context, ref, VitalKind.weight),
+                ),
+              ),
+              Expanded(
+                child: _VitalTile(
+                  label: l10n.bloodPressure,
+                  value: bp.isEmpty
+                      ? null
+                      : '${bp.last.value1.round()}/${bp.last.value2?.round()}',
+                  detail: bp.isEmpty
+                      ? l10n.notLoggedYet
+                      : l10n.loggedOn(formatShortDate(bp.last.at)),
+                  action: l10n.logBp,
+                  onLog: () => logVital(context, ref, VitalKind.bloodPressure),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: _VitalTile(
-              label: l10n.bloodPressure,
-              value: bp.isEmpty
-                  ? null
-                  : '${bp.last.value1.round()}/${bp.last.value2?.round()}',
-              detail: bp.isEmpty
-                  ? l10n.notLoggedYet
-                  : l10n.loggedOn(formatShortDate(bp.last.at)),
-              action: l10n.logBp,
-              onLog: () => logVital(context, ref, VitalKind.bloodPressure),
+        ),
+        const _BloodSugarTile(),
+      ],
+    );
+  }
+}
+
+/// The latest blood-sugar reading, wide under weight and BP: tap it for every
+/// reading, or log one. Never judged.
+class _BloodSugarTile extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final last =
+        (ref.watch(vitalsProvider(VitalKind.bloodSugar)).value ?? const [])
+            .lastOrNull;
+    final detail = last == null
+        ? l10n.notLoggedYet
+        : [
+            if (last.context case final c?) bloodSugarContextWord(l10n, c),
+            [
+              formatShortDate(last.at),
+              formatMinuteOfDay(last.at.hour * 60 + last.at.minute),
+            ].join(', '),
+          ].join(' · ');
+    // Two buttons in one card: keep them separate for screen readers.
+    return Card(
+      semanticContainer: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+        child: Row(
+          spacing: 12,
+          children: [
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => context.go('/care/blood-sugar'),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        l10n.bloodSugar,
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scheme.outline,
+                        ),
+                      ),
+                      Text(
+                        last == null
+                            ? '—'
+                            : l10n.bloodSugarValue(last.value1.round()),
+                        style: theme.textTheme.headlineSmall!.copyWith(
+                          fontSize: 24,
+                          height: 30 / 24,
+                        ),
+                      ),
+                      Text(
+                        detail,
+                        style: theme.textTheme.bodySmall!.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: scheme.surfaceContainerHighest,
+                side: BorderSide(color: scheme.outlineVariant),
+                minimumSize: const Size(48, 48),
+                textStyle: theme.textTheme.labelLarge,
+              ),
+              onPressed: () => logBloodSugar(context, ref),
+              child: Text(l10n.logBloodSugar),
+            ),
+          ],
+        ),
       ),
     );
   }

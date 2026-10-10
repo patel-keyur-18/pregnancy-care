@@ -294,6 +294,169 @@ Future<void> logVital(
       );
 }
 
+/// The word for when a blood-sugar reading was taken.
+String bloodSugarContextWord(AppLocalizations l10n, BloodSugarContext c) =>
+    switch (c) {
+      BloodSugarContext.fasting => l10n.bloodSugarContextFasting,
+      BloodSugarContext.beforeMeal => l10n.bloodSugarContextBeforeMeal,
+      BloodSugarContext.after1h => l10n.bloodSugarContextAfter1h,
+      BloodSugarContext.after2h => l10n.bloodSugarContextAfter2h,
+      BloodSugarContext.bedtime => l10n.bloodSugarContextBedtime,
+    };
+
+typedef _SugarReading = ({
+  int value,
+  BloodSugarContext? context,
+  DateTime at,
+  String? note,
+});
+
+/// Logs a blood-sugar reading: whole mg/dL, when it was taken, a time today
+/// and a note. Recorded only; never interpreted.
+Future<void> logBloodSugar(BuildContext context, WidgetRef ref) async {
+  final r = await showDialog<_SugarReading>(
+    context: context,
+    builder: (_) => const _BloodSugarDialog(),
+  );
+  final pregnancy = ref.read(activePregnancyProvider).value;
+  if (r == null || pregnancy == null) return;
+  await ref
+      .read(vitalsRepositoryProvider)
+      .add(
+        pregnancyId: pregnancy.id,
+        kind: VitalKind.bloodSugar,
+        value1: r.value.toDouble(),
+        context: r.context,
+        note: r.note,
+        at: r.at,
+      );
+}
+
+/// Owns its text fields, so they outlive the dialog's closing animation.
+class _BloodSugarDialog extends StatefulWidget {
+  const new();
+
+  @override
+  State<_BloodSugarDialog> createState() => _BloodSugarDialogState();
+}
+
+class _BloodSugarDialogState extends State<_BloodSugarDialog> {
+  final _value = TextEditingController();
+  final _note = TextEditingController();
+  BloodSugarContext? _context;
+  late DateTime _at = clockNow();
+
+  @override
+  void dispose() {
+    _value.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  /// Whole mg/dL from 1 to 999. A decimal (a mmol/L habit) saves nothing,
+  /// rather than turning 5.6 into 56.
+  void _save() {
+    final v = int.tryParse(_value.text);
+    if (v == null || v < 1) return;
+    final note = _note.text.trim();
+    Navigator.pop<_SugarReading>(context, (
+      value: v,
+      context: _context,
+      at: _at,
+      note: note.isEmpty ? null : note,
+    ));
+  }
+
+  Future<void> _pickTime() async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_at),
+    );
+    if (t == null) return;
+    setState(
+      () => _at = DateTime(_at.year, _at.month, _at.day, t.hour, t.minute),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return AlertDialog(
+      title: Semantics(header: true, child: Text(l10n.logBloodSugar)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            TextField(
+              controller: _value,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                LengthLimitingTextInputFormatter(3),
+              ],
+              decoration: InputDecoration(labelText: l10n.bloodSugarUnit),
+            ),
+            Text(l10n.bloodSugarWhen, style: theme.textTheme.labelLarge),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in BloodSugarContext.values)
+                  ChoiceChip(
+                    label: Text(bloodSugarContextWord(l10n, c)),
+                    selected: _context == c,
+                    showCheckmark: false,
+                    shape: const StadiumBorder(),
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    onSelected: (on) =>
+                        setState(() => _context = on ? c : null),
+                  ),
+              ],
+            ),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+              onPressed: _pickTime,
+              child: Row(
+                spacing: 12,
+                children: [
+                  Text(l10n.bloodSugarTime),
+                  Expanded(
+                    child: Text(
+                      l10n.bloodSugarToday(
+                        formatMinuteOfDay(_at.hour * 60 + _at.minute),
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextField(
+              controller: _note,
+              inputFormatters: [LengthLimitingTextInputFormatter(120)],
+              decoration: InputDecoration(labelText: l10n.noteOptional),
+            ),
+            Text(l10n.vitalsNote, style: theme.textTheme.bodySmall),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.backButton),
+        ),
+        FilledButton(onPressed: _save, child: Text(l10n.saveButton)),
+      ],
+    );
+  }
+}
+
 /// Owns its text fields, so they outlive the dialog's closing animation.
 class _VitalDialog extends StatefulWidget {
   const new({required this.kind});
