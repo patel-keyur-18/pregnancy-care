@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show OverflowBoxFit;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:navmaas/core/theme/navmaas_colors.dart';
@@ -150,20 +151,30 @@ class _Shared extends StatelessWidget {
             ),
           ],
         ),
-        Row(
-          children: [
-            for (var i = 0; i < 7; i++)
-              Expanded(
-                child: _DayChip(
-                  day: addDays(start, i),
-                  selected: addDays(start, i) == selected,
-                  isToday: addDays(start, i) == today,
-                  hasMeals:
-                      share.day(addDays(start, i))?.meals.isNotEmpty ?? false,
-                  onTap: () => onPick(addDays(start, i)),
-                ),
-              ),
-          ],
+        // Seven chips of at least 48 dp need 336 dp: on a 360 dp phone the
+        // strip reaches 12 dp into each gutter.
+        LayoutBuilder(
+          builder: (context, constraints) => OverflowBox(
+            fit: OverflowBoxFit.deferToChild,
+            minWidth: constraints.maxWidth + 24,
+            maxWidth: constraints.maxWidth + 24,
+            child: Row(
+              children: [
+                for (var i = 0; i < 7; i++)
+                  Expanded(
+                    child: _DayChip(
+                      day: addDays(start, i),
+                      selected: addDays(start, i) == selected,
+                      isToday: addDays(start, i) == today,
+                      hasMeals:
+                          share.day(addDays(start, i))?.meals.isNotEmpty ??
+                          false,
+                      onTap: () => onPick(addDays(start, i)),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
         Card(
           clipBehavior: Clip.antiAlias,
@@ -214,6 +225,8 @@ class _DayChip extends StatelessWidget {
       button: true,
       selected: selected,
       label: formatDate(day),
+      // The InkWell's tap is excluded with its semantics: give it back.
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
         key: ValueKey('nourishly-day-${DateFormat('yyyy-MM-dd').format(day)}'),

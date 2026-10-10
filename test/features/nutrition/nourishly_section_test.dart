@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
@@ -175,5 +176,33 @@ void main() {
   ) async {
     await _care(tester, FakeNourishly());
     expect(find.text('Foods you avoid'), findsOneWidget);
+  });
+
+  testWidgets('day chips: a tap action for screen readers, 48 dp on a '
+      '360 dp phone', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await pumpApp(
+      tester,
+      seed: _seed,
+      nourishly: FakeNourishly(nourishlyJson()),
+      size: const Size(360, 740),
+    );
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavmaasTabBar),
+        matching: find.text('Care'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+        .go('/care/nutrition');
+    await tester.pumpAndSettle();
+    final chip = find.byKey(const ValueKey('nourishly-day-2026-10-04'));
+    expect(
+      tester.getSemantics(chip),
+      isSemantics(isButton: true, hasTapAction: true),
+    );
+    expect(tester.getSize(chip).width, greaterThanOrEqualTo(48));
+    semantics.dispose();
   });
 }

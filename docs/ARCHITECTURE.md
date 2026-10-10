@@ -435,7 +435,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 | Background Modes | ✓ | Audio with the screen off |
 | Data Protection | ✓ | File protection classes (below) |
 | Keychain | ✓ | DB and attachment keys |
-| App Groups | ✓ | Home-screen widget snapshot (M10a) |
+| App Groups | ✓ | Home-screen widget snapshot (M10a); Nourishly's meals (`group.com.patelkeyur.share`, M8b) |
 | Family Controls | ✗ | Other-app Screen Rest is Android-only |
 | Push notifications, iCloud | ✗ | Not needed: local reminders, file backups |
 
@@ -462,7 +462,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 ### Personal install steps
 
 1. Enable Developer Mode on the iPhone (Settings → Privacy & Security). Trust the developer certificate after the first install (Settings → General → VPN & Device Management).
-2. In Xcode, open `ios/Runner.xcworkspace` and choose the personal team. The bundle ID is `com.patelkeyur.navmaas`; keep it the same forever. Since M10a the widget extension (`NavmaasWidgetExtension`, `com.patelkeyur.navmaas.widget`) is a second target: choose the same personal team for it under Signing & Capabilities once; Xcode registers the App Group `group.com.patelkeyur.navmaas` for both, and every later run signs both.
+2. In Xcode, open `ios/Runner.xcworkspace` and choose the personal team. The bundle ID is `com.patelkeyur.navmaas`; keep it the same forever. Since M10a the widget extension (`NavmaasWidgetExtension`, `com.patelkeyur.navmaas.widget`) is a second target: choose the same personal team for it under Signing & Capabilities once; Xcode registers the App Group `group.com.patelkeyur.navmaas` for both, and every later run signs both. Since M8b Runner also joins `group.com.patelkeyur.share`, which Nourishly joins under the same team; Signing & Capabilities lists both groups.
 3. Install a **release** build (`flutter run --release` with the phone connected, or Xcode with the Release scheme). Flutter debug builds on iOS only start from the debugger, not from the home screen.
 4. Repeat step 3 within 7 days. The app reminds you the day before.
 
@@ -470,7 +470,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 **OS backups.** iCloud and Finder backups stay on, but the database folder is marked `isExcludedFromBackup` (through the `navmaas/files` channel) and its key never leaves the device. Restoring an iPhone backup therefore doesn't bring Navmaas data back; the `.navmaas` file (§11) does. Android behaves the same way (below).
 
-**Android.** Install a release APK signed with the owner's keystore, which is never committed and also signs Nourishly (ADR 060): release builds read `android/key.properties` (git-ignored) and fall back to the debug key when it's missing. CI writes that file from four repository secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `ANDROID_KEY_ALIAS`), so GitHub releases carry the same key and install over each other. Auto Backup stays on (`allowBackup=true`), but `res/xml` backup rules exclude `files/db/` and the shared preferences that hold the key, because Android Keystore keys can't be restored on another phone. Keep the keystore safe: updates must be signed with the same key, or the old app has to be removed, which deletes its data. That case also needs a restore from backup.
+**Android.** Install a release APK signed with the owner's keystore, which is never committed and also signs Nourishly (ADR 060): release builds read `android/key.properties` (git-ignored) and fall back to the debug key when it's missing. Debug builds use the owner's key too when that file is there (M8b): Navmaas and Nourishly both declare the `NOURISHLY_SHARE` signature permission, and Android refuses to install an app that declares it again under another key, so a debug-key Navmaas couldn't go on a phone with Nourishly (uninstalling Nourishly would delete her food log). CI writes that file from four repository secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `ANDROID_KEY_ALIAS`), so GitHub releases carry the same key and install over each other. Auto Backup stays on (`allowBackup=true`), but `res/xml` backup rules exclude `files/db/` and the shared preferences that hold the key, because Android Keystore keys can't be restored on another phone. Keep the keystore safe: updates must be signed with the same key, or the old app has to be removed, which deletes its data. That case also needs a restore from backup.
 
 ## 13. Security and privacy
 
