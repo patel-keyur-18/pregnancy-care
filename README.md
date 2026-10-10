@@ -17,6 +17,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.2.1** signs the Android APK with one key you make, shared with Nourishly, so each GitHub release installs over the last.
+>
 > **Release 1.2.0** has the owner's enhancements E1–E4 on top of 1.1.0.
 >
 > **Release 1.1.0** (Phase 2) has M7, M10 and M11. All of its on-phone flows (onboarding, Taken from a notification, reading a PDF) are checked by `integration_test/app_flow_test.dart`.
@@ -31,23 +33,32 @@ It combines:
 
 ## Install on your phones
 
-**Android** (once: make a signing key and keep it safe, outside this repo; every update must be signed with the same key, or the old app has to be removed, which deletes its data):
+**Android.** One signing key, made once by you and never committed, signs both Navmaas and [Nourishly](https://github.com/patel-keyur-18/nourishly) ([ADR 060](docs/ARCHITECTURE.md#17-architecture-decision-records-adrs)). Every update must be signed with it, or the old app has to be removed, which deletes its data; it also lets Navmaas read Nourishly's meals. Keep the `.jks` and its passwords backed up in two places.
 
 ```sh
-keytool -genkeypair -v -keystore ~/navmaas-upload.jks -keyalg RSA -keysize 2048 \
-  -validity 10000 -alias navmaas
+keytool -genkeypair -v -keystore ~/keyur-android.jks -keyalg RSA -keysize 2048 \
+  -validity 10000 -alias release
 ```
 
-Then create `android/key.properties` (git-ignored, never committed):
+Then create `android/key.properties` (git-ignored, never committed; `storeFile` must be an absolute path):
 
 ```properties
-storeFile=/Users/<you>/navmaas-upload.jks
-storePassword=<the password you chose>
-keyAlias=navmaas
-keyPassword=<the password you chose>
+storeFile=/Users/<you>/keyur-android.jks
+storePassword=<the store password>
+keyAlias=release
+keyPassword=<the key password>
 ```
 
-Or download `navmaas-<version>.apk` from [Releases](https://github.com/patel-keyur-18/pregnancy-care/releases): each version bump merged to `main` publishes one (debug-key signed, so it can't update a phone that has your release-signed app; remove that first after a backup).
+CI signs with the same key from four repository secrets (each command prompts for its value):
+
+```sh
+base64 -i ~/keyur-android.jks | gh secret set ANDROID_KEYSTORE_BASE64
+gh secret set ANDROID_STORE_PASSWORD
+gh secret set ANDROID_KEY_PASSWORD
+echo -n release | gh secret set ANDROID_KEY_ALIAS
+```
+
+Or download `navmaas-<version>.apk` from [Releases](https://github.com/patel-keyur-18/pregnancy-care/releases): each version bump merged to `main` publishes one, signed with the same key, so it installs over the previous version and keeps its data. CI prints each APK's signing-certificate digest; compare it with `keytool -list -v -keystore ~/keyur-android.jks -alias release | grep SHA256`.
 
 Build the phone APK (Arm only, about 66 MB) and install it with the phone connected over USB (USB debugging on):
 
@@ -56,7 +67,7 @@ flutter build apk --release --target-platform android-arm,android-arm64
 adb install -r build/app/outputs/flutter-apk/app-release.apk
 ```
 
-`-r` installs over the existing app and keeps its data. Without `key.properties` the build is signed with the debug key, which is fine for a try-out but can't update a phone that has the release-signed app.
+`-r` installs over the existing app and keeps its data. Without `key.properties` the build is signed with the debug key, which is fine for a try-out but can't update a phone that has the release-signed app (and `flutter run` in debug can't either: remove the app first, after a backup).
 
 **iPhone** (free Apple ID): connect the phone, then `flutter run --release`, and do it again within 7 days; the app reminds you the day before. First-time steps (Developer Mode, the personal team, trusting the certificate) are in [Architecture §12](docs/ARCHITECTURE.md#personal-install-steps).
 
