@@ -381,9 +381,9 @@ class _Day extends StatelessWidget {
                               horizontal: 12,
                               vertical: 6,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            child: Wrap(
                               spacing: 5,
+                              crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
                                 Text(
                                   label(id),

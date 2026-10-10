@@ -304,6 +304,33 @@ void main() {
         }
       });
 
+      // M8b: the meals she logged in Nourishly, on a day with a partial
+      // total, then Care's tile with today's meals.
+      testWidgets('nutrition from Nourishly $name', skip: _dir == null, (
+        tester,
+      ) async {
+        await pumpApp(
+          tester,
+          seed: _seed,
+          nourishly: FakeNourishly(nourishlyJson()),
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Care');
+        GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+            .go('/care/nutrition');
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const ValueKey('nourishly-day-2026-10-04')),
+        );
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/nutrition_nourishly_$name.png'),
+        );
+      });
+
       testWidgets('letters $name', skip: _dir == null, (tester) async {
         await pumpApp(
           tester,
