@@ -51,5 +51,20 @@ import flutter_local_notifications
         UIApplication.shared.isIdleTimerDisabled = on
         result(nil)
       }
+
+    // Meals from Nourishly (M8b, ADR 061): its share file, in the App Group
+    // both apps join under the owner's team. Not there: nil.
+    let nourishly = engineBridge.pluginRegistry.registrar(forPlugin: "NavmaasNourishly")!
+    FlutterMethodChannel(name: "navmaas/nourishly", binaryMessenger: nourishly.messenger())
+      .setMethodCallHandler { call, result in
+        guard call.method == "readShare" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        let file = FileManager.default
+          .containerURL(forSecurityApplicationGroupIdentifier: "group.com.patelkeyur.share")?
+          .appendingPathComponent("share/nourishly-share.json")
+        result(file.flatMap { try? String(contentsOf: $0, encoding: .utf8) })
+      }
   }
 }

@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | v1.15 — decided 2026-10-04, updated 2026-10-09 (motion in §5; M3–M11 and E1–E4 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog) |
+| **Status** | v1.15 — decided 2026-10-04, updated 2026-10-10 (motion in §5; M3–M11, E1–E4 and M8 components; implementation notes in §8) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -216,7 +216,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M8a)
+## 8. Implementation status (M8b)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -229,6 +229,7 @@ Deliberate, permanent differences:
 | Journey trimester caption | 11 px | 12 px | Minimum text size (§3) |
 | Journey week chips | 52 × 60 | Grow with text size up to 1.6× | The week number never clips |
 | Take / Taken pill | 40 px tall | 48 dp | Accessibility (§4) |
+| From Nourishly totals | Label and value on one line in each pill | They wrap inside the pill at large text sizes | No overflow at 2.0× (§4) |
 | Onboarding | 3 steps | 4 steps: an optional "Your doctor and reminders" step | Owner decision (Plan 22, 23) |
 | Remove-time icon | (not drawn) | A × in the same line style | Needed for the supplement form; also on bring-along chips and photos |
 | Scan icon | (not drawn) | A screen with a gentle wave, same line style | Scans needed their own icon |

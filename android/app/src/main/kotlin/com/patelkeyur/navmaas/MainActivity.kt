@@ -12,6 +12,8 @@ class MainActivity : AudioServiceFragmentActivity() {
         super.configureFlutterEngine(flutterEngine)
         // App limits (M11a).
         AppUsage.register(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
+        // Meals from Nourishly (M8b).
+        NourishlyShare.register(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
         // Keeps the screen on while she records a voice letter (E3).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "navmaas/screen")
             .setMethodCallHandler { call, result ->

@@ -24,6 +24,13 @@
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <!-- Voice letters (E3): the microphone, only when she taps Record. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Meals from Nourishly (M8b, ADR 061): its share file is readable only
+         with this signature permission, so only by apps signed with the
+         owner's key. Navmaas declares it too, so install order doesn't matter. -->
+    <permission
+        android:name="com.patelkeyur.permission.NOURISHLY_SHARE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.patelkeyur.permission.NOURISHLY_SHARE" />
 
     <application
         android:label="Navmaas"
@@ -122,6 +129,8 @@
 
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
     <queries>
+        <!-- Meals from Nourishly (M8b): Android 11+ hides other apps' providers. -->
+        <provider android:authorities="com.nourishly.app.nourishly.share" />
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

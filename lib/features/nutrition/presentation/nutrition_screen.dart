@@ -5,10 +5,11 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
+import 'package:navmaas/features/nutrition/presentation/nourishly_section.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
-/// Care → Nutrition: the foods she avoids, with her own reasons (M8a). M8b
-/// adds the meals she logged in Nourishly above the list. No food advice.
+/// Care → Nutrition: the meals she logged in Nourishly (M8b), then the
+/// foods she avoids, with her own reasons (M8a). No food advice.
 class NutritionScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -33,6 +34,8 @@ class NutritionScreen extends ConsumerWidget {
             style: theme.textTheme.bodySmall!.copyWith(color: scheme.outline),
           ),
           const SizedBox(height: 20),
+          const NourishlySection(),
+          const SizedBox(height: 24),
           Semantics(
             header: true,
             child: Text(

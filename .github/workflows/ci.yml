@@ -113,6 +113,18 @@ jobs:
           tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
           "$tools/apksigner" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | grep -E 'DN|SHA-256'
 
+      # No network in release (ARCHITECTURE §13), and Nourishly's read
+      # permission is there (M8b).
+      - name: Check the APK's permissions
+        run: |
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          perms=$("$tools/aapt2" dump permissions build/app/outputs/flutter-apk/app-release.apk)
+          echo "$perms"
+          if grep -q "android.permission.INTERNET" <<<"$perms"; then
+            echo "The release APK asks for INTERNET"; exit 1
+          fi
+          grep -q "com.patelkeyur.permission.NOURISHLY_SHARE" <<<"$perms"
+
       - uses: actions/upload-artifact@v7
         with:
           name: navmaas-release-apk

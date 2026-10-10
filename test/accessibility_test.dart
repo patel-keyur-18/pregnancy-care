@@ -230,6 +230,9 @@ Future<void> _tapText(
 /// The Android app-usage stand-in for the screen under test.
 late FakeAppUsage _usage;
 
+/// What Nourishly shares in each test: nothing until an entry says so.
+late FakeNourishly _nourishly;
+
 /// Navmaas comes back to the foreground (from Settings).
 Future<void> _comeBack(WidgetTester t) async {
   [
@@ -714,6 +717,29 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'Nutrition');
     },
   ),
+  'nutrition, from Nourishly': (
+    true,
+    (t) async {
+      _nourishly.text = nourishlyJson();
+      await _go(t, '/care/nutrition');
+    },
+  ),
+  'nutrition, another Nourishly day': (
+    true,
+    (t) async {
+      _nourishly.text = nourishlyJson();
+      await _go(t, '/care/nutrition');
+      await t.tap(find.byKey(const ValueKey('nourishly-day-2026-10-04')));
+      await t.pumpAndSettle();
+    },
+  ),
+  'nutrition, Nourishly unreadable': (
+    true,
+    (t) async {
+      _nourishly.text = nourishlyJson(version: 2);
+      await _go(t, '/care/nutrition');
+    },
+  ),
   'edit food': (
     true,
     (t) async {
@@ -824,6 +850,7 @@ void main() {
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),
+          nourishly: _nourishly = FakeNourishly(),
           textScale: scale,
           size: _small,
         );
@@ -852,6 +879,7 @@ void main() {
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),
+          nourishly: _nourishly = FakeNourishly(),
         );
         await open(tester);
         expect(find.semantics.byFlag(SemanticsFlag.isHeader), findsAtLeast(1));
@@ -867,6 +895,7 @@ void main() {
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),
+          nourishly: _nourishly = FakeNourishly(),
           platformBrightness: brightness,
         );
         await open(tester);

@@ -17,6 +17,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.4.0** (M8b) shows the meals you log in [Nourishly](https://github.com/patel-keyur-18/nourishly) on Care → Nutrition: each day's meals and six totals (energy, protein, iron, calcium, folate, fibre) as plain numbers, never judged. Turn on Settings → Your data → Share with Navmaas in Nourishly; the link stays on the phone, and Navmaas keeps no copy.
+>
 > **Release 1.3.0** (M8a) adds blood sugar to Vitals (mg/dL, when it was taken and a note, never judged), Care → Nutrition with the foods you avoid, a hospital bag checklist with your own items and a reminder, and a birth plan in your own words. The contraction timer shows on Care from week 28, the hospital bag and birth plan from week 32.
 >
 > **Release 1.2.1** signs the Android APK with one key you make, shared with Nourishly, so each GitHub release installs over the last.
@@ -27,7 +29,7 @@ It combines:
 >
 > **Enhancements (E1–E4, 2026-10-08):** E1–E4 are built. E1: a finished book stays finished when you go back a page, a ⋯ button on each library row to rename or remove, walks and exercise routines that start when you tap Start (a paused walk can be carried on later, even after closing the app), and Today's reading can be ticked by hand for a printed book. E2 adds links: save a YouTube, YouTube Music or Spotify link in your library and it opens in that app (or your browser), and an audio file can be replaced with a new one. E3 adds voice letters: tap Speak in Talk to baby to record a voice note for your baby (up to 10 minutes, encrypted on the phone, in backups only when you choose). E4 adds a gentle scene on Today for the mood you picked: each mood has its own, and Tired and Low get a baby scene ("You and baby, together today"). To reword the scene lines, edit the `moodSceneLine*` entries in `lib/l10n/app_en.arb`.
 >
-> **Next:** M8b (the meals you log in Nourishly, shown in Nutrition), then the deferred M9 (records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+> **Next:** the deferred M9 (records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
