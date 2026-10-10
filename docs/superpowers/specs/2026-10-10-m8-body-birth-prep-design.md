@@ -51,9 +51,7 @@ So no release can update the previous one in place, and the M8b link can't work.
   - If the secrets are absent (fork PRs), the step is skipped and the build falls back to the debug key as today.
 - **Never committed:** no `.jks` and no `key.properties` (CLAUDE.md hard line).
 - **Check:** a CI step prints the APK's signing cert SHA-256 (`apksigner verify --print-certs`) so the owner can compare it across releases. It never prints passwords.
-- **One-time move on her phone** (Mac builds or the first releases on the new key):
-  1. Navmaas: Backup → uninstall → install → Restore.
-  2. Nourishly: export → uninstall → install → import.
+- **Her phone:** neither app is installed there yet (owner, 2026-10-10), so there is nothing to move. Her first installs are the first GitHub releases signed with the new key. The owner's own test installs may need one uninstall.
 - **Risk:** lose the `.jks` or its password and neither app updates in place. The owner backs both up in two places.
 - **Side effect:** `flutter run` (debug key) can't install over a release-signed app without uninstalling first.
 - **Docs:** README install steps (one key for both apps, the secrets), ARCHITECTURE §16 (CI signs with the owner's key from secrets) and an ADR.
