@@ -160,4 +160,21 @@ void main() {
         (await repo.watch(pregnancyId, VitalKind.bloodPressure).first).single;
     expect((bp.value1, bp.value2), (112, 72));
   });
+
+  test('blood sugar keeps its context and note', () async {
+    final vitals = VitalsRepository(db);
+    await vitals.add(
+      pregnancyId: pregnancyId,
+      kind: VitalKind.bloodSugar,
+      value1: 92,
+      context: BloodSugarContext.fasting,
+      note: 'after a walk',
+    );
+    final r =
+        (await vitals.watch(pregnancyId, VitalKind.bloodSugar).first).single;
+    expect(
+      (r.value1, r.context, r.note),
+      (92.0, BloodSugarContext.fasting, 'after a walk'),
+    );
+  });
 }
