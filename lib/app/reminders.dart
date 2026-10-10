@@ -14,6 +14,7 @@ import 'package:navmaas/core/reminders/reminder_settings.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/backup/data/backup_log.dart';
+import 'package:navmaas/features/birth_prep/domain/bag_reminder.dart';
 import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
@@ -198,6 +199,8 @@ class ReminderSync extends _$ReminderSync {
             goalReached: ref.read(waterGoalReachedProvider),
             l10n: _l10n,
           ),
+        if (pregnancy != null)
+          ...bagCandidates(now: now, at: settings.bagAt, l10n: _l10n),
         ...buildExpiryCandidates(expiry: expiry, l10n: _l10n),
         ...backupCandidates(
           now: now,

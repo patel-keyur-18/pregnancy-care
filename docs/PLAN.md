@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–70; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0; 2026-10-10: one signing key for both apps, Navmaas 1.2.1) |
+| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–75; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0; 2026-10-10: one signing key for both apps, Navmaas 1.2.1; M8a built: blood sugar, foods I avoid, hospital bag and birth plan, Navmaas 1.3.0) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -89,6 +89,11 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 68 | App icon | The **sprout** from the app-switcher cover, a little larger: dark sage on `primary-soft`, the same on iPhone and Android (Android 13+ themed icons get the sprout alone). It replaces Flutter's default icon; the moon stays the brand mark in the name's story and on the quiet page |
 | 69 | GitHub releases | Release tags follow the app's version: `v` + `version` in `pubspec.yaml` (first tag **v1.2.0**). Bumping the version in a PR and merging it publishes a GitHub release with the phone APK (`navmaas-<version>.apk`, signed with the owner's key since 1.2.1, Arm only); merges that don't bump publish nothing |
 | 70 | One signing key | One keystore, made by the owner (`keytool`) and never committed, signs Navmaas and Nourishly, on the Mac (`android/key.properties`) and in CI (four repository secrets the owner sets; Claude never sees the passwords). GitHub releases then update in place, and Navmaas can read Nourishly's meals (M8b). The owner keeps the keystore backed up in two places. **Navmaas 1.2.1 (build 4)** (ADR 060) |
+| 71 | Nutrition from Nourishly | Navmaas shows the meals she logs in Nourishly (the owner's own diet tracker) instead of its own meal notes: Nourishly writes a small share file (her profile only, the last 90 days, each day's meals and six totals, never targets or scores), served on Android by a `signature`-protected provider and on iPhone through a shared App Group; Navmaas reads it on open and resume and stores nothing. "Share with Navmaas" is off by default in Nourishly. Totals: energy (kcal), protein, iron, calcium, folate, fibre, values only. `meal_note` is dropped (ADR 061; built in M8b) |
+| 72 | M8 split | M8a (Navmaas: blood sugar, foods I avoid, hospital bag, birth plan), then a Nourishly PR (the share file), then M8b (Navmaas reads it) |
+| 73 | M8a content | The hospital bag template (31 items: for me, for baby, documents) and six birth-plan prompts, as drafted (`docs/content/hospital_bag.md`, `birth_plan.md`); pain relief and feeding stay, and she may leave any prompt empty |
+| 74 | Care by week | The kick counter shows at every week; the contraction timer joins it from week 28; Hospital bag and Birth plan show from week 32 and not before, twins included. Before week 28 the kick counter spans the row (owner, 2026-10-10; changes the M5a layout, where the contraction timer was always shown) |
+| 75 | Blood sugar | Whole mg/dL from 1 to 999 (a decimal, as from a mmol/L meter, saves nothing rather than turning 5.6 into 56), when it was taken (fasting, before a meal, 1 h or 2 h after a meal, bedtime), a time today and a note; listed by day with no ranges, colours or labels. **Navmaas 1.3.0 (build 5)** |
 
 ### What these decisions change
 
@@ -125,13 +130,13 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | **Doctor visits** | Appointments, reminders, "questions to ask" collected over weeks ★, what to bring, notes, prescription photo (encrypted), next visit, Call clinic and Directions | MVP |
 | **Walking** | Walk timer (Start, pause, carry on later, Finish; E1), steps from Apple Health / Health Connect, daily goal, history; always open | MVP |
 | **Exercise** | Trimester-filtered guided routines with timers (Start, pause, Finish; E1), locked until "doctor cleared me" is on | MVP |
-| **Vitals** ★ | Weight and blood pressure logs (blood sugar in P2). Logged values only — no interpretation | MVP / P2 (M8) |
-| **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor); hospital bag checklist and birth plan in P2 | MVP / P2 (M8) |
+| **Vitals** ★ | Weight, blood pressure and (M8a) blood sugar logs: mg/dL, when it was taken, a time and a note. Logged values only — no interpretation | MVP / P2 (M8a ✅) |
+| **Third-trimester tools** ★ | Kick counter (pattern log), contraction timer (log to show the doctor; on Care from week 28); hospital bag checklist and birth plan (M8a, on Care from week 32) | MVP / P2 (M8a ✅) |
 | **Backup & restore** ★ | Password-protected `.navmaas` backup file, optional books and audio, weekly reminder, restore with password | MVP |
 | **iPhone build-expiry reminder** ★ | Reads the 7-day signing expiry; shows it in Me; reminds the day before to back up and re-run from Xcode | MVP |
 | **Pregnancy loss handling** ★ | Pause tracking, baby has arrived, or end tracking (never asks why); one quiet page; immediately stops baby content and pregnancy reminders | MVP |
 | **Wellbeing** ★ | Mood and symptom journal, sleep log, water, meditation | P2 (M7) |
-| **Nutrition** ★ | Owner-written meal notes and "foods I avoid" list | P2 (M8) |
+| **Nutrition** ★ | "Foods I avoid", her own list with her own reasons (M8a); the meals she logs in Nourishly, read on the phone (M8b). No food advice | P2 (M8a ✅ / M8b) |
 | **Records vault** ★ | Encrypted on-device store for reports, scans, prescriptions; PDF summary for visits | P2 (M9) |
 | **Widgets** ★ | Home-screen widget (week + next reminder) with a "hide details" option; App Groups work with a free Apple ID | P2 (M10 ✅ 2026-10-06) |
 | **App lock** ★ | Optional Face ID / fingerprint lock with the device passcode as fallback; off by default | P2 (M10b ✅ 2026-10-06) |
@@ -142,7 +147,7 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 
 The prototype covers 29 screens, each in light and dark mode, with a clickable flow and the theme sheet (the 6 M7 Wellbeing screens and the M10 widgets, lock screen and Me → Your data boards, and the M11 Screen Rest limits card, Limits for other apps and Usage access boards, were added on 2026-10-06, ADR 043; on 2026-10-08 E1 updated Walk and Exercise before Start, the library's ⋯ button and Today's reading tick; E2 added the Add sheet with links, the link dialog, the audio and link ⋯ sheets and a link row on Sessions; E3 added Letters to baby with Write and Speak, the letter's voice note before, during and after recording, and the "Include voice letters" switch on Backup & restore; E4 added Today with a mood scene and all five scenes): [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8).
 
-Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Backup & restore · Me & settings · Wellbeing · Mood check-in · Symptom log · Sleep entry · Water · Meditation timer.
+Screens: Onboarding · Today · Journey · Sessions · Reading session · Listen (screen-off) · Walk · Exercise · Screen Rest · Care · Supplements · Doctor visit · Kick counter · Contraction timer · Blood sugar · Nutrition · Hospital bag · Birth plan · Backup & restore · Me & settings · Wellbeing · Mood check-in · Symptom log · Sleep entry · Water · Meditation timer.
 
 ## 5. Notes and constraints
 
@@ -179,7 +184,7 @@ There's a daily notification limit (default 4), digest bundling and quiet hours.
 |---|---|
 | **0 — Discovery & design** ✅ | Plan, name, theme, prototype, architecture |
 | **1 — MVP** | Milestones M1–M6 in [Architecture §15](ARCHITECTURE.md#15-delivery-milestones). M1 Foundation, M2 Today & Journey, M3 Care (M3a + M3b) and M4 Sessions (M4a + M4b) ✅ 2026-10-05; M5 third trimester, build expiry and backup (M5a + M5b) ✅ 2026-10-06; M6 Screen Rest, delete all data and release (M6a + M6b) ✅ 2026-10-06 |
-| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep (blood sugar, nutrition notes, hospital bag, birth plan) · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release ✅ 2026-10-06 (M11a limits; M11b the Phase 2 release, Navmaas 1.1.0, without the deferred M8 and M9). The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
+| **2 — Enhancements** | M7 Wellbeing ✅ 2026-10-06 (M7a mood, symptoms, sleep and water; M7b meditation) · M8 Body and birth prep: M8a ✅ 2026-10-10 (blood sugar, foods I avoid, hospital bag, birth plan; Navmaas 1.3.0), M8b meals from Nourishly next · M9 Records vault, visit summary PDF and EPUB · M10 Home-screen widgets and app lock ✅ 2026-10-06 (M10a widgets; M10b app lock) · M11 Limits for other apps (Android) and the Phase 2 release ✅ 2026-10-06 (M11a limits; M11b the Phase 2 release, Navmaas 1.1.0, without the deferred M8 and M9). The owner deferred M8 and M9 on 2026-10-06 and took M10 first. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-2--enhancements-m7m11) |
 | **3 — Postpartum and baby** | M12 Postpartum mode and her recovery · M13 Baby feeding and sleep · M14 Baby vaccines and visits, and the Phase 3 release. Scope and done-when criteria: [Architecture §15](ARCHITECTURE.md#phase-3--postpartum-and-baby-m12m14) |
 | **Enhancements (E1–E4)** | The owner's requests of 2026-10-08 (decisions 55–67): E1 Sessions fixes ✅ 2026-10-08, PR #28 (reading progress, ⋯ on library rows, walk and exercise Start / Finish, reading ticked by hand) · E2 links ✅ 2026-10-08, PR #29 (YouTube, YouTube Music and Spotify links that open in their apps; Replace file for audio) · E3 voice letters ✅ 2026-10-09, PR #30 (record a voice note for baby, encrypted; optional in backups) · E4 mood scenes on Today ✅ 2026-10-09, PR #31 (a gentle scene for each mood) and **Navmaas 1.2.0**. Scope: [Architecture §15](ARCHITECTURE.md#enhancements-e1e4) |
 | Out of scope | Family sharing (decision 37) |

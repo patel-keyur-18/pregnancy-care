@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:navmaas/core/content/content_pack.dart' show CareKind;
+import 'package:navmaas/core/content/content_pack.dart'
+    show BagSection, CareKind;
 import 'package:navmaas/core/pregnancy/pregnancy_engine.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:uuid/uuid.dart';
@@ -196,10 +197,14 @@ class Attachments extends Table with BaseColumns {
   TextColumn get mimeType => text()();
 }
 
-enum VitalKind { weight, bloodPressure }
+enum VitalKind { weight, bloodPressure, bloodSugar }
+
+/// When a blood-sugar reading was taken (M8a). Words in `app_en.arb`.
+enum BloodSugarContext { fasting, beforeMeal, after1h, after2h, bedtime }
 
 /// A logged reading. Weight: [value1] kg. Blood pressure: [value1] systolic,
-/// [value2] diastolic (mmHg). Recorded only; never interpreted.
+/// [value2] diastolic (mmHg). Blood sugar: [value1] mg/dL with a [context].
+/// Recorded only; never interpreted.
 @DataClassName('VitalReading')
 class VitalReadings extends Table with BaseColumns {
   @override
@@ -210,6 +215,10 @@ class VitalReadings extends Table with BaseColumns {
   RealColumn get value1 => real()();
   RealColumn get value2 => real().nullable()();
   DateTimeColumn get at => dateTime()();
+
+  /// Blood sugar only (v12).
+  TextColumn get context => textEnum<BloodSugarContext>().nullable()();
+  TextColumn get note => text().nullable()();
 }
 
 enum LibraryKind { pdf, text, audio }
@@ -455,4 +464,53 @@ class MediaLinks extends Table with BaseColumns {
   TextColumn get title => text()();
   TextColumn get url => text()();
   DateTimeColumn get lastOpenedAt => dateTime().nullable()();
+}
+
+/// A food she avoids, with her own reason (M8a). Her list; never advice.
+@DataClassName('AvoidFood')
+class AvoidFoods extends Table with BaseColumns {
+  @override
+  String get tableName => 'avoid_food';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get name => text()();
+  TextColumn get reason => text().nullable()();
+}
+
+/// A hospital-bag item: a template item she ticked ([templateKey]) or one of
+/// her own ([label]). Unticking a template item sets [packed] false.
+@DataClassName('BagItem')
+class BagItems extends Table with BaseColumns {
+  @override
+  String get tableName => 'bag_item';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+
+  /// `BagTemplateItem.key` from `hospital_bag.json`; null for her own items
+  /// (SQLite lets many NULLs share the unique key).
+  TextColumn get templateKey => text().nullable()();
+  TextColumn get label => text().nullable()();
+  TextColumn get section => textEnum<BagSection>()();
+  BoolColumn get packed => boolean().withDefault(const Constant(false))();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, templateKey},
+  ];
+}
+
+/// Her answer to one birth-plan prompt (`BirthPlanPrompt.key`).
+@DataClassName('BirthPlanAnswer')
+class BirthPlanAnswers extends Table with BaseColumns {
+  @override
+  String get tableName => 'birth_plan_answer';
+
+  TextColumn get pregnancyId => text().references(Pregnancies, #id)();
+  TextColumn get promptKey => text()();
+  TextColumn get answer => text()();
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => [
+    {pregnancyId, promptKey},
+  ];
 }

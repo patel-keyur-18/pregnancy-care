@@ -56,6 +56,10 @@ abstract final class SettingKeys {
   /// Wellbeing (M7): daily water goal in glasses (default 8), water
   /// reminders (default off) every `water_every` hours (2 or 3, default 2),
   /// and the day (`yyyy-MM-dd`) Today's "How are you today?" card was hidden.
+  /// Hospital bag (M8a): her one-off "Pack the hospital bag" reminder, as
+  /// a local date and time (`DateTime.toIso8601String`); absent for none.
+  static const bagRemindAt = 'bag_remind_at';
+
   static const waterGoal = 'water_goal';
   static const waterRemind = 'water_remind';
   static const waterEvery = 'water_every';

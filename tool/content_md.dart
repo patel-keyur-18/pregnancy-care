@@ -15,6 +15,10 @@ const activitiesJson = 'assets/content/activities.json';
 const activitiesMd = 'docs/content/activities.md';
 const routinesJson = 'assets/content/routines.json';
 const routinesMd = 'docs/content/routines.md';
+const bagJson = 'assets/content/hospital_bag.json';
+const bagMd = 'docs/content/hospital_bag.md';
+const planJson = 'assets/content/birth_plan.json';
+const planMd = 'docs/content/birth_plan.md';
 
 void main() {
   File(
@@ -27,6 +31,12 @@ void main() {
   );
   File(routinesMd).writeAsStringSync(
     renderRoutinesMarkdown(File(routinesJson).readAsStringSync()),
+  );
+  File(bagMd).writeAsStringSync(
+    renderHospitalBagMarkdown(File(bagJson).readAsStringSync()),
+  );
+  File(planMd).writeAsStringSync(
+    renderBirthPlanMarkdown(File(planJson).readAsStringSync()),
   );
 }
 
@@ -151,6 +161,57 @@ Gentle, original routines written to the standard of an experienced obstetrician
     for (final m in moves) {
       out.write('| ${m['name']} | ${m['how']} | ${m['sec']} s |\n');
     }
+  }
+  return out.toString();
+}
+
+String renderHospitalBagMarkdown(String json) {
+  final items = ((jsonDecode(json) as Map<String, dynamic>)['items'] as List)
+      .cast<Map<String, dynamic>>();
+  final out = StringBuffer('''
+# Hospital bag (review copy)
+
+Generated from [`assets/content/hospital_bag.json`](../../assets/content/hospital_bag.json) by `dart run tool/content_md.dart`. Edit the JSON, not this file. A test fails if they differ.
+
+The template for Care → Hospital bag. She ticks items as packed and adds her own; a tick follows the item's key, so rewording an item keeps her tick. Original text, nothing medical.
+
+**If you only have five minutes, check these:**
+
+1. Anything missing that your hospital asks you to bring?
+2. Anything here you'd never pack?
+''');
+  const sections = {
+    'forMe': 'For me',
+    'forBaby': 'For baby',
+    'documents': 'Documents',
+  };
+  for (final MapEntry(key: section, value: title) in sections.entries) {
+    out.write('\n## $title\n\n');
+    for (final i in items.where((i) => i['section'] == section)) {
+      out.write('- ${i['label']} `${i['key']}`\n');
+    }
+  }
+  return out.toString();
+}
+
+String renderBirthPlanMarkdown(String json) {
+  final prompts =
+      ((jsonDecode(json) as Map<String, dynamic>)['prompts'] as List)
+          .cast<Map<String, dynamic>>();
+  final out = StringBuffer('''
+# Birth plan prompts (review copy)
+
+Generated from [`assets/content/birth_plan.json`](../../assets/content/birth_plan.json) by `dart run tool/content_md.dart`. Edit the JSON, not this file. A test fails if they differ.
+
+Care → Birth plan shows each prompt with its hint; she answers in her own words, under the line "Talk this through with your doctor." The prompts suggest no medical choice.
+
+**If you only have five minutes, check these:**
+
+1. Is anything you'd want to write about missing?
+2. Does the pain-relief prompt feel right without naming any option?
+''');
+  for (final p in prompts) {
+    out.write('\n## ${p['title']} `${p['key']}`\n\n${p['hint']}\n');
   }
   return out.toString();
 }

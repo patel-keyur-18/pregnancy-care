@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
@@ -8,6 +9,8 @@ import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/features/birth_prep/data/bag_repository.dart';
+import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
 import 'package:navmaas/features/care/data/care_repository.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
@@ -17,13 +20,23 @@ import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
+import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:navmaas/features/wellbeing/presentation/wellbeing_widgets.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
+/// The contraction timer joins the kick counter on Care from this week
+/// (owner, 2026-10-10).
+const contractionsFromWeek = 28;
+
+/// Hospital bag and Birth plan show on Care from this week (owner,
+/// 2026-10-10).
+const gettingReadyFromWeek = 32;
+
 /// Care tab (prototype "Care"): supplements today, coming up (visits,
-/// tests, scans, vaccines) and vitals, under the kick counter and
-/// contraction timer tiles.
+/// tests, scans, vaccines) and vitals, under the kick counter (with the
+/// contraction timer from week 28, and Hospital bag and Birth plan from
+/// week 32).
 class CareScreen extends ConsumerWidget {
   const new({super.key});
 
@@ -33,6 +46,7 @@ class CareScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final text = theme.textTheme;
+    final week = currentWeek(ref);
     return SafeArea(
       bottom: false,
       child: ListView(
@@ -69,20 +83,27 @@ class CareScreen extends ConsumerWidget {
                     onTap: () => context.push('/kicks'),
                   ),
                 ),
-                Expanded(
-                  child: _ToolTile(
-                    icon: NavmaasIcon.contraction,
-                    background: scheme.tertiaryContainer,
-                    foreground: scheme.onTertiaryContainer,
-                    label: l10n.contractionTitle,
-                    onTap: () => context.push('/contractions'),
+                if (week >= contractionsFromWeek)
+                  Expanded(
+                    child: _ToolTile(
+                      icon: NavmaasIcon.contraction,
+                      background: scheme.tertiaryContainer,
+                      foreground: scheme.onTertiaryContainer,
+                      label: l10n.contractionTitle,
+                      onTap: () => context.push('/contractions'),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
+          if (week >= gettingReadyFromWeek) ...[
+            const SizedBox(height: 10),
+            const _GettingReady(),
+          ],
           const SizedBox(height: 10),
           const _WellbeingTile(),
+          const SizedBox(height: 10),
+          const _NutritionTile(),
           const SizedBox(height: 18),
           Row(
             children: [
@@ -140,6 +161,7 @@ class _ToolTile extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.subtitle,
+    this.chevron = true,
   });
 
   final NavmaasIcon icon;
@@ -149,8 +171,9 @@ class _ToolTile extends StatelessWidget {
   final VoidCallback onTap;
 
   /// With a subtitle the tile is a full-width row with a chevron
-  /// (Wellbeing).
+  /// (Wellbeing), unless [chevron] is off (Getting ready).
   final String? subtitle;
+  final bool chevron;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -202,7 +225,7 @@ class _ToolTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (subtitle != null)
+                if (subtitle != null && chevron)
                   NmIcon(
                     NavmaasIcon.chevronRight,
                     size: 20,
@@ -238,6 +261,78 @@ class _WellbeingTile extends ConsumerWidget {
         l10n.waterOfGoal(today.glasses, goal),
       ].join(' · '),
       onTap: () => context.push('/wellbeing'),
+    );
+  }
+}
+
+/// Getting ready, from week 32: Hospital bag and Birth plan with how far
+/// along each is.
+class _GettingReady extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final bag = ref.watch(bagProvider).value ?? const [];
+    final prompts = ref.watch(birthPlanPromptsProvider).value ?? const [];
+    final answers = ref.watch(birthPlanAnswersProvider).value ?? const {};
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
+          Expanded(
+            child: _ToolTile(
+              icon: NavmaasIcon.bag,
+              background: context.navmaas.amberSoft,
+              foreground: context.navmaas.onAmberSoft,
+              label: l10n.bagTitle,
+              subtitle: l10n.bagPacked(
+                bag.where((r) => r.packed).length,
+                bag.length,
+              ),
+              chevron: false,
+              onTap: () => context.go('/care/bag'),
+            ),
+          ),
+          Expanded(
+            child: _ToolTile(
+              icon: NavmaasIcon.birthPlan,
+              background: scheme.tertiaryContainer,
+              foreground: scheme.onTertiaryContainer,
+              label: l10n.birthPlanTitle,
+              subtitle: l10n.birthPlanAnswered(
+                prompts.where((p) => answers.containsKey(p.key)).length,
+                prompts.length,
+              ),
+              chevron: false,
+              onTap: () => context.go('/care/birth-plan'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Care → Nutrition, with how many foods she avoids (M8a; M8b adds today's
+/// meals from Nourishly).
+class _NutritionTile extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final foods = ref.watch(avoidFoodsProvider).value ?? const [];
+    return _ToolTile(
+      icon: NavmaasIcon.meal,
+      background: scheme.primaryContainer,
+      foreground: scheme.onPrimaryContainer,
+      label: l10n.nutritionTitle,
+      subtitle: l10n.nutritionAvoidCount(foods.length),
+      onTap: () => context.go('/care/nutrition'),
     );
   }
 }
@@ -494,42 +589,134 @@ class _VitalsRow extends ConsumerWidget {
     final change = weights.length < 2
         ? null
         : weights.last.value1 - weights.first.value1;
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 10,
-        children: [
-          Expanded(
-            child: _VitalTile(
-              label: l10n.weight,
-              value: weights.isEmpty
-                  ? null
-                  : l10n.weightKg(kg(weights.last.value1)),
-              detail: change == null
-                  ? (weights.isEmpty
-                        ? l10n.notLoggedYet
-                        : l10n.loggedOn(formatShortDate(weights.last.at)))
-                  : l10n.weightChange(
-                      '${change >= 0 ? '+' : '−'}${kg(change.abs())}',
+    return Column(
+      spacing: 10,
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 10,
+            children: [
+              Expanded(
+                child: _VitalTile(
+                  label: l10n.weight,
+                  value: weights.isEmpty
+                      ? null
+                      : l10n.weightKg(kg(weights.last.value1)),
+                  detail: change == null
+                      ? (weights.isEmpty
+                            ? l10n.notLoggedYet
+                            : l10n.loggedOn(formatShortDate(weights.last.at)))
+                      : l10n.weightChange(
+                          '${change >= 0 ? '+' : '−'}${kg(change.abs())}',
+                        ),
+                  action: l10n.logWeight,
+                  onLog: () => logVital(context, ref, VitalKind.weight),
+                ),
+              ),
+              Expanded(
+                child: _VitalTile(
+                  label: l10n.bloodPressure,
+                  value: bp.isEmpty
+                      ? null
+                      : '${bp.last.value1.round()}/${bp.last.value2?.round()}',
+                  detail: bp.isEmpty
+                      ? l10n.notLoggedYet
+                      : l10n.loggedOn(formatShortDate(bp.last.at)),
+                  action: l10n.logBp,
+                  onLog: () => logVital(context, ref, VitalKind.bloodPressure),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const _BloodSugarTile(),
+      ],
+    );
+  }
+}
+
+/// The latest blood-sugar reading, wide under weight and BP: tap it for every
+/// reading, or log one. Never judged.
+class _BloodSugarTile extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final last =
+        (ref.watch(vitalsProvider(VitalKind.bloodSugar)).value ?? const [])
+            .lastOrNull;
+    final detail = last == null
+        ? l10n.notLoggedYet
+        : [
+            if (last.context case final c?) bloodSugarContextWord(l10n, c),
+            [
+              formatShortDate(last.at),
+              formatMinuteOfDay(last.at.hour * 60 + last.at.minute),
+            ].join(', '),
+          ].join(' · ');
+    // Two buttons in one card: keep them separate for screen readers.
+    return Card(
+      semanticContainer: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+        // Side by side when they fit; the button drops below at large text.
+        child: Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
+          runSpacing: 4,
+          children: [
+            InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => context.go('/care/blood-sugar'),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(
+                      l10n.bloodSugar,
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: scheme.outline,
+                      ),
                     ),
-              action: l10n.logWeight,
-              onLog: () => logVital(context, ref, VitalKind.weight),
+                    Text(
+                      last == null
+                          ? '—'
+                          : l10n.bloodSugarValue(last.value1.round()),
+                      style: theme.textTheme.headlineSmall!.copyWith(
+                        fontSize: 24,
+                        height: 30 / 24,
+                      ),
+                    ),
+                    Text(
+                      detail,
+                      style: theme.textTheme.bodySmall!.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          Expanded(
-            child: _VitalTile(
-              label: l10n.bloodPressure,
-              value: bp.isEmpty
-                  ? null
-                  : '${bp.last.value1.round()}/${bp.last.value2?.round()}',
-              detail: bp.isEmpty
-                  ? l10n.notLoggedYet
-                  : l10n.loggedOn(formatShortDate(bp.last.at)),
-              action: l10n.logBp,
-              onLog: () => logVital(context, ref, VitalKind.bloodPressure),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                backgroundColor: scheme.surfaceContainerHighest,
+                side: BorderSide(color: scheme.outlineVariant),
+                minimumSize: const Size(48, 48),
+                textStyle: theme.textTheme.labelLarge,
+              ),
+              onPressed: () => logBloodSugar(context, ref),
+              child: Text(l10n.logBloodSugar),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

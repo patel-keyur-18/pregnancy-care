@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/services.dart';
-import 'package:navmaas/core/content/content_pack.dart' show CareKind;
+import 'package:navmaas/core/content/content_pack.dart'
+    show BagSection, CareKind;
 import 'package:navmaas/core/db/app_database.steps.dart';
 import 'package:navmaas/core/db/db_key.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -42,6 +43,9 @@ part 'app_database.g.dart';
     WaterLogs,
     AppLimits,
     MediaLinks,
+    AvoidFoods,
+    BagItems,
+    BirthPlanAnswers,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -63,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,6 +123,15 @@ class AppDatabase extends _$AppDatabase {
       from10To11: (m, schema) async {
         await m.addColumn(schema.letter, schema.letter.voiceFile);
         await m.addColumn(schema.letter, schema.letter.voiceSec);
+      },
+      // v12 (M8a): blood sugar on vitals, foods she avoids, the hospital bag
+      // and the birth plan.
+      from11To12: (m, schema) async {
+        await m.addColumn(schema.vitalReading, schema.vitalReading.context);
+        await m.addColumn(schema.vitalReading, schema.vitalReading.note);
+        await m.createTable(schema.avoidFood);
+        await m.createTable(schema.bagItem);
+        await m.createTable(schema.birthPlanAnswer);
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

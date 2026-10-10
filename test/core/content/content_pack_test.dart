@@ -193,7 +193,7 @@ void main() {
 
   // Plan decisions 39–43: the symptom pick-list and the mood words are a log,
   // never advice or a warning list, and Wellbeing has no good/bad wording.
-  group('wellbeing words (app_en.arb)', () {
+  group('wellbeing and vitals words (app_en.arb)', () {
     final arb = (jsonDecode(
       File('lib/l10n/app_en.arb').readAsStringSync(),
     ) as Map<String, dynamic>).map((k, v) => MapEntry(k, v.toString()));
@@ -218,6 +218,12 @@ void main() {
       expect(labels('moodWord').values.toSet(), hasLength(5));
     });
 
+    test('every blood-sugar context has a word', () {
+      expect(labels('bloodSugarContext').keys.toSet(), {
+        for (final c in BloodSugarContext.values) cap(c.name),
+      });
+    });
+
     test('hard lines: no advice, warning, verdict or good/bad words', () {
       const prefixes = [
         'wellbeing',
@@ -237,11 +243,25 @@ void main() {
         'goal',
         'noteOptional',
         'meditation',
+        'bloodSugar',
+        'nutrition',
+        'avoidFood',
+        'bag',
+        'reminderBag',
+        'birthPlan',
       ];
-      final text = [
-        for (final MapEntry(:key, :value) in arb.entries)
-          if (!key.startsWith('@') && prefixes.any(key.startsWith)) value,
-      ].join('\n');
+      final text =
+          [
+                for (final MapEntry(:key, :value) in arb.entries)
+                  if (!key.startsWith('@') && prefixes.any(key.startsWith))
+                    value,
+              ]
+              .join('\n')
+              // Blood sugar's unit is a measurement, not a dose, and "Hospital
+              // bag" is a checklist's name; "mg" and "hospital" alone stay
+              // banned.
+              .replaceAll('mg/dL', '')
+              .replaceAll(RegExp('hospital bag', caseSensitive: false), '');
       expect(text, contains('Heartburn'), reason: 'the words are checked');
       final forbidden = RegExp(
         r'\b(warn\w*|serious|severe|urgent\w*|abnormal|normal|risk\w*|'
@@ -252,6 +272,89 @@ void main() {
         caseSensitive: false,
       );
       expect(forbidden.allMatches(text).map((m) => m[0]), isEmpty);
+    });
+  });
+
+  // M8a: the hospital-bag template and the birth-plan prompts are original,
+  // drafted by Claude and approved by the owner.
+  group('hospital bag', () {
+    final source = File('assets/content/hospital_bag.json').readAsStringSync();
+    final items = parseHospitalBag(source);
+
+    test('about 30 items, every section filled, keys unique and stable', () {
+      expect(items.length, inInclusiveRange(24, 36));
+      for (final s in BagSection.values) {
+        expect(items.where((i) => i.section == s), isNotEmpty, reason: s.name);
+      }
+      final keys = items.map((i) => i.key).toList();
+      expect(keys.toSet(), hasLength(keys.length));
+      for (final k in keys) {
+        expect(k, matches(RegExp(r'^bag-[a-z0-9-]+$')));
+      }
+    });
+
+    test('hard lines: no forbidden words', () {
+      final forbidden = RegExp(
+        r'\b(mg|mcg|ml|iu|dose|doses|dosage|tablets?|boy|girl|gender|sex|'
+        r'guarantee\w*|emergency|danger\w*|sos|warn\w*|must|should)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(source).map((m) => m[0]), isEmpty);
+    });
+
+    test('unsupported schemaVersion is rejected', () {
+      expect(
+        () => parseHospitalBag('{"schemaVersion": 2, "items": []}'),
+        throwsFormatException,
+      );
+    });
+
+    test('docs/content/hospital_bag.md matches the JSON', () {
+      expect(
+        File('docs/content/hospital_bag.md').readAsStringSync(),
+        renderHospitalBagMarkdown(source),
+        reason: 'run: dart run tool/content_md.dart',
+      );
+    });
+  });
+
+  group('birth plan prompts', () {
+    final source = File('assets/content/birth_plan.json').readAsStringSync();
+    final prompts = parseBirthPlan(source);
+
+    test('5–7 prompts with unique keys, titles and hints', () {
+      expect(prompts.length, inInclusiveRange(5, 7));
+      expect(prompts.map((p) => p.key).toSet(), hasLength(prompts.length));
+      for (final p in prompts) {
+        expect(p.key, matches(RegExp(r'^plan-[a-z0-9-]+$')));
+        expect(p.title.trim(), isNotEmpty);
+        expect(p.hint.trim(), isNotEmpty);
+      }
+    });
+
+    test('hard lines: no forbidden words, no medical choices suggested', () {
+      final forbidden = RegExp(
+        r'\b(mg|mcg|ml|iu|dose|doses|dosage|tablets?|boy|girl|gender|sex|'
+        r'guarantee\w*|emergency|danger\w*|sos|warn\w*|must|should|'
+        r'epidural|induction|caesarean|c-section|recommend\w*)\b',
+        caseSensitive: false,
+      );
+      expect(forbidden.allMatches(source).map((m) => m[0]), isEmpty);
+    });
+
+    test('unsupported schemaVersion is rejected', () {
+      expect(
+        () => parseBirthPlan('{"schemaVersion": 2, "prompts": []}'),
+        throwsFormatException,
+      );
+    });
+
+    test('docs/content/birth_plan.md matches the JSON', () {
+      expect(
+        File('docs/content/birth_plan.md').readAsStringSync(),
+        renderBirthPlanMarkdown(source),
+        reason: 'run: dart run tool/content_md.dart',
+      );
     });
   });
 }

@@ -7,7 +7,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'vitals_repository.g.dart';
 
-/// Weight and blood-pressure logs. Recorded only, never interpreted.
+/// Weight, blood-pressure and blood-sugar logs. Recorded only, never
+/// interpreted.
 class VitalsRepository {
   const new(this._db);
 
@@ -30,6 +31,8 @@ class VitalsRepository {
     required VitalKind kind,
     required double value1,
     double? value2,
+    BloodSugarContext? context,
+    String? note,
     DateTime? at,
   }) => _db
       .into(_db.vitalReadings)
@@ -39,6 +42,8 @@ class VitalsRepository {
           kind: kind,
           value1: value1,
           value2: Value(value2),
+          context: Value(context),
+          note: Value(note),
           at: at ?? clockNow(),
         ),
       );

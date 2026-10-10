@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v17 — updated 2026-10-09 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b). Updated 2026-10-08: enhancements E1–E4 planned (ADR 053); E1 Sessions fixes built (schema v9, ADRs 051–052); E2 links built (schema v10, ADR 054). Updated 2026-10-09: E3 voice letters built (schema v11, ADRs 055–056); E4 mood scenes built (ADR 057) and Navmaas 1.2.0. Updated 2026-10-10: release APKs signed with the owner's key, Navmaas 1.2.1 (ADR 060)) |
+| **Status** | v17 — updated 2026-10-09 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b). Updated 2026-10-08: enhancements E1–E4 planned (ADR 053); E1 Sessions fixes built (schema v9, ADRs 051–052); E2 links built (schema v10, ADR 054). Updated 2026-10-09: E3 voice letters built (schema v11, ADRs 055–056); E4 mood scenes built (ADR 057) and Navmaas 1.2.0. Updated 2026-10-10: release APKs signed with the owner's key, Navmaas 1.2.1 (ADR 060); M8a built: blood sugar, foods I avoid, hospital bag and birth plan (schema v12, ADRs 061–062), Navmaas 1.3.0) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -121,6 +121,8 @@ pregnancy-care/
 │  │  ├─ journey/          # journey screen; data/ checklist repository
 │  │  ├─ sessions/         # data/ domain/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise, breathing (M4b); meditation and the shared screen-off overlay (M7b); the unfinished walk (domain/walk_draft.dart, E1); saved links (data/media_link_repository.dart, domain/media_link.dart, E2)
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
+│  │  ├─ nutrition/        # data/ foods she avoids; presentation/ Care → Nutrition (M8a; M8b adds the meals from Nourishly)
+│  │  ├─ birth_prep/       # data/ the hospital bag (mergeBag: template keys plus her own items) and birth-plan answers; domain/ the bag reminder; presentation/ Hospital bag, Birth plan (M8a)
 │  │  ├─ third_trimester/  # data/ domain/ presentation/: kick counter, contraction timer, her patterns (M5a)
 │  │  ├─ backup/           # data/: the .navmaas file format, the backup service, the backup log; presentation/: Backup & restore
 │  │  ├─ screen_rest/      # data/ time in Navmaas, eye-rest setting, app limits (M11a); domain/ rest windows and nudges, the app-limit rules (pure); presentation/ Screen Rest (M6a), Limits for other apps (M11a)
@@ -223,7 +225,7 @@ Pregnancy reminders (supplements, visits, care items), Screen Rest's nudges and 
 
 ## 8. Data model
 
-All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`, M5a `kick_session`, `contraction` and `backup_log`, M7a `mood_entry`, `symptom_entry`, `sleep_log` and `water_log`, M11a `app_limit`; E1 added `library_item.furthest`, E2 `media_link`; the other tables arrive with their milestones.
+All tables use `id` (UUID v7, text), `created_at`, `updated_at` and a nullable `deleted_at` (soft delete); timestamps are stored as ISO-8601 text. This keeps the schema ready for an optional sync later. M1 created `pregnancy` and `settings`, M2 `checklist_tick`, M3a `profile`, `supplement`, `supplement_schedule` and `dose_log`, M3b `care_item`, `appointment`, `visit_question`, `attachment` and `vital_reading`, M4a `library_item`, `session` and `letter`, M5a `kick_session`, `contraction` and `backup_log`, M7a `mood_entry`, `symptom_entry`, `sleep_log` and `water_log`, M11a `app_limit`, M8a `avoid_food`, `bag_item` and `birth_plan_answer` (with `vital_reading.context` and `note`); E1 added `library_item.furthest`, E2 `media_link`; the other tables arrive with their milestones.
 
 ```mermaid
 erDiagram
@@ -307,7 +309,7 @@ Tables not shown in detail:
 | `appointment` | M3b. Time, doctor, place (default from `profile`), notes, bring-along items (one per line) |
 | `visit_question` | M3b. Waits unlinked for the next visit; ticking it as asked links it to that visit |
 | `attachment` | M3b. Encrypted file name (in `db/attachments/`), MIME type, the visit it belongs to |
-| `vital_reading` | M3b. `weight` (kg) or `bloodPressure` (systolic / diastolic, mmHg) and time. Logged only, never interpreted |
+| `vital_reading` | M3b. `weight` (kg) or `bloodPressure` (systolic / diastolic, mmHg) and time; M8a adds `bloodSugar` (whole mg/dL) with `context` (fasting, before a meal, 1 h or 2 h after, bedtime) and a `note`. Logged only, never interpreted |
 | `library_item` | M4a. Kind (`pdf` / `text` / `audio`), title, file name inside `db/library/`, audio length, and where she left off: `position` (PDF page, 0-based, or thousandths of the way through a text) out of `total`, plus `last_opened_at`. E1 (v9): `furthest`, how far she has read in the same units, which only goes up; the library's progress and "Finished" use it, while the reader reopens at `position` (Plan decision 56). Not tied to a pregnancy. Reading progress lives here, so there is no separate `reading_progress` table |
 | `session` | M4a. A reading session is logged when she leaves the reader after at least a minute (E1: or by ticking Today's reading row, 15 minutes with no `library_item_id`, soft-deleted when unticked; Plan decision 57); listening is one session per item played, growing while it actually plays (from one minute). M4b: a walk (with the steps Health counted during it), a routine (`routine_key`) or breathing, each logged from one minute. A walk keeps counting with the screen off; the others pause in the background. E1: walks, routines and breathing start at Start; a walk is logged only at Finish walk, with the time and steps of the stretches she walked (the unfinished walk waits in the `walk_draft` setting; Plan decision 58). M7b: `meditation`, logged like listening (playing time, from one minute) from the timer's track or her own audio (then with its `library_item_id`); Finish or the end bell closes it, so the next one is a new session |
 | `letter` | M4a. Letters to baby (body text), in the encrypted database. E3 (v11): `voice_file` (its sealed voice note in `db/voice/`) and `voice_sec`; `body` is empty for a voice-only letter (Plan decision 62) |
@@ -319,11 +321,14 @@ Tables not shown in detail:
 | `sleep_log` | M7a. One night per wake-up `day` (unique with the pregnancy): `bed_at`, `woke_at`, `nap_minutes` and `rested` (`rested` / `bitTired` / `veryTired`, optional) |
 | `water_log` | M7a. Glasses on a `day` (unique with the pregnancy); + / − change the count, never below zero |
 | `media_link` | E2 (v10). A link she saved: `title`, `url` (YouTube, YouTube Music or Spotify, always `https`) and `last_opened_at`. Which service it is comes from the address when shown, so nothing else is stored. Not tied to a pregnancy; removing one soft-deletes it. In every backup, like the rest of the database (Plan decision 61) |
+| `avoid_food` | M8a (v12). A food she avoids: `name` and her own `reason` (optional). Per pregnancy; removing one soft-deletes it. The app adds no food guidance |
+| `bag_item` | M8a (v12). Her hospital bag: a template item she ticked (`template_key`, unique per pregnancy) or one of her own (`label`), its `section` (for me, for baby, documents) and `packed`. Labels of template items come from `hospital_bag.json`, so rewording one keeps her tick (ADR 062) |
+| `birth_plan_answer` | M8a (v12). Her answer to a birth-plan prompt (`prompt_key`, unique per pregnancy), in her own words; a blank answer soft-deletes it |
 | `app_limit` | M11a (Android). A daily limit on another app: `package` (unique), `label` (its name when she chose it), `minutes` (15–120). Not tied to a pregnancy; removing one soft-deletes it, and choosing the app again brings the row back. Backed up like everything else; on another phone only installed apps show their icon |
 | `backup_log` | M5a (written from M5b). `kind` (`backup` / `restore`), `size_bytes`, `includes_library`; the row's `created_at` is when. Never the password |
 | `settings` | Key-value. M1: `theme_mode` (`light` / `dark` / `system`, default system), `first_name`. M3a: `reminders_on`, `daily_limit` (1–8, default 4), `quiet_start` / `quiet_end` (minutes after midnight, default 1290 / 420), `reminders_offered`. M4a: `night_reading` (default on). M4b: `step_goal` (default 6,000). E1: `walk_draft` (the walk she started and hasn't finished: the start and end of each stretch as JSON; removed at Finish walk; ADR 051). M5b: `backup_day` (weekly backup reminder, 1–7 for Monday–Sunday or 0 for off; default 7, Sunday). E3: `backup_voice` ("Include voice letters", default off). M6a (Screen Rest, ADR 037): `quiet_on` (bedtime rest, default on), `meal_rest` (default on), `meal_lunch` / `meal_dinner` (window starts, default 780 / 1200), `eye_rest` (default on), `wind_down` (default off), `wind_down_at` (default 1260), and `use_day` / `use_seconds` (time in Navmaas on that day, saved when the app leaves the screen). M7a: `water_goal` (glasses, 4–16, default 8), `water_remind` (default off), `water_every` (2 or 3 hours, default 2) and `wellbeing_card_hidden` (the day Today's "How are you today?" card was closed). M10a: `widget_hide` ("Hide details on widget"; unset, it follows app lock: off, or on while app lock is on; Plan decision 47). M10b: `app_lock` (default off) and `app_lock_after` (1, 5 or 15 minutes, default 1; Plan decision 48) |
 
-Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, 8 in M11a: adds `app_limit`, 9 in E1: adds `library_item.furthest`, filled from `position`, 10 in E2: adds `media_link`, 11 in E3: adds `letter.voice_file` and `voice_sec`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
+Migrations are versioned with Drift's `schemaVersion` (1 in M1, 2 in M2: adds `checklist_tick`, 3 in M3a: adds `profile`, `supplement`, `supplement_schedule`, `dose_log`, 4 in M3b: adds `care_item`, `appointment`, `visit_question`, `attachment`, `vital_reading`, 5 in M4a: adds `library_item`, `session`, `letter`, 6 in M5a: adds `kick_session`, `contraction`, `backup_log`, 7 in M7a: adds `mood_entry`, `symptom_entry`, `sleep_log`, `water_log`, 8 in M11a: adds `app_limit`, 9 in E1: adds `library_item.furthest`, filled from `position`, 10 in E2: adds `media_link`, 11 in E3: adds `letter.voice_file` and `voice_sec`, 12 in M8a: adds `vital_reading.context` and `note`, `avoid_food`, `bag_item`, `birth_plan_answer`). Upgrades use drift's step-by-step helper (`app_database.steps.dart`, generated). Schema snapshots live in `drift_schemas/`. `test/drift/navmaas/migration_test.dart` checks that the tables match the latest snapshot and that every older version migrates to every newer one. After a schema change: bump `schemaVersion`, write the migration, run `dart run drift_dev make-migrations`.
 
 ## 9. Content
 
@@ -495,7 +500,7 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 
 ## 15. Delivery milestones
 
-Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements; its release, 1.1.0, has M7, M10 and M11 (the owner's enhancements E1–E4 followed as 1.2.0), with M8 and M9 deferred by the owner and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope. The owner's enhancement requests of 2026-10-08 run as E1–E4 alongside them (see [Enhancements](#enhancements-e1e4)).
+Phase 1 (the MVP, M1–M6) is complete. Phase 2 (M7–M11) adds the enhancements; its release, 1.1.0, has M7, M10 and M11 (the owner's enhancements E1–E4 followed as 1.2.0), with M8 and M9 deferred by the owner (M8a followed on 2026-10-10 as 1.3.0) and Phase 3 (M12–M14) adds postpartum and baby mode. **Family sharing is out of scope** for both (Plan decision 37, ADR 042); everything else in the Plan's feature map is in scope. The owner's enhancement requests of 2026-10-08 run as E1–E4 alongside them (see [Enhancements](#enhancements-e1e4)).
 
 ### Phase 1 — MVP ✅ 2026-10-06
 
@@ -534,7 +539,7 @@ These rules apply to every milestone below, on top of its own "done when":
 | Milestone | Focus | Schema |
 |---|---|---|
 | **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
-| **M8** | Body and birth prep: blood sugar, nutrition notes, hospital bag, birth plan (deferred) | The next free version |
+| **M8** | Body and birth prep. M8a ✅ 2026-10-10 (blood sugar, foods I avoid, hospital bag, birth plan; Navmaas 1.3.0); M8b meals from Nourishly next | v12 (M8a) |
 | **M9** | Records vault, visit summary PDF, EPUB books (deferred) | The next free version |
 | **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
 | **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (PR #24, limits); M11b 2026-10-06 (PR #25, release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
@@ -565,30 +570,36 @@ These rules apply to every milestone below, on top of its own "done when":
 
 #### M8 Body and birth prep
 
-**Scope**
-- Schema: the next free version (v8 went to M11a and v9–v11 to E1–E3, built first): a `context` column on `vital_reading`; new tables `meal_note`, `avoid_food`, `bag_item` and `birth_plan_answer`.
+**Scope** (spec: [`docs/superpowers/specs/2026-10-10-m8-body-birth-prep-design.md`](superpowers/specs/2026-10-10-m8-body-birth-prep-design.md))
+- Schema v12 (v8 went to M11a and v9–v11 to E1–E3, built first): `context` and `note` on `vital_reading`; new tables `avoid_food`, `bag_item` and `birth_plan_answer`.
 - **Blood sugar** in Vitals:
-  - Each reading has mg/dL, a context (fasting, before a meal, 1 h or 2 h after, bedtime), a time and a note.
+  - Each reading has whole mg/dL, when it was taken (fasting, before a meal, 1 h or 2 h after, bedtime), a time and a note.
   - Readings are listed by day, with no ranges, colours or labels such as "high".
-- **Nutrition notes** (Care):
-  - Meal notes by day.
+- **Nutrition** (Care):
   - "Foods I avoid": her own list, with an optional reason such as "doctor's advice".
+  - M8b: the meals and six day totals she logged in Nourishly, read from its share file (Plan decision 71, ADR 061). Navmaas keeps no meal notes of its own.
   - The app gives no food guidance of its own.
-- **Hospital bag** (a Care tile from week 28, always reachable from Care):
+- **Hospital bag** (a Care tile from week 32):
   - An original template, `hospital_bag.json`, with items for her, for the baby and documents.
   - She can add her own items and tick each one as packed.
-  - An optional reminder she sets.
-- **Birth plan** (Care):
-  - Original prompts in `birth_plan.json`: who will be with you, comfort preferences, after the birth, feeding wishes, anything else.
+  - An optional one-off reminder she sets, planned by `ReminderSync` under the calm rules.
+- **Birth plan** (a Care tile from week 32):
+  - Original prompts in `birth_plan.json`: who will be with you, what helps you feel calm, pain relief to talk over, just after the birth, feeding wishes, anything else.
   - She answers in her own words, under the line "Talk this through with your doctor".
+- **Care by week** (Plan decision 74): the kick counter always, the contraction timer from week 28, Hospital bag and Birth plan from week 32.
 
 **Owner decides at the start:** the hospital bag template and the birth-plan prompts.
+
+**Owner's answers** (Plan decisions 71–75): nutrition comes from Nourishly (M8b) and `meal_note` is dropped; M8 splits into M8a, a Nourishly PR and M8b; the drafted template and prompts approved as written; the Care week rules above; blood sugar in whole mg/dL.
 
 **Done when**
 - Blood-sugar readings are saved and listed with their context, and no screen judges a value (widget tests; the content test covers the labels).
 - Hospital bag ticks persist per pregnancy and survive template edits (stable keys, like `weeks.json`).
 - Birth plan answers are saved and editable.
 - Both content packs have generated review copies and pass the hard-line test.
+- M8b: Nourishly's share file is read on Android and iPhone, and Navmaas shows only values, never targets or scores.
+
+**Status:** **M8a ✅ 2026-10-10**: schema v12, blood sugar (dialog, Care tile, list by day), Care → Nutrition with Foods I avoid, Hospital bag (template ticks, her own items, the reminder), Birth plan, Care's week rules, the two content packs with review copies, accessibility entries and goldens for every new screen; Navmaas 1.3.0. **M8b** (meals from Nourishly) follows the Nourishly share-file PR.
 
 #### M9 Records vault, visit summary PDF and EPUB
 
@@ -870,3 +881,5 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
 | 058 | The app icon is drawn from `NavmaasIcon.sprout`'s own path: a 1024 px iPhone PNG rendered by `tool/app_icon_test.dart` (Xcode's single-size icon), and an Android adaptive icon whose foreground is a vector of the same path (minSdk 26, so no PNGs). Notifications use the 24 dp `widget_sprout` vector as their status-bar icon | No icon package (`flutter_launcher_icons`) or image editor; the icon can't drift from the prototype's path. The launcher icon is opaque, so as a status-bar icon Android would draw a plain square (Plan decision 68) |
 | 059 | GitHub releases come from the version in `pubspec.yaml`: a `release` job in `ci.yml` after the checks, `gh release create` with the run's own APK, skipped when the tag exists | One version for the app, backups and tags; no third-party release action; publishing needs only `GITHUB_TOKEN` (signing secrets: ADR 060); a release can't ship a build that failed tests (Plan decision 69) |
 | 060 | One keystore, made by the owner and never committed, signs Navmaas and Nourishly. CI writes `android/key.properties` from four repository secrets before the APK build and falls back to the debug key without them | CI's debug key was new on every run (2026-10-10: Navmaas 1.2.0 `7db737d7…`, an earlier build `44898f5e…`, Nourishly 1.0.0 `877104f5…`), so no GitHub release could update the last one in place, and Navmaas can't read Nourishly's share file (M8b, a `signature` permission) unless both apps share a key. Losing the keystore means neither app can update in place; `flutter run` (debug key) can't install over a release build (Plan decision 70) |
+| 061 | Navmaas reads Nourishly's meals from a share file Nourishly writes (her profile, 90 days, meals and six totals, no targets or scores): an Android `ContentProvider` behind a `signature` permission (both apps share the owner's key, ADR 060; Navmaas declares the permission too, so install order doesn't matter), an iPhone App Group `group.com.patelkeyur.share`. Navmaas stores none of it | One source of truth for what she ate; no network; no copy to back up or keep in step; nothing of Nourishly's general-population targets reaches a pregnancy app that never interprets (Plan decision 71) |
+| 062 | Hospital-bag ticks are keyed by the template item's key, and only ticked items get a row; her own items are rows with a label and no key | Rewording or reordering the template keeps her ticks, and removing an item drops its tick quietly, as Journey's checklist does with `weeks.json` (Plan decision 73) |

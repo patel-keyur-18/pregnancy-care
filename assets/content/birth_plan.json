@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "prompts": [
+    {
+      "key": "plan-with-me",
+      "title": "Who will be with you",
+      "hint": "The people you'd like beside you, and anyone you'd rather wait outside."
+    },
+    {
+      "key": "plan-calm",
+      "title": "What helps you feel calm",
+      "hint": "Music, prayer or chanting, soft light, moving around, a hand to hold: whatever settles you."
+    },
+    {
+      "key": "plan-pain-relief",
+      "title": "Pain relief to talk over",
+      "hint": "What you'd like to know about the options, and anything you already feel strongly about. Your doctor will go through them with you."
+    },
+    {
+      "key": "plan-after-birth",
+      "title": "Just after the birth",
+      "hint": "Holding your baby close, photos, quiet time together, and when you'd like visitors."
+    },
+    {
+      "key": "plan-feeding",
+      "title": "Feeding wishes",
+      "hint": "How you hope to feed your baby, and any help you'd like with it."
+    },
+    {
+      "key": "plan-anything-else",
+      "title": "Anything else",
+      "hint": "Customs, prayers, food from home, or anything you'd like your doctor and family to know."
+    }
+  ]
+}

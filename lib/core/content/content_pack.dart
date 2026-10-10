@@ -124,6 +124,56 @@ Future<List<CareTemplateItem>> careTemplate(Ref ref) async => parseCareTemplate(
   ),
 );
 
+enum BagSection { forMe, forBaby, documents }
+
+/// One hospital-bag item from the original template (M8a).
+typedef BagTemplateItem = ({String key, BagSection section, String label});
+
+/// Parses `hospital_bag.json` (schemaVersion 1), in file order.
+List<BagTemplateItem> parseHospitalBag(String source) {
+  final json = jsonDecode(source) as Map<String, dynamic>;
+  if (json['schemaVersion'] != 1) {
+    throw FormatException('Unsupported hospital bag schemaVersion', json);
+  }
+  return [
+    for (final i in (json['items'] as List).cast<Map<String, dynamic>>())
+      (
+        key: i['key'] as String,
+        section: BagSection.values.byName(i['section'] as String),
+        label: i['label'] as String,
+      ),
+  ];
+}
+
+@Riverpod(keepAlive: true)
+Future<List<BagTemplateItem>> hospitalBag(Ref ref) async => parseHospitalBag(
+  await rootBundle.loadString('assets/content/hospital_bag.json', cache: false),
+);
+
+/// One birth-plan prompt (original text): she answers in her own words.
+typedef BirthPlanPrompt = ({String key, String title, String hint});
+
+/// Parses `birth_plan.json` (schemaVersion 1), in file order.
+List<BirthPlanPrompt> parseBirthPlan(String source) {
+  final json = jsonDecode(source) as Map<String, dynamic>;
+  if (json['schemaVersion'] != 1) {
+    throw FormatException('Unsupported birth plan schemaVersion', json);
+  }
+  return [
+    for (final i in (json['prompts'] as List).cast<Map<String, dynamic>>())
+      (
+        key: i['key'] as String,
+        title: i['title'] as String,
+        hint: i['hint'] as String,
+      ),
+  ];
+}
+
+@Riverpod(keepAlive: true)
+Future<List<BirthPlanPrompt>> birthPlanPrompts(Ref ref) async => parseBirthPlan(
+  await rootBundle.loadString('assets/content/birth_plan.json', cache: false),
+);
+
 /// One calm idea for the Garbhasanskar path's "Activity" (original text).
 typedef Activity = ({String key, String title, String text});
 
