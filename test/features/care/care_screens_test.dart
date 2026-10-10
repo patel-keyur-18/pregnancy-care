@@ -214,4 +214,37 @@ void main() {
       scrollable: _list,
     );
   });
+
+  // Owner, 2026-10-10: the kick counter always; the contraction timer from
+  // week 28; Hospital bag and Birth plan from week 32, under them.
+  for (final (week, lmp, contractions, ready) in [
+    (24, DateTime.utc(2026, 4, 15), false, false),
+    (30, DateTime.utc(2026, 3, 9), true, false),
+    (33, DateTime.utc(2026, 2, 16), true, true),
+  ]) {
+    testWidgets('Care tiles at week $week', (tester) async {
+      await pumpApp(
+        tester,
+        seed: (db) =>
+            PregnancyRepository(db).saveDating(method: .lmp, date: lmp),
+      );
+      await _tab(tester, 'Care');
+      expect(find.text('Kick counter'), findsOneWidget);
+      expect(
+        find.text('Contraction timer'),
+        contractions ? findsOneWidget : findsNothing,
+      );
+      expect(find.text('Hospital bag'), ready ? findsOneWidget : findsNothing);
+      expect(find.text('Birth plan'), ready ? findsOneWidget : findsNothing);
+      if (ready) {
+        expect(
+          tester.getTopLeft(find.text('Hospital bag')).dy,
+          lessThan(tester.getTopLeft(find.text('Wellbeing')).dy),
+        );
+        await tester.tap(find.text('Hospital bag'));
+        await tester.pumpAndSettle();
+        expect(find.textContaining('packed'), findsOneWidget);
+      }
+    });
+  }
 }

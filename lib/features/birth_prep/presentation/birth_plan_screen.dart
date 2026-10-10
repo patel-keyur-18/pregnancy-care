@@ -46,6 +46,7 @@ class BirthPlanScreen extends ConsumerWidget {
         ),
         children: [
           Card(
+            margin: EdgeInsets.zero,
             color: scheme.primaryContainer,
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -72,6 +73,7 @@ class BirthPlanScreen extends ConsumerWidget {
           ),
           for (final p in prompts)
             Card(
+              margin: const EdgeInsets.only(top: 12),
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: () => edit(p),

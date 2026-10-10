@@ -11,12 +11,18 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
+import 'package:navmaas/features/birth_prep/data/bag_repository.dart';
+import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
+import 'package:navmaas/features/care/data/vitals_repository.dart';
+import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
@@ -219,6 +225,83 @@ void main() {
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/today_mood_$name.png'),
         );
+      });
+
+      // M8a at week 33: Care with Getting ready, then each new screen.
+      testWidgets('birth prep $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            final pregnancies = PregnancyRepository(db);
+            await pregnancies.saveDating(
+              method: .lmp,
+              date: DateTime.utc(2026, 2, 16),
+            );
+            final id = (await db.select(db.pregnancies).getSingle()).id;
+            final vitals = VitalsRepository(db);
+            for (final (h, m, v, c) in [
+              (7, 40, 96.0, BloodSugarContext.fasting),
+              (10, 5, 128.0, BloodSugarContext.after1h),
+            ]) {
+              await vitals.add(
+                pregnancyId: id,
+                kind: VitalKind.bloodSugar,
+                value1: v,
+                context: c,
+                at: DateTime(2026, 10, 5, h, m),
+              );
+            }
+            final foods = AvoidFoodRepository(db);
+            await foods.save(
+              pregnancyId: id,
+              name: 'Papaya',
+              reason: "Doctor's advice",
+            );
+            await foods.save(pregnancyId: id, name: 'Pineapple');
+            final bag = BagRepository(db);
+            for (final key in ['bag-me-nightwear', 'bag-me-slippers']) {
+              await bag.setPacked(
+                pregnancyId: id,
+                row: (
+                  id: null,
+                  templateKey: key,
+                  label: '',
+                  section: BagSection.forMe,
+                  packed: false,
+                ),
+                packed: true,
+              );
+            }
+            await BirthPlanRepository(db).save(
+              pregnancyId: id,
+              promptKey: 'plan-calm',
+              answer: 'Soft music, a prayer, low light.',
+            );
+          },
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Care');
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/care_week33_$name.png'),
+        );
+        final router = GoRouter.of(tester.element(find.byType(NavmaasTabBar)));
+        for (final (path, file) in [
+          ('/care/blood-sugar', 'blood_sugar'),
+          ('/care/nutrition', 'nutrition'),
+          ('/care/bag', 'hospital_bag'),
+          ('/care/birth-plan', 'birth_plan'),
+        ]) {
+          router.go(path);
+          await tester.pumpAndSettle();
+          await expectLater(
+            find.byType(MaterialApp),
+            matchesGoldenFile('$_dir/${file}_$name.png'),
+          );
+        }
       });
 
       testWidgets('letters $name', skip: _dir == null, (tester) async {

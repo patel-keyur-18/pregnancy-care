@@ -12,10 +12,10 @@ import 'package:navmaas/features/third_trimester/data/third_trimester_repository
 
 import '../../helpers.dart';
 
-/// Week 24 on the test day.
+/// Week 30 on the test day: the contraction timer shows from week 28.
 Future<void> _seed(AppDatabase db) =>
     PregnancyRepository(db)
-        .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
+        .saveDating(method: .lmp, date: DateTime.utc(2026, 3, 9));
 
 Future<void> _tab(WidgetTester tester, String label) async {
   await tester.tap(

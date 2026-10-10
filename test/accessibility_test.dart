@@ -1,14 +1,22 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
+import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/birth_prep/data/bag_repository.dart';
+import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
+import 'package:navmaas/features/birth_prep/presentation/bag_screen.dart';
+import 'package:navmaas/features/care/data/vitals_repository.dart';
+import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
@@ -94,6 +102,41 @@ Future<void> _seed(AppDatabase db) async {
       );
     }
   }
+  // Birth prep (M8a): a reading, a food, a packed item, her own item and
+  // an answer, so each list shows rows.
+  await VitalsRepository(db).add(
+    pregnancyId: pregnancy.id,
+    kind: VitalKind.bloodSugar,
+    value1: 96,
+    context: BloodSugarContext.fasting,
+    note: 'Before breakfast',
+    at: DateTime(2026, 10, 5, 7, 40),
+  );
+  await AvoidFoodRepository(
+    db,
+  ).save(pregnancyId: pregnancy.id, name: 'Papaya', reason: "Doctor's advice");
+  final bag = BagRepository(db);
+  await bag.addOwn(
+    pregnancyId: pregnancy.id,
+    label: 'Phone charger for the car',
+    section: BagSection.forMe,
+  );
+  await bag.setPacked(
+    pregnancyId: pregnancy.id,
+    row: (
+      id: null,
+      templateKey: 'bag-me-nightwear',
+      label: '',
+      section: BagSection.forMe,
+      packed: false,
+    ),
+    packed: true,
+  );
+  await BirthPlanRepository(db).save(
+    pregnancyId: pregnancy.id,
+    promptKey: 'plan-calm',
+    answer: 'Soft music and a hand to hold.',
+  );
   for (final minute in [10, 18, 27]) {
     final start = DateTime(2026, 10, 5, 8, minute);
     await third.saveContraction(
@@ -133,6 +176,13 @@ Future<void> _type(
   await tester.pumpAndSettle();
   await tester.enterText(field, text);
   await tester.pump();
+}
+
+/// Opens [path] the way a tile would (Getting ready shows from week 32; the
+/// seeded pregnancy is at week 24).
+Future<void> _go(WidgetTester tester, String path) async {
+  GoRouter.of(tester.element(find.byType(NavmaasTabBar))).go(path);
+  await tester.pumpAndSettle();
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -615,10 +665,67 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
   'contraction timer': (
     true,
     (t) async {
-      await _tab(t, 'Care');
-      await _tapText(t, 'Contraction timer');
+      // The seeded pregnancy is at week 24; the tile shows from week 28.
+      unawaited(
+        GoRouter.of(t.element(find.byType(NavmaasTabBar)))
+            .push('/contractions'),
+      );
+      await t.pumpAndSettle();
       await t.tap(find.text('Contraction started'));
       await t.pump(const Duration(seconds: 3));
+    },
+  ),
+  'blood sugar': (true, (t) => _go(t, '/care/blood-sugar')),
+  'log blood sugar': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Log blood sugar');
+    },
+  ),
+  'nutrition': (
+    true,
+    (t) async {
+      await _tab(t, 'Care');
+      await _tapText(t, 'Nutrition');
+    },
+  ),
+  'edit food': (
+    true,
+    (t) async {
+      await _go(t, '/care/nutrition');
+      await _tapText(t, 'Papaya');
+    },
+  ),
+  'hospital bag': (true, (t) => _go(t, '/care/bag')),
+  'hospital bag, add your own': (
+    true,
+    (t) async {
+      await _go(t, '/care/bag');
+      // The bag is long at 2.0×: scroll its own list to the end.
+      final add = find.text('Add your own');
+      await t.scrollUntilVisible(
+        add,
+        400,
+        scrollable: find
+            .descendant(
+              of: find.byType(BagScreen),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await t.ensureVisible(add);
+      await t.pumpAndSettle();
+      await t.tap(add);
+      await t.pumpAndSettle();
+    },
+  ),
+  'birth plan': (true, (t) => _go(t, '/care/birth-plan')),
+  'birth plan, answer': (
+    true,
+    (t) async {
+      await _go(t, '/care/birth-plan');
+      await _tapText(t, 'What helps you feel calm');
     },
   ),
   'pause or end': (
