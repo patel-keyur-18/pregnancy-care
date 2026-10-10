@@ -164,4 +164,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(fake.reads, greaterThan(reads));
   });
+
+  testWidgets("Care's tile: today's meals from Nourishly", (tester) async {
+    await _care(tester, FakeNourishly(nourishlyJson()));
+    expect(find.text('Today: 1 meal from Nourishly'), findsOneWidget);
+  });
+
+  testWidgets("Care's tile: foods she avoids when nothing is shared today", (
+    tester,
+  ) async {
+    await _care(tester, FakeNourishly());
+    expect(find.text('Foods you avoid'), findsOneWidget);
+  });
 }

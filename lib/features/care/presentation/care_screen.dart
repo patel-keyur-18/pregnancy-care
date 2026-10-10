@@ -21,6 +21,7 @@ import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
+import 'package:navmaas/features/nutrition/data/nourishly_meals.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:navmaas/features/wellbeing/presentation/wellbeing_widgets.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -316,8 +317,8 @@ class _GettingReady extends ConsumerWidget {
   }
 }
 
-/// Care → Nutrition, with how many foods she avoids (M8a; M8b adds today's
-/// meals from Nourishly).
+/// Care → Nutrition, with today's meals from Nourishly (M8b), or how many
+/// foods she avoids.
 class _NutritionTile extends ConsumerWidget {
   const new();
 
@@ -326,12 +327,17 @@ class _NutritionTile extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final foods = ref.watch(avoidFoodsProvider).value ?? const [];
+    final today = ref.watch(todayProvider);
+    final meals =
+        ref.watch(nourishlyShareProvider).value?.day(today)?.meals.length ?? 0;
     return _ToolTile(
       icon: NavmaasIcon.meal,
       background: scheme.primaryContainer,
       foreground: scheme.onPrimaryContainer,
       label: l10n.nutritionTitle,
-      subtitle: l10n.nutritionAvoidCount(foods.length),
+      subtitle: meals > 0
+          ? l10n.nutritionTodayMeals(meals)
+          : l10n.nutritionAvoidCount(foods.length),
       onTap: () => context.go('/care/nutrition'),
     );
   }
