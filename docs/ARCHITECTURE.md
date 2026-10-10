@@ -801,7 +801,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
   - `dart format --set-exit-if-changed`
   - `flutter analyze`
   - `flutter test`
-  - `flutter build apk --release --target-platform android-arm,android-arm64` (the phone build; fails over 100 MB; uploaded as an artifact; signed with the owner's key from repository secrets, or the debug key when they're missing, as on fork PRs; the log shows the signing certificate's SHA-256 digest, ADR 060)
+  - `flutter build apk --release --target-platform android-arm,android-arm64` (the phone build; fails over 100 MB; uploaded as an artifact; signed with the owner's key from repository secrets, or the debug key when they're missing, as on fork PRs, while a push to `main` without them fails; the log shows the signing certificate's SHA-256 digest, ADR 060)
   - On a push to `main` (after the checks and the APK pass): if `v<version>` from `pubspec.yaml` has no release yet, a `release` job (the only one with `contents: write`) tags the commit and publishes a GitHub release with the APK as `navmaas-<version>.apk` and notes from the merged PRs (Plan decision 69)
   - On a test failure: golden diff images (`golden-failures`) and regenerated Linux goldens (`linux-goldens`) are uploaded
   - iOS builds happen on the owner's Mac, because personal-team signing can't run in CI.

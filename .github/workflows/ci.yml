@@ -71,8 +71,16 @@ jobs:
           path: test/goldens/linux/
           retention-days: 7
 
+      # A push to main may publish a release; on any other key it couldn't
+      # update the installed app, so a missing key stops the run here.
+      - name: Require the signing key on main
+        if: ${{ github.event_name == 'push' && env.KEYSTORE == '' }}
+        run: |
+          echo "::error::ANDROID_KEYSTORE_BASE64 is not set; see ADR 060"
+          exit 1
+
       # Signs with the owner's key when the secrets exist; without them
-      # Gradle falls back to the debug key.
+      # (fork PRs) Gradle falls back to the debug key.
       - name: Use the owner's signing key
         if: ${{ env.KEYSTORE != '' }}
         env:
