@@ -349,6 +349,7 @@
   "bagDocuments": "Documents",
   "bagPacked": "{packed} of {total} packed",
   "@bagPacked": {"placeholders": {"packed": {"type": "int"}, "total": {"type": "int"}}},
+  "bagAllPacked": "All packed",
   "bagAddOwn": "Add your own",
   "bagOwnItem": "Item",
   "bagRemoveItem": "Remove {item}",
