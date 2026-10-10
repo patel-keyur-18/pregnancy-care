@@ -5,7 +5,9 @@ import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
+import 'package:navmaas/core/theme/navmaas_colors.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
@@ -141,7 +143,13 @@ class _ReminderCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final at = ref.watch(reminderSettingsProvider).value?.bagAt;
+    final reminders = ref.watch(reminderSettingsProvider).value;
+    // A time that has passed rings no more: show it as none.
+    final at = switch (reminders?.bagAt) {
+      final t? when t.isAfter(clockNow()) => t,
+      _ => null,
+    };
+    final off = reminders != null && !reminders.on;
     final settings = ref.read(settingsRepositoryProvider);
     Future<void> pick() async {
       final now = clockNow();
@@ -157,17 +165,43 @@ class _ReminderCard extends ConsumerWidget {
         context: context,
         initialTime: TimeOfDay.fromDateTime(at ?? DateTime(2000, 1, 1, 10)),
       );
-      if (time == null) return;
-      await settings.put(
-        SettingKeys.bagRemindAt,
-        DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        ).toIso8601String(),
+      if (time == null || !context.mounted) return;
+      final chosen = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
       );
+      if (!chosen.isAfter(clockNow())) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.bagRemindPast)));
+        return;
+      }
+      await settings.put(SettingKeys.bagRemindAt, chosen.toIso8601String());
+      if (!off || !context.mounted) return;
+      // She asked for a reminder: offer to turn reminders on.
+      final yes = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Semantics(header: true, child: Text(l10n.offerRemindersTitle)),
+          content: Text(l10n.bagRemindOfferBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.notNow),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.turnOnReminders),
+            ),
+          ],
+        ),
+      );
+      if (yes == true &&
+          await ref.read(reminderSchedulerProvider).requestPermission()) {
+        await settings.put(SettingKeys.remindersOn, 'true');
+      }
     }
 
     return Card(
@@ -200,6 +234,14 @@ class _ReminderCard extends ConsumerWidget {
                     color: theme.colorScheme.outline,
                   ),
                 ),
+                if (at != null && off)
+                  Text(
+                    l10n.bagRemindsOff,
+                    style: theme.textTheme.bodySmall!.copyWith(
+                      color: context.navmaas.onAmberSoft,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
               ],
             ),
             Row(

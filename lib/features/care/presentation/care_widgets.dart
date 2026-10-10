@@ -346,6 +346,9 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
   BloodSugarContext? _context;
   late DateTime _at = clockNow();
 
+  /// Shown after Save on a value that isn't whole mg/dL.
+  String? _error;
+
   @override
   void dispose() {
     _value.dispose();
@@ -357,7 +360,10 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
   /// rather than turning 5.6 into 56.
   void _save() {
     final v = int.tryParse(_value.text);
-    if (v == null || v < 1) return;
+    if (v == null || v < 1) {
+      setState(() => _error = AppLocalizations.of(context).bloodSugarInvalid);
+      return;
+    }
     final note = _note.text.trim();
     Navigator.pop<_SugarReading>(context, (
       value: v,
@@ -398,7 +404,13 @@ class _BloodSugarDialogState extends State<_BloodSugarDialog> {
                 FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
                 LengthLimitingTextInputFormatter(3),
               ],
-              decoration: InputDecoration(labelText: l10n.bloodSugarUnit),
+              decoration: InputDecoration(
+                labelText: l10n.bloodSugarUnit,
+                errorText: _error,
+              ),
+              onChanged: (_) {
+                if (_error != null) setState(() => _error = null);
+              },
             ),
             Text(l10n.bloodSugarWhen, style: theme.textTheme.labelLarge),
             Wrap(

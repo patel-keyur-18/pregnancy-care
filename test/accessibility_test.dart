@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
@@ -673,6 +674,29 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await t.pumpAndSettle();
       await t.tap(find.text('Contraction started'));
       await t.pump(const Duration(seconds: 3));
+    },
+  ),
+  // Care from week 32: the contraction timer and Getting ready tiles (the
+  // seeded pregnancy is re-dated from week 24).
+  'care, week 33': (
+    true,
+    (t) async {
+      final db = ProviderScope.containerOf(
+        t.element(find.byType(NavmaasTabBar)),
+      ).read(appDatabaseProvider);
+      await t.runAsync(
+        () =>
+            PregnancyRepository(db)
+                .saveDating(method: .lmp, date: DateTime.utc(2026, 2, 16)),
+      );
+      await _tab(t, 'Care');
+      // Below the fold at 2.0×: bring the Getting ready tiles into view.
+      await t.scrollUntilVisible(
+        find.text('Hospital bag'),
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await t.pumpAndSettle();
     },
   ),
   'blood sugar': (true, (t) => _go(t, '/care/blood-sugar')),

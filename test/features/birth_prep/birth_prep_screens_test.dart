@@ -105,4 +105,58 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('My husband and my mother'), findsOneWidget);
   });
+
+  // Review fix: a reminder must never look set when it can't ring.
+  testWidgets('hospital bag: a past reminder shows as none', (tester) async {
+    await pumpApp(
+      tester,
+      seed: (db) async {
+        await _seed(db);
+        await SettingsRepository(db)
+            .put(SettingKeys.bagRemindAt, '2026-10-04T10:00:00.000');
+      },
+    );
+    await _open(tester, '/care/bag');
+    expect(find.text('No reminder set'), findsOneWidget);
+    expect(find.text('Clear'), findsNothing);
+  });
+
+  testWidgets('hospital bag: with reminders off, says so and offers them', (
+    tester,
+  ) async {
+    final scheduler = FakeScheduler();
+    final db = await pumpApp(
+      tester,
+      scheduler: scheduler,
+      seed: (db) async {
+        await _seed(db);
+        await SettingsRepository(db)
+            .put(SettingKeys.bagRemindAt, '2026-10-08T10:00:00.000');
+      },
+    );
+    await _open(tester, '/care/bag');
+    expect(
+      find.text("Reminders are off, so this one won't ring."),
+      findsOneWidget,
+    );
+
+    // Setting it again offers to turn reminders on.
+    await tester.tap(find.text('Change'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.text('Remind you on time?'), findsOneWidget);
+    await tester.tap(find.text('Turn on reminders'));
+    await tester.pumpAndSettle();
+    final settings = await tester.runAsync(
+      () => SettingsRepository(db).getAll(),
+    );
+    expect(settings![SettingKeys.remindersOn], 'true');
+    expect(
+      find.text("Reminders are off, so this one won't ring."),
+      findsNothing,
+    );
+  });
 }

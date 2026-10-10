@@ -242,7 +242,7 @@ Deliberate, permanent differences:
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
 | Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
 | Blood sugar tile (Care) | Reading and "Log blood sugar" side by side | Side by side when they fit; at large text the button moves under the reading | No overflow at 2.0× text |
-| Hospital bag reminder | "Change" and "Clear" | "Set" when no reminder is set; "Change" and "Clear" once one is | Nothing to change or clear yet |
+| Hospital bag reminder | "Change" and "Clear" | "Set" when no reminder is set; "Change" and "Clear" once one is; a time that has passed shows as none; with reminders off the card says "Reminders are off, so this one won't ring." and setting one offers to turn them on | A reminder must never look set when it can't ring |
 | M8a dialogs | Each box's label above it | The label floats inside the outlined box | One text-field style across the app |
 | Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
 | Walk screen | "Evening walk" | "Gentle walk"; the Sessions tile shows "Paused · 12:30" while a walk waits to be carried on (E1); steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |

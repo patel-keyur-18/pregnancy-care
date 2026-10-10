@@ -145,6 +145,12 @@ void main() {
         await tester.tap(find.text('Save'));
         await tester.pumpAndSettle();
         expect(find.byType(AlertDialog), findsOneWidget, reason: typed);
+        // Review fix: she is told why, not left guessing.
+        expect(
+          find.text('Whole mg/dL, like 96'),
+          findsOneWidget,
+          reason: typed,
+        );
       }
       await tester.enterText(value, '96');
       await tester.tap(find.text('Fasting'));
