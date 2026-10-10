@@ -5,6 +5,7 @@ import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/backup/presentation/backup_screen.dart';
+import 'package:navmaas/features/birth_prep/presentation/bag_screen.dart';
 import 'package:navmaas/features/care/presentation/blood_sugar_screen.dart';
 import 'package:navmaas/features/care/presentation/care_screen.dart';
 import 'package:navmaas/features/care/presentation/edit_supplement_screen.dart';
@@ -164,6 +165,7 @@ GoRouter router(Ref ref) {
                 path: 'nutrition',
                 builder: (_, _) => const NutritionScreen(),
               ),
+              GoRoute(path: 'bag', builder: (_, _) => const BagScreen()),
               GoRoute(
                 path: 'visit',
                 builder: (_, state) =>

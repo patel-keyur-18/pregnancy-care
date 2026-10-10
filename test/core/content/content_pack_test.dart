@@ -246,6 +246,8 @@ void main() {
         'bloodSugar',
         'nutrition',
         'avoidFood',
+        'bag',
+        'reminderBag',
       ];
       final text =
           [
@@ -254,9 +256,11 @@ void main() {
                     value,
               ]
               .join('\n')
-              // Blood sugar's unit is a measurement, not a dose; "mg" alone
-              // stays banned.
-              .replaceAll('mg/dL', '');
+              // Blood sugar's unit is a measurement, not a dose, and "Hospital
+              // bag" is a checklist's name; "mg" and "hospital" alone stay
+              // banned.
+              .replaceAll('mg/dL', '')
+              .replaceAll(RegExp('hospital bag', caseSensitive: false), '');
       expect(text, contains('Heartburn'), reason: 'the words are checked');
       final forbidden = RegExp(
         r'\b(warn\w*|serious|severe|urgent\w*|abnormal|normal|risk\w*|'

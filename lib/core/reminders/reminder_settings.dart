@@ -22,6 +22,7 @@ class ReminderSettings {
     this.windDownAt = 21 * 60,
     this.waterOn = false,
     this.waterEvery = 2,
+    this.bagAt,
   });
 
   factory fromSettings(Map<String, String> s) {
@@ -40,6 +41,7 @@ class ReminderSettings {
       windDownAt: minutes(SettingKeys.windDownAt, 21 * 60),
       waterOn: s[SettingKeys.waterRemind] == 'true',
       waterEvery: s[SettingKeys.waterEvery] == '3' ? 3 : 2,
+      bagAt: DateTime.tryParse(s[SettingKeys.bagRemindAt] ?? ''),
     );
   }
 
@@ -70,6 +72,9 @@ class ReminderSettings {
   /// hours (2 or 3) in the day (Plan decision 41).
   final bool waterOn;
   final int waterEvery;
+
+  /// Hospital bag → "Remind me to pack" (M8a): one reminder, or null.
+  final DateTime? bagAt;
 
   List<int> get mealStarts => [mealLunch, mealDinner];
 
@@ -109,6 +114,7 @@ class ReminderSettings {
     windDownAt,
     waterOn,
     waterEvery,
+    bagAt,
   );
 
   // Equal values don't re-plan reminders when an unrelated setting changes.
