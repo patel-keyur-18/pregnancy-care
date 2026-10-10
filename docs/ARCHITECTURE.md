@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v17 — updated 2026-10-09 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b). Updated 2026-10-08: enhancements E1–E4 planned (ADR 053); E1 Sessions fixes built (schema v9, ADRs 051–052); E2 links built (schema v10, ADR 054). Updated 2026-10-09: E3 voice letters built (schema v11, ADRs 055–056); E4 mood scenes built (ADR 057) and Navmaas 1.2.0. Updated 2026-10-10: release APKs signed with the owner's key, Navmaas 1.2.1 (ADR 060); M8a built: blood sugar, foods I avoid, hospital bag and birth plan (schema v12, ADRs 061–062), Navmaas 1.3.0) |
+| **Status** | v18 — updated 2026-10-10 (MVP complete, M1–M6. Phase 2 split into M7–M11 and Phase 3 into M12–M14, each with scope and done-when criteria (§15); family sharing out of scope, ADR 042. M7 Wellbeing built (M7a schema v7, ADRs 044–045; M7b meditation, ADR 046). M10 home-screen widgets (M10a, ADRs 047–048) and app lock (M10b, ADR 049) built; M8 and M9 deferred by the owner. M11 built: limits for other apps (M11a, schema v8, ADR 050) and the Phase 2 release, Navmaas 1.1.0 (M11b). Updated 2026-10-08: enhancements E1–E4 planned (ADR 053); E1 Sessions fixes built (schema v9, ADRs 051–052); E2 links built (schema v10, ADR 054). Updated 2026-10-09: E3 voice letters built (schema v11, ADRs 055–056); E4 mood scenes built (ADR 057) and Navmaas 1.2.0. Updated 2026-10-10: release APKs signed with the owner's key, Navmaas 1.2.1 (ADR 060); M8a built: blood sugar, foods I avoid, hospital bag and birth plan (schema v12, ADRs 061–062), Navmaas 1.3.0; M8b built: meals from Nourishly (no schema change), Navmaas 1.4.0) |
 | **Stack** | Flutter (stable) · Dart 3 |
 | **Inputs** | [Plan](PLAN.md) · [Design system](DESIGN_SYSTEM.md) · [Prototype](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) |
 
@@ -113,7 +113,7 @@ pregnancy-care/
 │  │  ├─ reminders/        # planner (pure), scheduler adapter, calm-notification settings, data reminders (build expiry)
 │  │  ├─ content/          # content-pack loaders (weeks, India care template, daily activities)
 │  │  ├─ widgets/          # shared widgets: pill segmented control, step button, icon motion, amber notice
-│  │  ├─ platform/         # audio playback (M4a), steps (M4b), iPhone build expiry (M5a), widget publisher (M10a), authenticator (M10b), app usage (M11a), voice recorder, player and screen-on (E3)
+│  │  ├─ platform/         # audio playback (M4a), steps (M4b), iPhone build expiry (M5a), widget publisher (M10a), authenticator (M10b), app usage (M11a), voice recorder, player and screen-on (E3), Nourishly's share file (M8b)
 │  │  └─ utils/            # clockNow, todayProvider / nowProvider (clock), date-only maths and formatting
 │  ├─ features/
 │  │  ├─ onboarding/
@@ -121,7 +121,7 @@ pregnancy-care/
 │  │  ├─ journey/          # journey screen; data/ checklist repository
 │  │  ├─ sessions/         # data/ domain/ presentation/: library, reader, listen, letters, path (M4a); walk, exercise, breathing (M4b); meditation and the shared screen-off overlay (M7b); the unfinished walk (domain/walk_draft.dart, E1); saved links (data/media_link_repository.dart, domain/media_link.dart, E2)
 │  │  ├─ care/             # data/ domain/ presentation/: supplements (M3a); vaccines & tests, visits, vitals (M3b)
-│  │  ├─ nutrition/        # data/ foods she avoids; presentation/ Care → Nutrition (M8a; M8b adds the meals from Nourishly)
+│  │  ├─ nutrition/        # data/ foods she avoids, nourishlyShareProvider; domain/ the share-file parser (pure); presentation/ Care → Nutrition: From Nourishly (M8b), Foods I avoid (M8a)
 │  │  ├─ birth_prep/       # data/ the hospital bag (mergeBag: template keys plus her own items) and birth-plan answers; domain/ the bag reminder; presentation/ Hospital bag, Birth plan (M8a)
 │  │  ├─ third_trimester/  # data/ domain/ presentation/: kick counter, contraction timer, her patterns (M5a)
 │  │  ├─ backup/           # data/: the .navmaas file format, the backup service, the backup log; presentation/: Backup & restore
@@ -475,11 +475,12 @@ Apple's [capabilities table](https://developer.apple.com/help/account/reference/
 ## 13. Security and privacy
 
 - **Network:** the app makes no network calls. Release Android builds omit the `INTERNET` permission (the main manifest removes it with `tools:node="remove"`, which also strips it from plugins), so the app itself cannot send data anywhere; debug and profile builds keep it for hot reload. Fonts are bundled.
-- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin); `WAKE_LOCK`, `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` for background audio (M4a); `health.READ_STEPS` for walks (M4b); `USE_BIOMETRIC` and `USE_FINGERPRINT` for app lock (M10b); `PACKAGE_USAGE_STATS` for app limits (M11a; she turns it on in Settings, and only today's minutes for her chosen apps are read); `RECORD_AUDIO` for voice letters (E3; asked the first time she taps Record). Never `INTERNET`; `ACCESS_NETWORK_STATE`, which a plugin asks for, is removed the same way.
+- **Permissions (Android release):** `POST_NOTIFICATIONS`, `RECEIVE_BOOT_COMPLETED`, `USE_EXACT_ALARM`, `SCHEDULE_EXACT_ALARM` (Android 12 only) and `VIBRATE` (added by the notification plugin); `WAKE_LOCK`, `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_MEDIA_PLAYBACK` for background audio (M4a); `health.READ_STEPS` for walks (M4b); `USE_BIOMETRIC` and `USE_FINGERPRINT` for app lock (M10b); `PACKAGE_USAGE_STATS` for app limits (M11a; she turns it on in Settings, and only today's minutes for her chosen apps are read); `RECORD_AUDIO` for voice letters (E3; asked the first time she taps Record); `com.patelkeyur.permission.NOURISHLY_SHARE` to read Nourishly's meals (M8b; a `signature` permission Navmaas also declares, granted without asking). Never `INTERNET`; `ACCESS_NETWORK_STATE`, which a plugin asks for, is removed the same way.
 - **Database:** encrypted with SQLCipher. A random 256-bit raw key is generated on first run and kept in Keychain / Android Keystore. The app refuses to open the database on a build without SQLCipher. The database and its key are excluded from OS backups on both platforms (§12).
 - **Attachments** (prescription photos, reports) are encrypted with AES-256-GCM under a separate stored key (`navmaas.attachments_key.v1`), as nonce + ciphertext + tag, in `db/attachments/` inside the folder OS backups skip. Photos are only decrypted in memory to show them. Imported books and audio stay as plain files in `db/library/`, skipped by OS backups; they are the owner's own media, not health data, and audio must stream to the player.
 - **Voice letters** (E3) are sealed with the attachment key in `db/voice/`. The recorder writes a plain file into the app's private temporary folder, sealed and deleted the moment she stops; playing decrypts a plain copy there for the player, deleted when the letter closes; the folder is also emptied when the app starts. A plain copy can't be avoided: `just_audio`'s in-memory source serves audio through a loopback HTTP server, which needs `INTERNET` on Android (ADR 055).
 - **Backups:** encrypted with a key derived from the owner's password (§11). The password is never stored.
+- **Nourishly link** (M8b, ADR 061): Navmaas only reads. On Android it declares and uses `com.patelkeyur.permission.NOURISHLY_SHARE` (`signature`, so only apps signed with the owner's key hold it) and lists Nourishly's provider in `<queries>`; on iPhone Runner joins App Group `group.com.patelkeyur.share` beside the widget's group. Not installed, sharing off or no permission all read as "not shared". Nothing from the file is stored or backed up.
 - **Home-screen widget** (M10a): it reads a plain-text snapshot, never the database. With "Hide details on widget" it holds no week, size or reminder titles (a unit test checks this). On Android the snapshot sits in shared preferences, which OS backups already skip; on iPhone it's in the App Group's preferences, which iPhone backups include, so hiding details also keeps them out of those.
 - **Optional app lock** (M10b) with Face ID, Touch ID or fingerprint, falling back to the device passcode (`local_auth`), off by default; see §10. It guards the screens, not the data: the database stays encrypted with its own key either way.
 - **Deletion** (M6b): Me → Your data → "Delete all data" (red) opens a dialog that says what goes, shows when she last backed up with "Back up first", and a red "Delete everything". It cancels every reminder (snoozed ones too) and pauses audio, moves `db/` aside to `db-deleted/`, deletes both keys from Keychain / Keystore, opens a new, empty database under a new key (so the app starts again at onboarding), then deletes `db-deleted/`, any restore rollback, the backup work folders and the file picker's copies in the cache. If the app stops part-way, the next open deletes `db-deleted/`. It does not touch backup files saved elsewhere (ADR 040).
@@ -539,7 +540,7 @@ These rules apply to every milestone below, on top of its own "done when":
 | Milestone | Focus | Schema |
 |---|---|---|
 | **M7** ✅ | Wellbeing: mood, symptoms, sleep, water, meditation. M7a ✅ 2026-10-06 (PR #18); M7b ✅ 2026-10-06 (PR #19) | v7 |
-| **M8** | Body and birth prep. M8a ✅ 2026-10-10 (blood sugar, foods I avoid, hospital bag, birth plan; Navmaas 1.3.0); M8b meals from Nourishly next | v12 (M8a) |
+| **M8** | Body and birth prep. M8a ✅ 2026-10-10 (blood sugar, foods I avoid, hospital bag, birth plan; Navmaas 1.3.0); M8b ✅ 2026-10-10 (meals from Nourishly; Navmaas 1.4.0) | v12 (M8a) |
 | **M9** | Records vault, visit summary PDF, EPUB books (deferred) | The next free version |
 | **M10** | Home-screen widgets and app lock ✅. M10a 2026-10-06 (PR #21, widgets); M10b 2026-10-06 (PR #22, app lock) | No change (settings only) |
 | **M11** | Limits for other apps (Android) and the Phase 2 release ✅. M11a 2026-10-06 (PR #24, limits); M11b 2026-10-06 (PR #25, release 1.1.0) | v8 (taken first, as M8 and M9 were deferred) |
@@ -599,7 +600,7 @@ These rules apply to every milestone below, on top of its own "done when":
 - Both content packs have generated review copies and pass the hard-line test.
 - M8b: Nourishly's share file is read on Android and iPhone, and Navmaas shows only values, never targets or scores.
 
-**Status:** **M8a ✅ 2026-10-10**: schema v12, blood sugar (dialog, Care tile, list by day), Care → Nutrition with Foods I avoid, Hospital bag (template ticks, her own items, the reminder), Birth plan, Care's week rules, the two content packs with review copies, accessibility entries and goldens for every new screen; Navmaas 1.3.0. **M8b** (meals from Nourishly) follows the Nourishly share-file PR.
+**Status:** **M8a ✅ 2026-10-10**: schema v12, blood sugar (dialog, Care tile, list by day), Care → Nutrition with Foods I avoid, Hospital bag (template ticks, her own items, the reminder), Birth plan, Care's week rules, the two content packs with review copies, accessibility entries and goldens for every new screen; Navmaas 1.3.0. **M8b ✅ 2026-10-10**: Nourishly's share file read on Android (`NourishlyShare.kt`, signature permission declared and used) and iPhone (App Group `group.com.patelkeyur.share`), parsed in pure Dart, shown in Care → Nutrition (a week of days, meals, day totals, partial notes, "Updated") and on Care's Nutrition tile; nothing stored; Navmaas 1.4.0 (Plan decision 76).
 
 #### M9 Records vault, visit summary PDF and EPUB
 
@@ -814,6 +815,7 @@ The owner's requests of 2026-10-08 (Plan decisions 55–63). They are numbered E
   - `flutter test`
   - `flutter build apk --release --target-platform android-arm,android-arm64` (the phone build; fails over 100 MB; uploaded as an artifact; signed with the owner's key from repository secrets, or the debug key when they're missing, as on fork PRs, while a push to `main` without them fails; the log shows the signing certificate's SHA-256 digest, ADR 060)
   - On a push to `main` (after the checks and the APK pass): if `v<version>` from `pubspec.yaml` has no release yet, a `release` job (the only one with `contents: write`) tags the commit and publishes a GitHub release with the APK as `navmaas-<version>.apk` and notes from the merged PRs (Plan decision 69)
+  - The release APK's permissions (`aapt2 dump permissions`): the job fails if `INTERNET` is there or `com.patelkeyur.permission.NOURISHLY_SHARE` is missing (M8b)
   - On a test failure: golden diff images (`golden-failures`) and regenerated Linux goldens (`linux-goldens`) are uploaded
   - iOS builds happen on the owner's Mac, because personal-team signing can't run in CI.
 
