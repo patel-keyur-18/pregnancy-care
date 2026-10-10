@@ -249,17 +249,21 @@ void main() {
         'bag',
         'reminderBag',
         'birthPlan',
+        'nourishly',
       ];
       final text =
           [
                 for (final MapEntry(:key, :value) in arb.entries)
-                  if (!key.startsWith('@') && prefixes.any(key.startsWith))
+                  if (!key.startsWith('@') &&
+                      !key.startsWith('nourishlyUnit') &&
+                      prefixes.any(key.startsWith))
                     value,
               ]
               .join('\n')
               // Blood sugar's unit is a measurement, not a dose, and "Hospital
               // bag" is a checklist's name; "mg" and "hospital" alone stay
-              // banned.
+              // banned. Nourishly's unit strings (`nourishlyUnit*`, skipped
+              // above) are measurements of food, not doses.
               .replaceAll('mg/dL', '')
               .replaceAll(RegExp('hospital bag', caseSensitive: false), '');
       expect(text, contains('Heartburn'), reason: 'the words are checked');

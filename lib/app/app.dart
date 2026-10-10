@@ -16,6 +16,7 @@ import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/app_lock/app_lock.dart';
 import 'package:navmaas/features/app_lock/lock_screen.dart';
+import 'package:navmaas/features/nutrition/data/nourishly_meals.dart';
 import 'package:navmaas/features/screen_rest/data/screen_use.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -71,9 +72,11 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
   Future<void> _onResume() async {
     // A new day may have started, the time zone may have changed, and a
     // reminder's "Taken" may have written to the DB from another isolate.
+    // Nourishly may have written new meals while she was away.
     ref
       ..invalidate(todayProvider)
-      ..invalidate(nowProvider);
+      ..invalidate(nowProvider)
+      ..invalidate(nourishlyShareProvider);
     final db = ref.read(appDatabaseProvider);
     db.markTablesUpdated([db.doseLogs, db.supplements]);
     await ref.read(reminderSchedulerProvider).refreshTimeZone();
