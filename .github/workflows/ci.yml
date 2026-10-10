@@ -1,6 +1,7 @@
-# ARCHITECTURE §16. No secrets: release APKs are debug-signed here and only
-# signed with the real key on the owner's machine. iOS builds happen on the
-# owner's Mac (free Apple ID signing can't run in CI).
+# ARCHITECTURE §16. Release APKs are signed with the owner's key (one key for
+# Navmaas and Nourishly, ADR 060) from repository secrets; without them (fork
+# PRs) they fall back to the debug key. iOS builds happen on the owner's Mac
+# (free Apple ID signing can't run in CI).
 name: CI
 
 on:
@@ -20,6 +21,9 @@ jobs:
   check-and-build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      # `if:` can't read secrets directly.
+      KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
     steps:
       - uses: actions/checkout@v7
 
@@ -67,6 +71,31 @@ jobs:
           path: test/goldens/linux/
           retention-days: 7
 
+      # A push to main may publish a release; on any other key it couldn't
+      # update the installed app, so a missing key stops the run here.
+      - name: Require the signing key on main
+        if: ${{ github.event_name == 'push' && env.KEYSTORE == '' }}
+        run: |
+          echo "::error::ANDROID_KEYSTORE_BASE64 is not set; see ADR 060"
+          exit 1
+
+      # Signs with the owner's key when the secrets exist; without them
+      # (fork PRs) Gradle falls back to the debug key.
+      - name: Use the owner's signing key
+        if: ${{ env.KEYSTORE != '' }}
+        env:
+          STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          echo "$KEYSTORE" | base64 --decode -i > "$RUNNER_TEMP/release.jks"
+          {
+            printf 'storeFile=%s\n' "$RUNNER_TEMP/release.jks"
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+          } > android/key.properties
+
       # The phone build: Arm only (~66 MB). Plan decision 25.
       - name: Build release APK
         run: flutter build apk --release --target-platform android-arm,android-arm64
@@ -77,6 +106,12 @@ jobs:
           size=$(stat -c%s build/app/outputs/flutter-apk/app-release.apk)
           echo "Phone APK: $size bytes"
           test "$size" -lt 100000000
+
+      # Compare with the owner's key: every release must show the same digest.
+      - name: Show the APK's signing certificate
+        run: |
+          tools="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          "$tools/apksigner" verify --print-certs build/app/outputs/flutter-apk/app-release.apk | grep -E 'DN|SHA-256'
 
       - uses: actions/upload-artifact@v7
         with:

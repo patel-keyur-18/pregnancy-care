@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–67; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0) |
+| **Status** | v15 — approved 2026-10-04, updated 2026-10-09 (MVP built, M1–M6; owner decisions 12–70; Phase 2 and 3 milestones M7–M14 planned; M7 Wellbeing built; M10 widgets and app lock built, M8 and M9 deferred; enhancements E1–E4 planned, E1–E4 built, Navmaas 1.2.0; 2026-10-10: one signing key for both apps, Navmaas 1.2.1) |
 | **App name** | Navmaas (नवमास, "nine months") |
 | **Platforms** | iOS (free Apple ID, signed from Xcode) + Android (signed APK) — Flutter |
 | **Audience** | Personal use, India, English only |
@@ -87,7 +87,8 @@ Legend: ★ = feature added during brainstorming (not in the original brief).
 | 66 | Mood scene motion (E4) | It moves gently for **about 12 seconds each time the app opens to Today** (not on every tab switch) and **again when tapped**, then rests; with reduce motion it is a still picture and a tap doesn't move it. This is the one exception to "nothing plays on its own" (DESIGN_SYSTEM §5) |
 | 67 | Release 1.2.0 | **Navmaas 1.2.0 (build 3)** carries E1–E4, released with E4 |
 | 68 | App icon | The **sprout** from the app-switcher cover, a little larger: dark sage on `primary-soft`, the same on iPhone and Android (Android 13+ themed icons get the sprout alone). It replaces Flutter's default icon; the moon stays the brand mark in the name's story and on the quiet page |
-| 69 | GitHub releases | Release tags follow the app's version: `v` + `version` in `pubspec.yaml` (first tag **v1.2.0**). Bumping the version in a PR and merging it publishes a GitHub release with the phone APK (`navmaas-<version>.apk`, debug-key signed, Arm only); merges that don't bump publish nothing |
+| 69 | GitHub releases | Release tags follow the app's version: `v` + `version` in `pubspec.yaml` (first tag **v1.2.0**). Bumping the version in a PR and merging it publishes a GitHub release with the phone APK (`navmaas-<version>.apk`, signed with the owner's key since 1.2.1, Arm only); merges that don't bump publish nothing |
+| 70 | One signing key | One keystore, made by the owner (`keytool`) and never committed, signs Navmaas and Nourishly, on the Mac (`android/key.properties`) and in CI (four repository secrets the owner sets; Claude never sees the passwords). GitHub releases then update in place, and Navmaas can read Nourishly's meals (M8b). The owner keeps the keystore backed up in two places. **Navmaas 1.2.1 (build 4)** (ADR 060) |
 
 ### What these decisions change
 
