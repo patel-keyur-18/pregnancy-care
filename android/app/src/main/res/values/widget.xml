@@ -10,4 +10,6 @@
     <color name="widget_primary_soft">#E2ECE5</color>
     <color name="widget_on_primary_soft">#2C4638</color>
     <string name="widget_description">Your week and the next reminder</string>
+    <!-- The launch screen's background: the app's bg token. -->
+    <color name="launch_background">#FAF6F0</color>
 </resources>

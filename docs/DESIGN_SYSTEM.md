@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.15 — decided 2026-10-04, updated 2026-10-10 (motion in §5; M3–M11, E1–E4 and M8 components; implementation notes in §8) |
+| **Status** | v1.16 — decided 2026-10-04, updated 2026-10-11 (official logo in §1; motion in §5; M3–M11, E1–E4 and M8 components; implementation notes in §8) |
 | **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals; M8 follow-up boards added 2026-10-10: Today at week 33 with the Hospital bag card, and with everything packed) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
@@ -17,7 +17,7 @@ Pregnancy often brings tired eyes, headaches, nausea and sometimes changes in vi
 - **Red only for destructive actions.** Restore (which replaces data), delete and error messages are the only red elements, so red always means "this changes or loses data".
 - **Night reading.** A warm amber page with low blue light for bedtime Garbhasanskar sessions.
 
-The name comes from *maas* (month), which follows the moon. The logo is a sage crescent moon cradling a small rose seed. The app icon is the sprout (Plan decision 68): `#2C4638` on `primary-soft` `#E2ECE5`, the 24-grid sprout at 60 % of the tile, stroke 2.
+The name comes from *maas* (month), which follows the moon. The official logo (Plan decision 78) is a sage mother cradling a lavender baby: `#4A6F5D` and `#6E63A0` on `primary-soft` `#E2ECE5`, or `#9CC2AE` and `#B9AFE3` on dark `bg` `#1B1820`. Its art is in `design/logo/` (main, dark and a white monochrome shape); it is the app icon, the notification icon (the white shape), the widget's mark, the app-switcher cover and the launch screen.
 
 ## 2. Colour tokens
 
@@ -154,7 +154,7 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Wellbeing tile (M7) | Card, 40 icon tile (mood `rose-soft` heart, symptoms `surface-2` notes, sleep `lavender-soft` bed, water `primary-soft` drop), label 13/700 `text-3`, value 16/800 |
 | App limit row (M11) | 40 app icon (her launcher's, or its first letter on `surface-2`), name 16/800, "18 of 30 min today" 13/600 `text-3`, a 6 px `primary` bar on `track`; past the limit "32 min today · past your 30 min", same colours. On the Limits screen the limit 14/800 `text-2` and a chevron |
 | App lock screen (M10) | `bg`; 88 `primary-soft` circle with the lock 36; "Navmaas is locked" 22/800 (heading); the way to unlock 15/600 `text-2`; full-width Unlock (`primary`, 56) |
-| Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: 28 `primary-soft` circle with the sprout, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
+| Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: the 28 logo, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
 
 ## 7. Flutter mapping
@@ -283,8 +283,11 @@ Deliberate, permanent differences:
 | App lock screen | Lock, title and line centred on the whole screen | Centred in the space above Unlock, and it scrolls at large text | No overflow at 2.0× |
 | Me → App lock subtitle | "Face ID or your passcode to open Navmaas" | Same on iPhone; "Fingerprint or screen lock to open Navmaas" on Android | Each phone's own words |
 | Turning on app lock without a phone screen lock | (not drawn) | The switch stays off and a snackbar says "Set a screen lock on your phone first, then turn on app lock." | Otherwise she could lock herself out |
-| App switcher cover | (described in a canvas note) | The sprout in an 88 `primary-soft` circle on `bg` | — |
-| App icon | (not drawn; the moon logo) | The sprout filling 60 % of a `primary-soft` tile, `#2C4638`, stroke 2; Android's adaptive icon and themed (monochrome) icon use the same path | Owner's choice (Plan decision 68) |
+| App switcher cover | (described in a canvas note) | The 128 logo (light or dark) on `bg` | Official logo (Plan decision 78) |
+| App icon | (not drawn) | The official logo on `primary-soft` (iPhone: light, dark and tinted; Android: adaptive at 76 % of the tile, so the logo is a little smaller there, and its white shape for themed icons) | Plan decision 78 |
+| Notification icon | (not drawn) | The logo's white shape (Android status bar); iPhone shows the app icon | Status-bar icons are white on transparent |
+| Home-screen widget mark | Sprout in a `primary-soft` circle (28, or 56 when tracking is stopped) | The logo alone, 28 (64 when tracking is stopped), light or dark | Plan decision 78 |
+| Launch screen | (not drawn) | The 128 logo on `bg`, light or dark (Android 12+: the app icon on `bg`) | Plan decision 78 |
 | Screen Rest's limits card while Usage access is off | (not drawn) | "Paused: Usage access is off" in `on-amber-soft` instead of the app rows, then Manage limits | A calm notice in amber (§2) |
 | Daily limit sheet | Minute chips in a three-column grid, 48 px | The same six choices as chips that wrap, 48 dp | They wrap at large text |
 | Limits for other apps, the notice preview | Always shown | Shown once she has a limit, for her first one | It previews her own notice |

@@ -11,16 +11,14 @@
 
     <FrameLayout
         android:id="@+id/widget_mark_only"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="center"
-        android:background="@drawable/widget_mark_background">
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center">
         <ImageView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:importantForAccessibility="no"
-            android:src="@drawable/widget_sprout" />
+            android:src="@drawable/logo" />
     </FrameLayout>
 
     <LinearLayout
@@ -41,17 +39,11 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-                <FrameLayout
+                <ImageView
                     android:layout_width="28dp"
                     android:layout_height="28dp"
-                    android:background="@drawable/widget_mark_background">
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_gravity="center"
-                        android:importantForAccessibility="no"
-                        android:src="@drawable/widget_sprout" />
-                </FrameLayout>
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/logo" />
                 <TextView
                     android:id="@+id/widget_name"
                     android:layout_width="wrap_content"
