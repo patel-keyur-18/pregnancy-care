@@ -211,5 +211,16 @@ PickFile pickFile(Ref ref) => (extensions) async {
     type: FileType.custom,
     allowedExtensions: extensions,
   );
-  return f == null ? null : (name: f.name, bytes: f.xFile.openRead());
+  if (f == null) return null;
+  // The picker's plain copy (Android, iPhone) goes once it's been read, or
+  // the reader stops early (a record over 25 MB).
+  Stream<List<int>> bytes() async* {
+    try {
+      yield* f.xFile.openRead();
+    } finally {
+      await FilePicker.clearTemporaryFiles();
+    }
+  }
+
+  return (name: f.name, bytes: bytes());
 };

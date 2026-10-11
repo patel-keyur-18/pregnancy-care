@@ -258,6 +258,21 @@ void main() {
       );
     });
 
+    test('from an upcoming visit, later visits never start the range', () {
+      final r = summaryRange(
+        .sinceLastVisit,
+        today: _today,
+        pregnancyStart: _start,
+        visitDays: [
+          DateTime.utc(2026, 9, 17),
+          DateTime.utc(2026, 10, 12),
+          DateTime.utc(2026, 10, 20),
+        ],
+        fromVisitDay: DateTime.utc(2026, 10, 20),
+      );
+      expect(r, (from: DateTime.utc(2026, 9, 17), to: _today));
+    });
+
     test('custom keeps her dates', () {
       final mine = (
         from: DateTime.utc(2026, 9, 2),

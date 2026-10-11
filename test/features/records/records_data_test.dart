@@ -228,17 +228,32 @@ void main() {
     expect(p.dirname(seen!.path), temp.path);
   });
 
-  test('clearRecordsTemp removes a copy left by a crash', () async {
-    final temp = Directory.systemTemp.createTempSync('navmaas_share');
-    File(p.join(temp.path, 'left.pdf')).writeAsBytesSync(pdf);
-    await clearRecordsTemp(temp);
-    expect(temp.existsSync(), isFalse);
-  });
-
   test('mime from a file name', () {
     expect(mimeForName('a.PDF'), 'application/pdf');
     expect(mimeForName('a.png'), 'image/png');
     expect(mimeForName('a.heic'), 'image/heic');
     expect(mimeForName('a.jpeg'), 'image/jpeg');
+  });
+
+  test('the start-up sweep removes plain copies the plugins leave', () {
+    final tmp = Directory.systemTemp.createTempSync('navmaas_tmp');
+    File put(String path) => File(p.join(tmp.path, path))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync([1]);
+    put('navmaas-share/Blood report.pdf'); // ours, mid-share
+    put('share_plus/Blood report.pdf'); // share_plus (Android)
+    put('file_picker/1700000000/scan.pdf'); // file_picker (Android)
+    put('image_picker_ABC.jpg'); // image_picker (iPhone)
+    put('flutter_image_picker_copy_1.jpg'); // image_picker (iPhone)
+    put('scaled_1700000000.jpg'); // image_picker resized (Android)
+    put('3f2b8c1e-0d4a-4b7e-9a1c-2e5f6a7b8c9d/IMG_1.jpg'); // its original
+    final keep = put('other/kept.bin');
+    sweepPlainCopies(tmp);
+    final left = tmp
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((f) => p.relative(f.path, from: tmp.path))
+        .toList();
+    expect(left, [p.relative(keep.path, from: tmp.path)]);
   });
 }

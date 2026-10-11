@@ -155,7 +155,14 @@ PickImage pickImage(Ref ref) => ({required camera}) async {
     maxWidth: 2400,
     imageQuality: 85,
   );
-  return f == null ? null : await f.readAsBytes();
+  if (f == null) return null;
+  try {
+    return await f.readAsBytes();
+  } finally {
+    // The picker's plain copy goes as soon as it's read.
+    final copy = File(f.path);
+    if (copy.existsSync()) await copy.delete();
+  }
 };
 
 /// Where a record or the visit summary waits, plain, for the share sheet.
@@ -163,9 +170,28 @@ PickImage pickImage(Ref ref) => ({required camera}) async {
 Future<Directory> recordsTempDir(Ref ref) async =>
     Directory(p.join((await getTemporaryDirectory()).path, 'navmaas-share'));
 
-/// Deletes every plain copy in [dir] (at app start).
-Future<void> clearRecordsTemp(Directory dir) async {
-  if (dir.existsSync()) await dir.delete(recursive: true);
+/// Plain copies that may be left in the app's temporary folder [tmp] after
+/// the app stopped: ours mid-share (`navmaas-share/`), `share_plus`'s copy
+/// for the receiving app (Android), `file_picker`'s copy of a picked file
+/// (Android), and `image_picker`'s photos (named `image_picker…`,
+/// `flutter_image_picker_copy_…`, `scaled_…`, or in a UUID folder on
+/// Android). Run at app start, when nothing is being shared or picked.
+void sweepPlainCopies(Directory tmp) {
+  if (!tmp.existsSync()) return;
+  final uuid = RegExp(r'^[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$');
+  for (final e in tmp.listSync()) {
+    final name = p.basename(e.path);
+    final plain = switch (e) {
+      Directory() =>
+        const {'navmaas-share', 'share_plus', 'file_picker'}.contains(name) ||
+            uuid.hasMatch(name),
+      _ =>
+        name.startsWith('image_picker') ||
+            name.startsWith('flutter_image_picker_copy_') ||
+            name.startsWith('scaled_'),
+    };
+    if (plain) e.deleteSync(recursive: true);
+  }
 }
 
 /// Writes [bytes] as [name] in [temp], hands it to [share], and deletes it

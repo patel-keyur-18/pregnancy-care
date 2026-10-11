@@ -410,7 +410,11 @@ Future<void> showAddRecord(
       initialCategory: appointmentId == null
           ? RecordCategory.other
           : RecordCategory.prescription,
-      initialDay: visitDay ?? dateOnly(clockNow()),
+      // A record is never dated after today, even from an upcoming visit.
+      initialDay: switch ((visitDay, dateOnly(clockNow()))) {
+        (final v?, final today) when !v.isAfter(today) => v,
+        (_, final today) => today,
+      },
     ),
   );
   final pregnancyId = ref.read(activePregnancyProvider).value?.id;

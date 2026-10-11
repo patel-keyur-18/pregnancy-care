@@ -60,7 +60,12 @@ SummaryRange summaryRange(
   switch (choice) {
     case .sinceLastVisit:
       final before = fromVisitDay ?? today;
-      final past = visitDays.where((d) => d.isBefore(before)).toList()..sort();
+      // Visits before the one it's for, and never one still to come.
+      final past =
+          visitDays
+              .where((d) => d.isBefore(before) && !d.isAfter(today))
+              .toList()
+            ..sort();
       return (from: past.isEmpty ? pregnancyStart : past.last, to: today);
     case .lastFourWeeks:
       final from = addDays(today, -28);

@@ -14,9 +14,11 @@ Future<void> main() async {
   await initReminders(container);
   // A plain voice copy left by a crash goes now (E3).
   unawaited(container.read(voiceTempDirProvider.future).then(clearVoiceTemp));
-  // … and a plain record or visit summary left mid-share (M9a).
+  // … and plain record copies left mid-share or mid-pick (M9a).
   unawaited(
-    container.read(recordsTempDirProvider.future).then(clearRecordsTemp),
+    container
+        .read(recordsTempDirProvider.future)
+        .then((d) => sweepPlainCopies(d.parent)),
   );
   runApp(
     UncontrolledProviderScope(container: container, child: const NavmaasApp()),

@@ -51,12 +51,17 @@ Future<void> Function(AppDatabase) _seedRecords(Directory dir) => (db) async {
   );
 };
 
+/// Real file I/O and encryption run outside fake time: wait for them, and
+/// for the "Saving…" ring to go (slower when the whole suite runs).
 Future<void> _settleIo(WidgetTester tester) async {
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 200; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pump();
+    if (i >= 4 && find.byType(CircularProgressIndicator).evaluate().isEmpty) {
+      break;
+    }
   }
   await tester.pumpAndSettle();
 }
@@ -293,5 +298,51 @@ void main() {
       find.bySemanticsLabel(RegExp('^Prescription Fri, 2 Oct')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a record added from an upcoming visit is dated today', (
+    tester,
+  ) async {
+    final dir = Directory.systemTemp.createTempSync('navmaas_rec');
+    late String visit;
+    final db = await pumpApp(
+      tester,
+      records: dir,
+      pickImage: ({required camera}) async => _png,
+      seed: (db) async {
+        await _seedPregnancy(db);
+        final pid = (await db.select(db.pregnancies).getSingle()).id;
+        visit = await VisitRepository(db)
+            .saveAppointment(pregnancyId: pid, at: DateTime(2026, 10, 20, 11));
+      },
+    );
+    GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+        .go('/care/visit', extra: visit);
+    await _settleIo(tester);
+    await tester.scrollUntilVisible(
+      find.text('Make visit summary'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    final add = find.text('Add').last;
+    await tester.ensureVisible(add);
+    await tester.pumpAndSettle();
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose a photo'));
+    await _settleIo(tester);
+    expect(find.text('Mon, 5 Oct 2026'), findsOneWidget);
+    // The date picker opens on a day it allows.
+    await tester.tap(find.byKey(const ValueKey('date-field')));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save'));
+    await _settleIo(tester);
+    final row = await tester.runAsync(
+      () => db.select(db.attachments).getSingle(),
+    );
+    expect(row!.takenOn, DateTime.utc(2026, 10, 5));
   });
 }
