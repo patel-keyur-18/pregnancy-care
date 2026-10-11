@@ -118,31 +118,7 @@ extension Color {
   static let nmOnPrimarySoft = nm(0x2C4638, 0xCFE4D7)
 }
 
-/// The prototype's line icons (NavmaasIcon), on its 24-grid.
-struct Sprout: Shape {
-  func path(in rect: CGRect) -> Path {
-    let s = rect.width / 24
-    var p = Path()
-    p.move(to: CGPoint(x: 12 * s, y: 21 * s))
-    p.addLine(to: CGPoint(x: 12 * s, y: 12.5 * s))
-    p.move(to: CGPoint(x: 12 * s, y: 12.5 * s))
-    p.addCurve(
-      to: CGPoint(x: 20 * s, y: 5 * s), control1: CGPoint(x: 12 * s, y: 8.3 * s),
-      control2: CGPoint(x: 15 * s, y: 5 * s))
-    p.addCurve(
-      to: CGPoint(x: 12 * s, y: 12.5 * s), control1: CGPoint(x: 20 * s, y: 9.2 * s),
-      control2: CGPoint(x: 17 * s, y: 12.5 * s))
-    p.move(to: CGPoint(x: 12 * s, y: 14.5 * s))
-    p.addCurve(
-      to: CGPoint(x: 5 * s, y: 8.5 * s), control1: CGPoint(x: 12 * s, y: 11.2 * s),
-      control2: CGPoint(x: 9.4 * s, y: 8.5 * s))
-    p.addCurve(
-      to: CGPoint(x: 12 * s, y: 14.5 * s), control1: CGPoint(x: 5 * s, y: 11.8 * s),
-      control2: CGPoint(x: 7.6 * s, y: 14.5 * s))
-    return p
-  }
-}
-
+/// The prototype's bell (NavmaasIcon.bell), on its 24-grid.
 struct Bell: Shape {
   func path(in rect: CGRect) -> Path {
     let s = rect.width / 24
@@ -171,15 +147,15 @@ private func nmFont(_ size: CGFloat, _ weight: Font.Weight = .heavy) -> Font {
   .system(size: size, weight: weight, design: .rounded)
 }
 
+/// The logo (Plan decision 78), light or dark from the asset catalog.
 struct Mark: View {
   let size: CGFloat
   var body: some View {
-    ZStack {
-      Circle().fill(Color.nmPrimarySoft)
-      line(Sprout(), size / 2).foregroundColor(.nmOnPrimarySoft)
-    }
-    .frame(width: size, height: size)
-    .accessibilityHidden(true)
+    Image("Logo")
+      .resizable()
+      .scaledToFit()
+      .frame(width: size, height: size)
+      .accessibilityHidden(true)
   }
 }
 
@@ -208,7 +184,7 @@ struct WidgetView: View {
           AnyView(hidden(labels, shown))
         }
       } else {
-        AnyView(Mark(size: 56).frame(maxWidth: .infinity, maxHeight: .infinity))
+        AnyView(Mark(size: 64).frame(maxWidth: .infinity, maxHeight: .infinity))
       }
     }
     .widgetURL(openToday)

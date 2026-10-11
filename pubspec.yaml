@@ -1,7 +1,7 @@
 name: navmaas
 description: "Navmaas - a calm, private pregnancy companion."
 publish_to: 'none'
-version: 1.5.0+7
+version: 1.6.0+8
 
 environment:
   sdk: ^3.13.3
@@ -66,6 +66,9 @@ flutter:
     - assets/content/routines.json
     - assets/content/hospital_bag.json
     - assets/content/birth_plan.json
+    # The logo, light and dark (tool/app_icon_test.dart).
+    - assets/brand/logo.png
+    - assets/brand/logo_dark.png
     # Meditation's original bell and quiet clip (tool/bell.dart).
     - assets/audio/bell.wav
     - assets/audio/quiet.wav

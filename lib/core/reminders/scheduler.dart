@@ -118,7 +118,9 @@ class LocalNotificationsScheduler implements ReminderScheduler {
     final l10n = lookupAppLocalizations(const Locale('en'));
     await _plugin.initialize(
       settings: InitializationSettings(
-        android: const AndroidInitializationSettings('@drawable/widget_sprout'),
+        android: const AndroidInitializationSettings(
+          '@drawable/ic_notification',
+        ),
         iOS: DarwinInitializationSettings(
           // Asked during onboarding or from Me, never on launch.
           requestAlertPermission: false,

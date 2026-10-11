@@ -111,30 +111,24 @@ class _LockScreenState extends ConsumerState<LockScreen> {
   }
 }
 
-/// What the app switcher shows while app lock is on: the sprout mark on
-/// the background colour, never her data.
+/// What the app switcher shows while app lock is on: the logo on the
+/// background colour, never her data.
 class PrivacyCover extends StatelessWidget {
   const new({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: theme.scaffoldBackgroundColor,
       child: Center(
-        child: Container(
-          width: 88,
-          height: 88,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: scheme.primaryContainer,
-          ),
-          alignment: Alignment.center,
-          child: NmIcon(
-            NavmaasIcon.sprout,
-            size: 40,
-            color: scheme.onPrimaryContainer,
-          ),
+        child: Image.asset(
+          theme.brightness == Brightness.dark
+              ? 'assets/brand/logo_dark.png'
+              : 'assets/brand/logo.png',
+          width: 128,
+          height: 128,
+          excludeFromSemantics: true,
         ),
       ),
     );

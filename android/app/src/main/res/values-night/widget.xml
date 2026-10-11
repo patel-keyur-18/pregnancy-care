@@ -8,4 +8,6 @@
     <color name="widget_primary">#9CC2AE</color>
     <color name="widget_primary_soft">#2B3A33</color>
     <color name="widget_on_primary_soft">#CFE4D7</color>
+    <!-- The launch screen's background: the app's bg token. -->
+    <color name="launch_background">#1B1820</color>
 </resources>
