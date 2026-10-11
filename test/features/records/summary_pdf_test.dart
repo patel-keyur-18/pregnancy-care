@@ -45,9 +45,8 @@ SummaryDoc _doc({int questions = 3, String name = 'Meera'}) => (
 
 String _label(int n, int m) => 'Page $n of $m';
 
-int _pages(Uint8List pdf) => RegExp(
-  r'/Type\s*/Page\b',
-).allMatches(String.fromCharCodes(pdf)).length;
+int _pages(Uint8List pdf) =>
+    RegExp(r'/Type\s*/Page\b').allMatches(String.fromCharCodes(pdf)).length;
 
 void main() {
   test('a valid one-page PDF', () async {

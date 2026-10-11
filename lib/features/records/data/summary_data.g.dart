@@ -8,6 +8,45 @@ part of 'summary_data.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// The PDF's fonts; widget tests read the files directly.
+
+@ProviderFor(pdfFonts)
+final pdfFontsProvider = PdfFontsProvider._();
+
+/// The PDF's fonts; widget tests read the files directly.
+
+final class PdfFontsProvider
+    extends
+        $FunctionalProvider<AsyncValue<PdfFonts>, PdfFonts, FutureOr<PdfFonts>>
+    with $FutureModifier<PdfFonts>, $FutureProvider<PdfFonts> {
+  /// The PDF's fonts; widget tests read the files directly.
+  PdfFontsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pdfFontsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pdfFontsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<PdfFonts> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<PdfFonts> create(Ref ref) {
+    return pdfFonts(ref);
+  }
+}
+
+String _$pdfFontsHash() => r'19655db57a9209e616099f5bf71824a00ada335b';
+
 /// The sections she last chose for the visit summary.
 
 @ProviderFor(summarySections)

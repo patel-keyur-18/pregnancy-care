@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -26,6 +27,8 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/records/data/records_repository.dart';
+import 'package:navmaas/features/records/data/summary_data.dart';
+import 'package:navmaas/features/records/domain/summary_pdf.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -481,6 +484,7 @@ Future<AppDatabase> pumpApp(
   Directory? records,
   PickImage? pickImage,
   Directory? recordsTemp,
+  PdfFonts? pdfFonts,
   DeleteAllData? deleteAll,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
@@ -585,6 +589,18 @@ Future<AppDatabase> pumpApp(
         ),
         pickImageProvider.overrideWithValue(
           pickImage ?? ({required camera}) async => null,
+        ),
+        pdfFontsProvider.overrideWith(
+          (_) async =>
+              pdfFonts ??
+              (
+                regular: ByteData.sublistView(
+                  File('assets/fonts/pdf/Nunito-Regular.ttf').readAsBytesSync(),
+                ),
+                bold: ByteData.sublistView(
+                  File('assets/fonts/pdf/Nunito-Bold.ttf').readAsBytesSync(),
+                ),
+              ),
         ),
         recordsTempDirProvider.overrideWith(
           (_) async =>

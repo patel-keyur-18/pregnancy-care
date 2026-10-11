@@ -4,10 +4,15 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/features/records/domain/summary_pdf.dart';
 import 'package:navmaas/features/records/domain/visit_summary.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'summary_data.g.dart';
+
+/// The PDF's fonts; widget tests read the files directly.
+@riverpod
+Future<PdfFonts> pdfFonts(Ref ref) => loadPdfFonts();
 
 /// The sections she last chose for the visit summary.
 @riverpod
