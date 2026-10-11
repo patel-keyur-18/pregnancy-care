@@ -334,7 +334,7 @@ void main() {
     (9, ['media_link', ...birthPrepTables]),
     (10, birthPrepTables),
     (11, birthPrepTables),
-    (12, []),
+    (12, <String>[]),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -362,15 +362,19 @@ void main() {
       }
       // v13 added a record's pregnancy, kind, title, date and size. Its
       // pregnancy is a foreign key, which SQLite can't drop: rebuild.
+      const v12Attachment =
+          'CREATE TABLE attachment (id TEXT NOT NULL PRIMARY KEY, '
+          'created_at TEXT NOT NULL, updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'appointment_id TEXT NULL REFERENCES appointment (id), '
+          'file_name TEXT NOT NULL, mime_type TEXT NOT NULL)';
+      const copy =
+          'CREATE TABLE attachment_v12 AS SELECT id, created_at, updated_at, '
+          'deleted_at, appointment_id, file_name, mime_type FROM attachment';
       for (final sql in [
-        'CREATE TABLE attachment_v12 AS SELECT id, created_at, updated_at, '
-            'deleted_at, appointment_id, file_name, mime_type FROM attachment',
+        copy,
         'DROP TABLE attachment',
-        'CREATE TABLE attachment (id TEXT NOT NULL PRIMARY KEY, '
-            'created_at TEXT NOT NULL, updated_at TEXT NOT NULL, '
-            'deleted_at TEXT NULL, '
-            'appointment_id TEXT NULL REFERENCES appointment (id), '
-            'file_name TEXT NOT NULL, mime_type TEXT NOT NULL)',
+        v12Attachment,
         'INSERT INTO attachment SELECT * FROM attachment_v12',
         'DROP TABLE attachment_v12',
       ]) {
