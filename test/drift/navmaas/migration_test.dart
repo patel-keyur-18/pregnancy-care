@@ -9,6 +9,7 @@ import 'generated/schema.dart';
 import 'generated/schema_v1.dart' as v1;
 import 'generated/schema_v10.dart' as v10;
 import 'generated/schema_v11.dart' as v11;
+import 'generated/schema_v12.dart' as v12;
 import 'generated/schema_v6.dart' as v6;
 import 'generated/schema_v7.dart' as v7;
 import 'generated/schema_v8.dart' as v8;
@@ -286,6 +287,58 @@ void main() {
     expect(await db.select(db.avoidFoods).get(), isEmpty);
     expect(await db.select(db.bagItems).get(), isEmpty);
     expect(await db.select(db.birthPlanAnswers).get(), isEmpty);
+    await db.close();
+  });
+
+  test('v12 → v13 turns visit photos into prescription records', () async {
+    final schema = await verifier.schemaAt(12);
+    final old = v12.DatabaseAtV12(schema.newConnection());
+    const at = '2026-10-05T00:00:00.000';
+    await old
+        .into(old.pregnancy)
+        .insert(
+          v12.PregnancyCompanion.insert(
+            id: 'p1',
+            createdAt: at,
+            updatedAt: at,
+            status: 'active',
+            datingMethod: 'lmp',
+            startDate: '2026-04-15',
+            dueDate: '2027-01-20',
+          ),
+        );
+    await old
+        .into(old.appointment)
+        .insert(
+          v12.AppointmentCompanion.insert(
+            id: 'a1',
+            createdAt: at,
+            updatedAt: at,
+            pregnancyId: 'p1',
+            at: '2026-10-08T11:00:00.000',
+          ),
+        );
+    await old
+        .into(old.attachment)
+        .insert(
+          v12.AttachmentCompanion.insert(
+            id: 'f1',
+            createdAt: at,
+            updatedAt: at,
+            appointmentId: const Value('a1'),
+            fileName: 'abc.bin',
+            mimeType: 'image/jpeg',
+          ),
+        );
+    await old.close();
+
+    final db = AppDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 13);
+    final r = await db.select(db.attachments).getSingle();
+    expect(
+      (r.pregnancyId, r.category, r.title, r.takenOn, r.sizeBytes),
+      ('p1', RecordCategory.prescription, '', DateTime.utc(2026, 10, 8), null),
+    );
     await db.close();
   });
 }

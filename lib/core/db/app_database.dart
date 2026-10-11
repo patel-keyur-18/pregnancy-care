@@ -67,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -132,6 +132,25 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(schema.avoidFood);
         await m.createTable(schema.bagItem);
         await m.createTable(schema.birthPlanAnswer);
+      },
+      // v13 (M9a): records — a pregnancy, kind, title, date and size on each
+      // attachment. Visit photos become prescriptions dated by their visit.
+      from12To13: (m, schema) async {
+        final a = schema.attachment;
+        await m.addColumn(a, a.pregnancyId);
+        await m.addColumn(a, a.category);
+        await m.addColumn(a, a.title);
+        await m.addColumn(a, a.takenOn);
+        await m.addColumn(a, a.sizeBytes);
+        await m.database.customStatement('''
+          UPDATE attachment SET
+            category = 'prescription',
+            pregnancy_id = (SELECT pregnancy_id FROM appointment
+                            WHERE appointment.id = attachment.appointment_id),
+            taken_on = (SELECT substr(at, 1, 10) FROM appointment
+                        WHERE appointment.id = attachment.appointment_id)
+          WHERE appointment_id IS NOT NULL
+        ''');
       },
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
