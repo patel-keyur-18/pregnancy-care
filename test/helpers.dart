@@ -25,6 +25,7 @@ import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -477,6 +478,9 @@ Future<AppDatabase> pumpApp(
   DateTime? buildExpiry,
   FakeBackupService? backup,
   ShareFile? share,
+  Directory? records,
+  PickImage? pickImage,
+  Directory? recordsTemp,
   DeleteAllData? deleteAll,
   Future<void> Function(AppDatabase db)? seed,
   Brightness platformBrightness = Brightness.light,
@@ -572,6 +576,20 @@ Future<AppDatabase> pumpApp(
           (_) async => backup ?? FakeBackupService(),
         ),
         shareFileProvider.overrideWithValue(share ?? (_) async {}),
+        attachmentStoreProvider.overrideWith(
+          (_) async => AttachmentStore(
+            directory:
+                records ?? Directory.systemTemp.createTempSync('navmaas_rec'),
+            key: () async => List.filled(32, 7),
+          ),
+        ),
+        pickImageProvider.overrideWithValue(
+          pickImage ?? ({required camera}) async => null,
+        ),
+        recordsTempDirProvider.overrideWith(
+          (_) async =>
+              recordsTemp ?? Directory.systemTemp.createTempSync('navmaas_st'),
+        ),
         // The real one deletes folders and keys; this empties the database.
         deleteAllDataProvider.overrideWith(
           (ref) =>

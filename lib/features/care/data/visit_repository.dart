@@ -1,13 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:navmaas/core/db/app_database.dart';
-import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'visit_repository.g.dart';
 
-/// Doctor visits, questions to ask and encrypted attachments.
+/// Doctor visits and questions to ask. Their records live in
+/// `RecordsRepository` (M9a).
 class VisitRepository {
   const new(this._db);
 
@@ -64,10 +64,21 @@ class VisitRepository {
         ),
       );
 
-  Future<void> removeAppointment(String id) =>
-      (_db.update(_db.appointments)..where((t) => t.id.equals(id))).write(
-        AppointmentsCompanion(deletedAt: Value(clockNow())),
-      );
+  /// Removes a visit; its records stay in Records, unlinked (Plan 79).
+  Future<void> removeAppointment(String id) => _db.transaction(() async {
+    final now = clockNow();
+    await (_db.update(
+      _db.attachments,
+    )..where((t) => t.appointmentId.equals(id))).write(
+      AttachmentsCompanion(
+        appointmentId: const Value(null),
+        updatedAt: Value(now),
+      ),
+    );
+    await (_db.update(_db.appointments)..where((t) => t.id.equals(id))).write(
+      AppointmentsCompanion(deletedAt: Value(now), updatedAt: Value(now)),
+    );
+  });
 
   Stream<List<VisitQuestion>> watchQuestions(String pregnancyId) =>
       (_db.select(_db.visitQuestions)
@@ -103,40 +114,6 @@ class VisitRepository {
       (_db.update(_db.visitQuestions)..where((t) => t.id.equals(id))).write(
         VisitQuestionsCompanion(deletedAt: Value(clockNow())),
       );
-
-  Stream<List<Attachment>> watchAttachments(String appointmentId) =>
-      (_db.select(_db.attachments)
-            ..where(
-              (t) =>
-                  t.appointmentId.equals(appointmentId) & t.deletedAt.isNull(),
-            )
-            ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
-          .watch();
-
-  Future<void> addAttachment(
-    AttachmentStore store,
-    String appointmentId,
-    Uint8List bytes,
-    String mimeType,
-  ) async {
-    final name = await store.save(bytes);
-    await _db
-        .into(_db.attachments)
-        .insert(
-          AttachmentsCompanion.insert(
-            appointmentId: Value(appointmentId),
-            fileName: name,
-            mimeType: mimeType,
-          ),
-        );
-  }
-
-  Future<void> removeAttachment(AttachmentStore store, Attachment a) async {
-    await (_db.update(_db.attachments)..where((t) => t.id.equals(a.id))).write(
-      AttachmentsCompanion(deletedAt: Value(clockNow())),
-    );
-    await store.delete(a.fileName);
-  }
 }
 
 @riverpod
@@ -156,7 +133,3 @@ Stream<List<VisitQuestion>> visitQuestions(Ref ref) {
   if (id == null) return Stream.value(const []);
   return ref.watch(visitRepositoryProvider).watchQuestions(id);
 }
-
-@riverpod
-Stream<List<Attachment>> visitAttachments(Ref ref, String appointmentId) =>
-    ref.watch(visitRepositoryProvider).watchAttachments(appointmentId);

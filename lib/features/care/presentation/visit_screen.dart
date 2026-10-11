@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:navmaas/core/db/app_database.dart';
-import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/profile_repository.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
@@ -71,49 +69,6 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
     if (notes != null) await _repo.setNotes(visit.id, notes);
   }
 
-  Future<void> _addPhoto() async {
-    final l10n = AppLocalizations.of(context);
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const NmIcon(NavmaasIcon.camera),
-              title: Text(l10n.takePhoto),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const NmIcon(NavmaasIcon.plus),
-              title: Text(l10n.choosePhoto),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-              child: Text(l10n.photoPrivacy),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (source == null) return;
-    final file = await ImagePicker().pickImage(
-      source: source,
-      maxWidth: 2400,
-      imageQuality: 85,
-    );
-    if (file == null) return;
-    final store = await ref.read(attachmentStoreProvider.future);
-    await _repo.addAttachment(
-      store,
-      widget.visitId,
-      await file.readAsBytes(),
-      'image/jpeg',
-    );
-  }
-
   Future<void> _remove() async {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
@@ -139,12 +94,6 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
       ),
     );
     if (ok != true) return;
-    final store = await ref.read(attachmentStoreProvider.future);
-    for (final a
-        in ref.read(visitAttachmentsProvider(widget.visitId)).value ??
-            const <Attachment>[]) {
-      await _repo.removeAttachment(store, a);
-    }
     await _repo.removeAppointment(widget.visitId);
     if (mounted) context.pop();
   }
@@ -167,8 +116,6 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
       now: now,
     );
     final profile = ref.watch(profileProvider).value;
-    final photos =
-        ref.watch(visitAttachmentsProvider(widget.visitId)).value ?? const [];
     final days = localDay(visit.at).difference(localDay(now)).inDays;
     final bring = visit.bringAlong
         .split('\n')
@@ -393,11 +340,6 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
                   onTap: () => _editNotes(visit),
                 ),
                 _AfterTile(
-                  icon: NavmaasIcon.camera,
-                  label: l10n.prescription,
-                  onTap: _addPhoto,
-                ),
-                _AfterTile(
                   icon: NavmaasIcon.calendar,
                   label: l10n.nextVisit,
                   onTap: () => context.push('/care/visit-edit'),
@@ -412,14 +354,6 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Text(notes, style: text.bodyMedium),
               ),
-            ),
-          ],
-          if (photos.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [for (final a in photos) _Photo(attachment: a)],
             ),
           ],
           const SizedBox(height: 28),
@@ -539,65 +473,6 @@ class _AfterTile extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-/// A decrypted thumbnail; tap to view, long-press to remove.
-class _Photo extends ConsumerWidget {
-  const new({required this.attachment});
-
-  final Attachment attachment;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final store = ref.watch(attachmentStoreProvider).value;
-    if (store == null) return const SizedBox.square(dimension: 96);
-    return FutureBuilder<Uint8List>(
-      future: store.read(attachment.fileName),
-      builder: (context, snap) {
-        final bytes = snap.data;
-        return Semantics(
-          button: true,
-          label: l10n.prescription,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: bytes == null
-                ? null
-                : () => showDialog<void>(
-                    context: context,
-                    builder: (context) => Dialog(
-                      child: InteractiveViewer(child: Image.memory(bytes)),
-                    ),
-                  ),
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
-                  child: SizedBox.square(
-                    dimension: 96,
-                    child: bytes == null
-                        ? const ColoredBox(color: Colors.black12)
-                        : Image.memory(bytes, fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: IconButton(
-                    tooltip: l10n.removePhoto,
-                    onPressed: () => ref
-                        .read(visitRepositoryProvider)
-                        .removeAttachment(store, attachment),
-                    icon: const NmIcon(NavmaasIcon.close, size: 18),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

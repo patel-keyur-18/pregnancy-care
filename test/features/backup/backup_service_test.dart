@@ -12,6 +12,7 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
@@ -115,7 +116,15 @@ void main() {
       at: DateTime(2026, 10, 20, 11),
       doctor: 'Dr Rao',
     );
-    await visits.addAttachment(a.attachments, visit, photo, 'image/jpeg');
+    await RecordsRepository(a.db, a.attachments).add(
+      pregnancyId: id,
+      bytes: photo,
+      mimeType: 'image/jpeg',
+      category: RecordCategory.prescription,
+      title: '',
+      takenOn: DateTime.utc(2026, 10, 20),
+      appointmentId: visit,
+    );
     await a.library.import('stories.txt', Stream.value(utf8.encode('Once')));
     // … and a day of wellbeing logs (M7).
     final wellbeing = WellbeingRepository(a.db);

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:navmaas/app/app.dart';
 import 'package:navmaas/app/reminders.dart';
 import 'package:navmaas/core/platform/voice.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +14,10 @@ Future<void> main() async {
   await initReminders(container);
   // A plain voice copy left by a crash goes now (E3).
   unawaited(container.read(voiceTempDirProvider.future).then(clearVoiceTemp));
+  // … and a plain record or visit summary left mid-share (M9a).
+  unawaited(
+    container.read(recordsTempDirProvider.future).then(clearRecordsTemp),
+  );
   runApp(
     UncontrolledProviderScope(container: container, child: const NavmaasApp()),
   );
