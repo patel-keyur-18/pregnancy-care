@@ -183,7 +183,12 @@ class VisitQuestions extends Table with BaseColumns {
   DateTimeColumn get askedAt => dateTime().nullable()();
 }
 
-/// An encrypted file (e.g. a prescription photo) in the private data folder.
+/// What a record is (M9a). Words in `app_en.arb` (`recordKind*`).
+enum RecordCategory { report, scan, prescription, other }
+
+/// A record (M9a): a report, scan, prescription photo or other file, kept
+/// encrypted in the private `db/attachments/` folder (ARCHITECTURE §13).
+/// Belongs to a pregnancy; a visit link is optional.
 @DataClassName('Attachment')
 class Attachments extends Table with BaseColumns {
   @override
@@ -195,6 +200,19 @@ class Attachments extends Table with BaseColumns {
   /// File name inside `db/attachments/`.
   TextColumn get fileName => text()();
   TextColumn get mimeType => text()();
+
+  /// v13. Nullable in SQL only; the app always sets it.
+  TextColumn get pregnancyId =>
+      text().nullable().references(Pregnancies, #id)();
+  TextColumn get category =>
+      textEnum<RecordCategory>().withDefault(const Constant('other'))();
+
+  /// Her title; empty shows the category word.
+  TextColumn get title => text().withDefault(const Constant(''))();
+
+  /// The date on the record (defaults to the day it was added).
+  TextColumn get takenOn => text().map(const DateOnlyConverter()).nullable()();
+  IntColumn get sizeBytes => integer().nullable()();
 }
 
 enum VitalKind { weight, bloodPressure, bloodSugar }

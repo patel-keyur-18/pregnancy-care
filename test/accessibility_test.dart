@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -10,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -18,6 +20,7 @@ import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
 import 'package:navmaas/features/birth_prep/presentation/bag_screen.dart';
 import 'package:navmaas/features/care/data/vitals_repository.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
@@ -35,6 +38,13 @@ final _expiry = DateTime(2026, 10, 6, 14);
 /// The file picker hands over a backup (for Restore).
 Future<PickedFile?> _pickBackup(List<String> _) async =>
     (name: 'navmaas-backup.navmaas', bytes: Stream.value([1]));
+
+/// A record for the seeded screens (M9a): a 1 × 1 PNG, sealed here.
+final Directory _records = Directory.systemTemp.createTempSync('navmaas_a11yr');
+final Uint8List _png = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAD'
+  'hgGAWjR9awAAAABJRU5ErkJggg==',
+);
 
 /// Library files for the seeded screens (a book and an audio file).
 final Directory _library = Directory.systemTemp.createTempSync('navmaas_a11y');
@@ -69,6 +79,18 @@ Future<void> _seed(AppDatabase db) async {
   // Routines unlocked, so the exercise screen is reachable.
   final pregnancy = await db.select(db.pregnancies).getSingle();
   await PregnancyRepository(db).setFlags(pregnancy.id, exerciseCleared: true);
+  // A record, so Records, its viewer and its menu show.
+  await RecordsRepository(
+    db,
+    AttachmentStore(directory: _records, key: () async => List.filled(32, 7)),
+  ).add(
+    pregnancyId: pregnancy.id,
+    bytes: _png,
+    mimeType: 'image/png',
+    category: RecordCategory.report,
+    title: 'Thyroid report',
+    takenOn: DateTime.utc(2026, 9, 9),
+  );
   // Logs, so the kick counter and contraction timer show their lists.
   final third = ThirdTrimesterRepository(db);
   for (var day = 1; day <= 4; day++) {
@@ -184,6 +206,13 @@ Future<void> _type(
 Future<void> _go(WidgetTester tester, String path) async {
   GoRouter.of(tester.element(find.byType(NavmaasTabBar))).go(path);
   await tester.pumpAndSettle();
+}
+
+/// Care → Records → the seeded record.
+Future<void> _openRecord(WidgetTester tester) async {
+  await _go(tester, '/care/records');
+  await _tapText(tester, 'Thyroid report');
+  await _settleIo(tester);
 }
 
 Future<void> _tab(WidgetTester tester, String label) async {
@@ -800,6 +829,68 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'What helps you feel calm');
     },
   ),
+  'records': (true, (t) => _go(t, '/care/records')),
+  'records, none yet': (
+    true,
+    (t) async {
+      await _openRecord(t);
+      await t.tap(find.byTooltip('More for this record'));
+      await t.pumpAndSettle();
+      await _tapText(t, 'Delete record');
+      await t.tap(find.text('Delete'));
+      await _settleIo(t);
+    },
+  ),
+  'add a record': (
+    true,
+    (t) async {
+      await _go(t, '/care/records');
+      await _tapText(t, 'Add a record');
+    },
+  ),
+  'record details': (
+    true,
+    (t) async {
+      await _go(t, '/care/records');
+      await _tapText(t, 'Add a record');
+      await _tapText(t, 'Choose a photo');
+      await _settleIo(t);
+    },
+  ),
+  'record': (true, _openRecord),
+  'record menu': (
+    true,
+    (t) async {
+      await _openRecord(t);
+      await t.tap(find.byTooltip('More for this record'));
+      await t.pumpAndSettle();
+    },
+  ),
+  'share a copy': (
+    true,
+    (t) async {
+      await _openRecord(t);
+      await t.tap(find.byTooltip('More for this record'));
+      await t.pumpAndSettle();
+      await _tapText(t, 'Share a copy');
+    },
+  ),
+  'delete a record': (
+    true,
+    (t) async {
+      await _openRecord(t);
+      await t.tap(find.byTooltip('More for this record'));
+      await t.pumpAndSettle();
+      await _tapText(t, 'Delete record');
+    },
+  ),
+  'visit summary': (
+    true,
+    (t) async {
+      await _go(t, '/care/visit-summary');
+      await _settleIo(t);
+    },
+  ),
   'pause or end': (
     true,
     (t) async {
@@ -869,6 +960,8 @@ void main() {
           tester,
           seed: seeded ? _seed : null,
           library: _library,
+          records: _records,
+          pickImage: ({required camera}) async => _png,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),
@@ -898,6 +991,8 @@ void main() {
           tester,
           seed: seeded ? _seed : null,
           library: _library,
+          records: _records,
+          pickImage: ({required camera}) async => _png,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),
@@ -914,6 +1009,8 @@ void main() {
           tester,
           seed: seeded ? _seed : null,
           library: _library,
+          records: _records,
+          pickImage: ({required camera}) async => _png,
           buildExpiry: _expiry,
           pickFile: _pickBackup,
           appUsage: _usage = FakeAppUsage(),

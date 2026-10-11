@@ -19,6 +19,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.7.0** (M9a) adds Records in Care: keep reports, scans and prescriptions (a photo, or a PDF or image up to 25 MB) encrypted on the phone, opened only in memory, with a warning before you share a copy. A visit shows its own records, and a **visit summary** makes a PDF on the phone of what you logged (since your last visit by default, the sections you choose, values only) to share with your doctor.
+>
 > **Release 1.6.0** brings the official Navmaas logo, a mother cradling her baby, as the app icon on iPhone (light, dark and tinted) and Android (including themed icons), the notification icon, the home-screen widget's mark, the app-switcher cover and the launch screen.
 >
 > **Release 1.5.0** puts the hospital bag one tap away on Today from week 32 (how much is packed, or "All packed"), keeps a blood-sugar time at now or earlier, and fixes small things from M8.
@@ -35,7 +37,7 @@ It combines:
 >
 > **Enhancements (E1–E4, 2026-10-08):** E1–E4 are built. E1: a finished book stays finished when you go back a page, a ⋯ button on each library row to rename or remove, walks and exercise routines that start when you tap Start (a paused walk can be carried on later, even after closing the app), and Today's reading can be ticked by hand for a printed book. E2 adds links: save a YouTube, YouTube Music or Spotify link in your library and it opens in that app (or your browser), and an audio file can be replaced with a new one. E3 adds voice letters: tap Speak in Talk to baby to record a voice note for your baby (up to 10 minutes, encrypted on the phone, in backups only when you choose). E4 adds a gentle scene on Today for the mood you picked: each mood has its own, and Tired and Low get a baby scene ("You and baby, together today"). To reword the scene lines, edit the `moodSceneLine*` entries in `lib/l10n/app_en.arb`.
 >
-> **Next:** the deferred M9 (records vault, visit PDF and EPUB), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
+> **Next:** M9b (EPUB books in the reader), then Phase 3 (M12–M14: postpartum mode, baby feeding and sleep, baby vaccines and visits). Family sharing is out of scope. Each milestone's scope and done-when criteria are in [Architecture §15](docs/ARCHITECTURE.md#15-delivery-milestones).
 >
 > Navmaas is a personal tracking aid, not medical advice. It has no emergency features.
 >
@@ -70,7 +72,7 @@ echo -n release | gh secret set ANDROID_KEY_ALIAS
 
 Or download `navmaas-<version>.apk` from [Releases](https://github.com/patel-keyur-18/pregnancy-care/releases): each version bump merged to `main` publishes one, signed with the same key, so it installs over the previous version and keeps its data. CI prints each APK's signing-certificate digest; compare it with `keytool -list -v -keystore ~/keyur-android.jks -alias release | grep SHA256`.
 
-Build the phone APK (Arm only, about 66 MB) and install it with the phone connected over USB (USB debugging on):
+Build the phone APK (Arm only, about 70 MB) and install it with the phone connected over USB (USB debugging on):
 
 ```sh
 flutter build apk --release --target-platform android-arm,android-arm64

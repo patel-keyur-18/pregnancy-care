@@ -32,6 +32,10 @@ abstract final class SettingKeys {
   /// Backups include voice letters (E3; default off, remembered).
   static const backupVoice = 'backup_voice';
 
+  /// Visit summary: the sections she last chose (M9a), comma-separated;
+  /// unset means the clinical defaults.
+  static const summarySections = 'summary_sections';
+
   /// Screen Rest rules (ARCHITECTURE §8). Bedtime rest switches quiet hours
   /// on or off (default on).
   static const quietOn = 'quiet_on';

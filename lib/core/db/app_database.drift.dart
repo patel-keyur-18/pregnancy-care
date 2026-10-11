@@ -5873,6 +5873,60 @@ class $AttachmentsTable extends Attachments
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pregnancyIdMeta = const VerificationMeta(
+    'pregnancyId',
+  );
+  @override
+  late final GeneratedColumn<String> pregnancyId = GeneratedColumn<String>(
+    'pregnancy_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES pregnancy (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<RecordCategory, String> category =
+      GeneratedColumn<String>(
+        'category',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('other'),
+      ).withConverter<RecordCategory>($AttachmentsTable.$convertercategory);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<DateTime?, String> takenOn =
+      GeneratedColumn<String>(
+        'taken_on',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<DateTime?>($AttachmentsTable.$convertertakenOnn);
+  static const VerificationMeta _sizeBytesMeta = const VerificationMeta(
+    'sizeBytes',
+  );
+  @override
+  late final GeneratedColumn<int> sizeBytes = GeneratedColumn<int>(
+    'size_bytes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5882,6 +5936,11 @@ class $AttachmentsTable extends Attachments
     appointmentId,
     fileName,
     mimeType,
+    pregnancyId,
+    category,
+    title,
+    takenOn,
+    sizeBytes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5941,6 +6000,27 @@ class $AttachmentsTable extends Attachments
     } else if (isInserting) {
       context.missing(_mimeTypeMeta);
     }
+    if (data.containsKey('pregnancy_id')) {
+      context.handle(
+        _pregnancyIdMeta,
+        pregnancyId.isAcceptableOrUnknown(
+          data['pregnancy_id']!,
+          _pregnancyIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    }
+    if (data.containsKey('size_bytes')) {
+      context.handle(
+        _sizeBytesMeta,
+        sizeBytes.isAcceptableOrUnknown(data['size_bytes']!, _sizeBytesMeta),
+      );
+    }
     return context;
   }
 
@@ -5978,6 +6058,30 @@ class $AttachmentsTable extends Attachments
         DriftSqlType.string,
         data['${effectivePrefix}mime_type'],
       )!,
+      pregnancyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pregnancy_id'],
+      ),
+      category: $AttachmentsTable.$convertercategory.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}category'],
+        )!,
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      takenOn: $AttachmentsTable.$convertertakenOnn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}taken_on'],
+        ),
+      ),
+      sizeBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}size_bytes'],
+      ),
     );
   }
 
@@ -5985,6 +6089,13 @@ class $AttachmentsTable extends Attachments
   $AttachmentsTable createAlias(String alias) {
     return $AttachmentsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<RecordCategory, String, String> $convertercategory =
+      const EnumNameConverter<RecordCategory>(RecordCategory.values);
+  static TypeConverter<DateTime, String> $convertertakenOn =
+      const DateOnlyConverter();
+  static TypeConverter<DateTime?, String?> $convertertakenOnn =
+      NullAwareTypeConverter.wrap($convertertakenOn);
 }
 
 class Attachment extends DataClass implements Insertable<Attachment> {
@@ -5997,6 +6108,17 @@ class Attachment extends DataClass implements Insertable<Attachment> {
   /// File name inside `db/attachments/`.
   final String fileName;
   final String mimeType;
+
+  /// v13. Nullable in SQL only; the app always sets it.
+  final String? pregnancyId;
+  final RecordCategory category;
+
+  /// Her title; empty shows the category word.
+  final String title;
+
+  /// The date on the record (defaults to the day it was added).
+  final DateTime? takenOn;
+  final int? sizeBytes;
   const Attachment({
     required this.id,
     required this.createdAt,
@@ -6005,6 +6127,11 @@ class Attachment extends DataClass implements Insertable<Attachment> {
     this.appointmentId,
     required this.fileName,
     required this.mimeType,
+    this.pregnancyId,
+    required this.category,
+    required this.title,
+    this.takenOn,
+    this.sizeBytes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -6020,6 +6147,23 @@ class Attachment extends DataClass implements Insertable<Attachment> {
     }
     map['file_name'] = Variable<String>(fileName);
     map['mime_type'] = Variable<String>(mimeType);
+    if (!nullToAbsent || pregnancyId != null) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId);
+    }
+    {
+      map['category'] = Variable<String>(
+        $AttachmentsTable.$convertercategory.toSql(category),
+      );
+    }
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || takenOn != null) {
+      map['taken_on'] = Variable<String>(
+        $AttachmentsTable.$convertertakenOnn.toSql(takenOn),
+      );
+    }
+    if (!nullToAbsent || sizeBytes != null) {
+      map['size_bytes'] = Variable<int>(sizeBytes);
+    }
     return map;
   }
 
@@ -6036,6 +6180,17 @@ class Attachment extends DataClass implements Insertable<Attachment> {
           : Value(appointmentId),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
+      pregnancyId: pregnancyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pregnancyId),
+      category: Value(category),
+      title: Value(title),
+      takenOn: takenOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(takenOn),
+      sizeBytes: sizeBytes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sizeBytes),
     );
   }
 
@@ -6052,6 +6207,13 @@ class Attachment extends DataClass implements Insertable<Attachment> {
       appointmentId: serializer.fromJson<String?>(json['appointmentId']),
       fileName: serializer.fromJson<String>(json['fileName']),
       mimeType: serializer.fromJson<String>(json['mimeType']),
+      pregnancyId: serializer.fromJson<String?>(json['pregnancyId']),
+      category: $AttachmentsTable.$convertercategory.fromJson(
+        serializer.fromJson<String>(json['category']),
+      ),
+      title: serializer.fromJson<String>(json['title']),
+      takenOn: serializer.fromJson<DateTime?>(json['takenOn']),
+      sizeBytes: serializer.fromJson<int?>(json['sizeBytes']),
     );
   }
   @override
@@ -6065,6 +6227,13 @@ class Attachment extends DataClass implements Insertable<Attachment> {
       'appointmentId': serializer.toJson<String?>(appointmentId),
       'fileName': serializer.toJson<String>(fileName),
       'mimeType': serializer.toJson<String>(mimeType),
+      'pregnancyId': serializer.toJson<String?>(pregnancyId),
+      'category': serializer.toJson<String>(
+        $AttachmentsTable.$convertercategory.toJson(category),
+      ),
+      'title': serializer.toJson<String>(title),
+      'takenOn': serializer.toJson<DateTime?>(takenOn),
+      'sizeBytes': serializer.toJson<int?>(sizeBytes),
     };
   }
 
@@ -6076,6 +6245,11 @@ class Attachment extends DataClass implements Insertable<Attachment> {
     Value<String?> appointmentId = const Value.absent(),
     String? fileName,
     String? mimeType,
+    Value<String?> pregnancyId = const Value.absent(),
+    RecordCategory? category,
+    String? title,
+    Value<DateTime?> takenOn = const Value.absent(),
+    Value<int?> sizeBytes = const Value.absent(),
   }) => Attachment(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -6086,6 +6260,11 @@ class Attachment extends DataClass implements Insertable<Attachment> {
         : this.appointmentId,
     fileName: fileName ?? this.fileName,
     mimeType: mimeType ?? this.mimeType,
+    pregnancyId: pregnancyId.present ? pregnancyId.value : this.pregnancyId,
+    category: category ?? this.category,
+    title: title ?? this.title,
+    takenOn: takenOn.present ? takenOn.value : this.takenOn,
+    sizeBytes: sizeBytes.present ? sizeBytes.value : this.sizeBytes,
   );
   Attachment copyWithCompanion(AttachmentsCompanion data) {
     return Attachment(
@@ -6098,6 +6277,13 @@ class Attachment extends DataClass implements Insertable<Attachment> {
           : this.appointmentId,
       fileName: data.fileName.present ? data.fileName.value : this.fileName,
       mimeType: data.mimeType.present ? data.mimeType.value : this.mimeType,
+      pregnancyId: data.pregnancyId.present
+          ? data.pregnancyId.value
+          : this.pregnancyId,
+      category: data.category.present ? data.category.value : this.category,
+      title: data.title.present ? data.title.value : this.title,
+      takenOn: data.takenOn.present ? data.takenOn.value : this.takenOn,
+      sizeBytes: data.sizeBytes.present ? data.sizeBytes.value : this.sizeBytes,
     );
   }
 
@@ -6110,7 +6296,12 @@ class Attachment extends DataClass implements Insertable<Attachment> {
           ..write('deletedAt: $deletedAt, ')
           ..write('appointmentId: $appointmentId, ')
           ..write('fileName: $fileName, ')
-          ..write('mimeType: $mimeType')
+          ..write('mimeType: $mimeType, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('category: $category, ')
+          ..write('title: $title, ')
+          ..write('takenOn: $takenOn, ')
+          ..write('sizeBytes: $sizeBytes')
           ..write(')'))
         .toString();
   }
@@ -6124,6 +6315,11 @@ class Attachment extends DataClass implements Insertable<Attachment> {
     appointmentId,
     fileName,
     mimeType,
+    pregnancyId,
+    category,
+    title,
+    takenOn,
+    sizeBytes,
   );
   @override
   bool operator ==(Object other) =>
@@ -6135,7 +6331,12 @@ class Attachment extends DataClass implements Insertable<Attachment> {
           other.deletedAt == this.deletedAt &&
           other.appointmentId == this.appointmentId &&
           other.fileName == this.fileName &&
-          other.mimeType == this.mimeType);
+          other.mimeType == this.mimeType &&
+          other.pregnancyId == this.pregnancyId &&
+          other.category == this.category &&
+          other.title == this.title &&
+          other.takenOn == this.takenOn &&
+          other.sizeBytes == this.sizeBytes);
 }
 
 class AttachmentsCompanion extends UpdateCompanion<Attachment> {
@@ -6146,6 +6347,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
   final Value<String?> appointmentId;
   final Value<String> fileName;
   final Value<String> mimeType;
+  final Value<String?> pregnancyId;
+  final Value<RecordCategory> category;
+  final Value<String> title;
+  final Value<DateTime?> takenOn;
+  final Value<int?> sizeBytes;
   final Value<int> rowid;
   const AttachmentsCompanion({
     this.id = const Value.absent(),
@@ -6155,6 +6361,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     this.appointmentId = const Value.absent(),
     this.fileName = const Value.absent(),
     this.mimeType = const Value.absent(),
+    this.pregnancyId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.title = const Value.absent(),
+    this.takenOn = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AttachmentsCompanion.insert({
@@ -6165,6 +6376,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     this.appointmentId = const Value.absent(),
     required String fileName,
     required String mimeType,
+    this.pregnancyId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.title = const Value.absent(),
+    this.takenOn = const Value.absent(),
+    this.sizeBytes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : fileName = Value(fileName),
        mimeType = Value(mimeType);
@@ -6176,6 +6392,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     Expression<String>? appointmentId,
     Expression<String>? fileName,
     Expression<String>? mimeType,
+    Expression<String>? pregnancyId,
+    Expression<String>? category,
+    Expression<String>? title,
+    Expression<String>? takenOn,
+    Expression<int>? sizeBytes,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6186,6 +6407,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
       if (appointmentId != null) 'appointment_id': appointmentId,
       if (fileName != null) 'file_name': fileName,
       if (mimeType != null) 'mime_type': mimeType,
+      if (pregnancyId != null) 'pregnancy_id': pregnancyId,
+      if (category != null) 'category': category,
+      if (title != null) 'title': title,
+      if (takenOn != null) 'taken_on': takenOn,
+      if (sizeBytes != null) 'size_bytes': sizeBytes,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6198,6 +6424,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     Value<String?>? appointmentId,
     Value<String>? fileName,
     Value<String>? mimeType,
+    Value<String?>? pregnancyId,
+    Value<RecordCategory>? category,
+    Value<String>? title,
+    Value<DateTime?>? takenOn,
+    Value<int?>? sizeBytes,
     Value<int>? rowid,
   }) {
     return AttachmentsCompanion(
@@ -6208,6 +6439,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
       appointmentId: appointmentId ?? this.appointmentId,
       fileName: fileName ?? this.fileName,
       mimeType: mimeType ?? this.mimeType,
+      pregnancyId: pregnancyId ?? this.pregnancyId,
+      category: category ?? this.category,
+      title: title ?? this.title,
+      takenOn: takenOn ?? this.takenOn,
+      sizeBytes: sizeBytes ?? this.sizeBytes,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6236,6 +6472,25 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
     if (mimeType.present) {
       map['mime_type'] = Variable<String>(mimeType.value);
     }
+    if (pregnancyId.present) {
+      map['pregnancy_id'] = Variable<String>(pregnancyId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(
+        $AttachmentsTable.$convertercategory.toSql(category.value),
+      );
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (takenOn.present) {
+      map['taken_on'] = Variable<String>(
+        $AttachmentsTable.$convertertakenOnn.toSql(takenOn.value),
+      );
+    }
+    if (sizeBytes.present) {
+      map['size_bytes'] = Variable<int>(sizeBytes.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6252,6 +6507,11 @@ class AttachmentsCompanion extends UpdateCompanion<Attachment> {
           ..write('appointmentId: $appointmentId, ')
           ..write('fileName: $fileName, ')
           ..write('mimeType: $mimeType, ')
+          ..write('pregnancyId: $pregnancyId, ')
+          ..write('category: $category, ')
+          ..write('title: $title, ')
+          ..write('takenOn: $takenOn, ')
+          ..write('sizeBytes: $sizeBytes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -15158,6 +15418,24 @@ final class $$PregnanciesTableReferences
     );
   }
 
+  static MultiTypedResultKey<$AttachmentsTable, List<Attachment>>
+  _attachmentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.attachments,
+    aliasName: 'pregnancy__id__attachment__pregnancy_id',
+  );
+
+  $$AttachmentsTableProcessedTableManager get attachmentsRefs {
+    final manager = $$AttachmentsTableTableManager(
+      $_db,
+      $_db.attachments,
+    ).filter((f) => f.pregnancyId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_attachmentsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
   static MultiTypedResultKey<$VitalReadingsTable, List<VitalReading>>
   _vitalReadingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
     db.vitalReadings,
@@ -15586,6 +15864,31 @@ class $$PregnanciesTableFilterComposer
           }) => $$VisitQuestionsTableFilterComposer(
             $db: $db,
             $table: $db.visitQuestions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> attachmentsRefs(
+    Expression<bool> Function($$AttachmentsTableFilterComposer f) f,
+  ) {
+    final $$AttachmentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attachments,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttachmentsTableFilterComposer(
+            $db: $db,
+            $table: $db.attachments,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16170,6 +16473,31 @@ class $$PregnanciesTableAnnotationComposer
     return f(composer);
   }
 
+  Expression<T> attachmentsRefs<T extends Object>(
+    Expression<T> Function($$AttachmentsTableAnnotationComposer a) f,
+  ) {
+    final $$AttachmentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attachments,
+      getReferencedColumn: (t) => t.pregnancyId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttachmentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.attachments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> vitalReadingsRefs<T extends Object>(
     Expression<T> Function($$VitalReadingsTableAnnotationComposer a) f,
   ) {
@@ -16490,6 +16818,7 @@ class $$PregnanciesTableTableManager
             bool careItemsRefs,
             bool appointmentsRefs,
             bool visitQuestionsRefs,
+            bool attachmentsRefs,
             bool vitalReadingsRefs,
             bool sessionsRefs,
             bool lettersRefs,
@@ -16602,6 +16931,7 @@ class $$PregnanciesTableTableManager
                 careItemsRefs = false,
                 appointmentsRefs = false,
                 visitQuestionsRefs = false,
+                attachmentsRefs = false,
                 vitalReadingsRefs = false,
                 sessionsRefs = false,
                 lettersRefs = false,
@@ -16623,6 +16953,7 @@ class $$PregnanciesTableTableManager
                     if (careItemsRefs) db.careItems,
                     if (appointmentsRefs) db.appointments,
                     if (visitQuestionsRefs) db.visitQuestions,
+                    if (attachmentsRefs) db.attachments,
                     if (vitalReadingsRefs) db.vitalReadings,
                     if (sessionsRefs) db.sessions,
                     if (lettersRefs) db.letters,
@@ -16738,6 +17069,27 @@ class $$PregnanciesTableTableManager
                                 table,
                                 p0,
                               ).visitQuestionsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.pregnancyId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (attachmentsRefs)
+                        await $_getPrefetchedData<
+                          Pregnancy,
+                          $PregnanciesTable,
+                          Attachment
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PregnanciesTableReferences
+                              ._attachmentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PregnanciesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attachmentsRefs,
                           referencedItemsForCurrentItem:
                               (item, referencedItems) => referencedItems.where(
                                 (e) => e.pregnancyId == item.id,
@@ -17022,6 +17374,7 @@ typedef $$PregnanciesTableProcessedTableManager =
         bool careItemsRefs,
         bool appointmentsRefs,
         bool visitQuestionsRefs,
+        bool attachmentsRefs,
         bool vitalReadingsRefs,
         bool sessionsRefs,
         bool lettersRefs,
@@ -20789,6 +21142,11 @@ typedef $$AttachmentsTableCreateCompanionBuilder =
       Value<String?> appointmentId,
       required String fileName,
       required String mimeType,
+      Value<String?> pregnancyId,
+      Value<RecordCategory> category,
+      Value<String> title,
+      Value<DateTime?> takenOn,
+      Value<int?> sizeBytes,
       Value<int> rowid,
     });
 typedef $$AttachmentsTableUpdateCompanionBuilder =
@@ -20800,6 +21158,11 @@ typedef $$AttachmentsTableUpdateCompanionBuilder =
       Value<String?> appointmentId,
       Value<String> fileName,
       Value<String> mimeType,
+      Value<String?> pregnancyId,
+      Value<RecordCategory> category,
+      Value<String> title,
+      Value<DateTime?> takenOn,
+      Value<int?> sizeBytes,
       Value<int> rowid,
     });
 
@@ -20819,6 +21182,23 @@ final class $$AttachmentsTableReferences
       $_db.appointments,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_appointmentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $PregnanciesTable _pregnancyIdTable(_$AppDatabase db) =>
+      db.pregnancies.createAlias('attachment__pregnancy_id__pregnancy__id');
+
+  $$PregnanciesTableProcessedTableManager? get pregnancyId {
+    final $_column = $_itemColumn<String>('pregnancy_id');
+    if ($_column == null) return null;
+    final manager = $$PregnanciesTableTableManager(
+      $_db,
+      $_db.pregnancies,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pregnancyIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -20865,6 +21245,28 @@ class $$AttachmentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnWithTypeConverterFilters<RecordCategory, RecordCategory, String>
+  get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DateTime?, DateTime, String> get takenOn =>
+      $composableBuilder(
+        column: $table.takenOn,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$AppointmentsTableFilterComposer get appointmentId {
     final $$AppointmentsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -20879,6 +21281,29 @@ class $$AttachmentsTableFilterComposer
           }) => $$AppointmentsTableFilterComposer(
             $db: $db,
             $table: $db.appointments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PregnanciesTableFilterComposer get pregnancyId {
+    final $$PregnanciesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableFilterComposer(
+            $db: $db,
+            $table: $db.pregnancies,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -20928,6 +21353,26 @@ class $$AttachmentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get takenOn => $composableBuilder(
+    column: $table.takenOn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sizeBytes => $composableBuilder(
+    column: $table.sizeBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$AppointmentsTableOrderingComposer get appointmentId {
     final $$AppointmentsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -20942,6 +21387,29 @@ class $$AttachmentsTableOrderingComposer
           }) => $$AppointmentsTableOrderingComposer(
             $db: $db,
             $table: $db.appointments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PregnanciesTableOrderingComposer get pregnancyId {
+    final $$PregnanciesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableOrderingComposer(
+            $db: $db,
+            $table: $db.pregnancies,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -20979,6 +21447,18 @@ class $$AttachmentsTableAnnotationComposer
   GeneratedColumn<String> get mimeType =>
       $composableBuilder(column: $table.mimeType, builder: (column) => column);
 
+  GeneratedColumnWithTypeConverter<RecordCategory, String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DateTime?, String> get takenOn =>
+      $composableBuilder(column: $table.takenOn, builder: (column) => column);
+
+  GeneratedColumn<int> get sizeBytes =>
+      $composableBuilder(column: $table.sizeBytes, builder: (column) => column);
+
   $$AppointmentsTableAnnotationComposer get appointmentId {
     final $$AppointmentsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -20993,6 +21473,29 @@ class $$AttachmentsTableAnnotationComposer
           }) => $$AppointmentsTableAnnotationComposer(
             $db: $db,
             $table: $db.appointments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$PregnanciesTableAnnotationComposer get pregnancyId {
+    final $$PregnanciesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.pregnancyId,
+      referencedTable: $db.pregnancies,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PregnanciesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.pregnancies,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -21016,7 +21519,7 @@ class $$AttachmentsTableTableManager
           $$AttachmentsTableUpdateCompanionBuilder,
           (Attachment, $$AttachmentsTableReferences),
           Attachment,
-          PrefetchHooks Function({bool appointmentId})
+          PrefetchHooks Function({bool appointmentId, bool pregnancyId})
         > {
   $$AttachmentsTableTableManager(_$AppDatabase db, $AttachmentsTable table)
     : super(
@@ -21038,6 +21541,11 @@ class $$AttachmentsTableTableManager
                 Value<String?> appointmentId = const Value.absent(),
                 Value<String> fileName = const Value.absent(),
                 Value<String> mimeType = const Value.absent(),
+                Value<String?> pregnancyId = const Value.absent(),
+                Value<RecordCategory> category = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime?> takenOn = const Value.absent(),
+                Value<int?> sizeBytes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AttachmentsCompanion(
                 id: id,
@@ -21047,6 +21555,11 @@ class $$AttachmentsTableTableManager
                 appointmentId: appointmentId,
                 fileName: fileName,
                 mimeType: mimeType,
+                pregnancyId: pregnancyId,
+                category: category,
+                title: title,
+                takenOn: takenOn,
+                sizeBytes: sizeBytes,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -21058,6 +21571,11 @@ class $$AttachmentsTableTableManager
                 Value<String?> appointmentId = const Value.absent(),
                 required String fileName,
                 required String mimeType,
+                Value<String?> pregnancyId = const Value.absent(),
+                Value<RecordCategory> category = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<DateTime?> takenOn = const Value.absent(),
+                Value<int?> sizeBytes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AttachmentsCompanion.insert(
                 id: id,
@@ -21067,6 +21585,11 @@ class $$AttachmentsTableTableManager
                 appointmentId: appointmentId,
                 fileName: fileName,
                 mimeType: mimeType,
+                pregnancyId: pregnancyId,
+                category: category,
+                title: title,
+                takenOn: takenOn,
+                sizeBytes: sizeBytes,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -21077,45 +21600,57 @@ class $$AttachmentsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({appointmentId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (appointmentId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.appointmentId,
-                        referencedTable: $$AttachmentsTableReferences
-                            ._appointmentIdTable(db),
-                        referencedColumn: $$AttachmentsTableReferences
-                            ._appointmentIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({appointmentId = false, pregnancyId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (appointmentId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.appointmentId,
+                            referencedTable: $$AttachmentsTableReferences
+                                ._appointmentIdTable(db),
+                            referencedColumn: $$AttachmentsTableReferences
+                                ._appointmentIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (pregnancyId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.pregnancyId,
+                            referencedTable: $$AttachmentsTableReferences
+                                ._pregnancyIdTable(db),
+                            referencedColumn: $$AttachmentsTableReferences
+                                ._pregnancyIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -21132,7 +21667,7 @@ typedef $$AttachmentsTableProcessedTableManager =
       $$AttachmentsTableUpdateCompanionBuilder,
       (Attachment, $$AttachmentsTableReferences),
       Attachment,
-      PrefetchHooks Function({bool appointmentId})
+      PrefetchHooks Function({bool appointmentId, bool pregnancyId})
     >;
 typedef $$VitalReadingsTableCreateCompanionBuilder =
     VitalReadingsCompanion Function({

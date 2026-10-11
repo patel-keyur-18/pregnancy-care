@@ -12,6 +12,7 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
@@ -103,6 +104,7 @@ void main() {
   late _Phone a;
   late _Phone b;
   final photo = Uint8List.fromList(List.generate(2000, (i) => i % 251));
+  final report = Uint8List.fromList([...'%PDF-1.7'.codeUnits, 1, 2, 3]);
 
   setUp(() async {
     // Phone A: a pregnancy, a visit with a photo, a book.
@@ -115,7 +117,24 @@ void main() {
       at: DateTime(2026, 10, 20, 11),
       doctor: 'Dr Rao',
     );
-    await visits.addAttachment(a.attachments, visit, photo, 'image/jpeg');
+    await RecordsRepository(a.db, a.attachments).add(
+      pregnancyId: id,
+      bytes: photo,
+      mimeType: 'image/jpeg',
+      category: RecordCategory.prescription,
+      title: '',
+      takenOn: DateTime.utc(2026, 10, 20),
+      appointmentId: visit,
+    );
+    // … and a lab report PDF of her own (M9a records).
+    await RecordsRepository(a.db, a.attachments).add(
+      pregnancyId: id,
+      bytes: report,
+      mimeType: 'application/pdf',
+      category: RecordCategory.report,
+      title: 'Blood report',
+      takenOn: DateTime.utc(2026, 10, 2),
+    );
     await a.library.import('stories.txt', Stream.value(utf8.encode('Once')));
     // … and a day of wellbeing logs (M7).
     final wellbeing = WellbeingRepository(a.db);
@@ -156,7 +175,7 @@ void main() {
     );
     expect(p.basename(made.file.path), startsWith('navmaas-backup-'));
     expect(made.file.path, endsWith('.navmaas'));
-    expect(made.photos, 1);
+    expect(made.photos, 2);
     // pregnancy, care items? no; appointment, attachment, library item.
     expect(made.entries, greaterThanOrEqualTo(4));
     final logged = await a.db.select(a.db.backupLog).getSingle();
@@ -165,7 +184,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 12));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 13));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -177,9 +196,18 @@ void main() {
       await SettingsRepository(b.db).watch(SettingKeys.firstName).first,
       'Meera',
     );
-    // … its photo, sealed with A's key, which B now holds …
-    final attachment = await b.db.select(b.db.attachments).getSingle();
-    expect(await b.attachments.read(attachment.fileName), photo);
+    // … its records, sealed with A's key, which B now holds …
+    final records = {
+      for (final r in await b.db.select(b.db.attachments).get()) r.category: r,
+    };
+    final prescription = records[RecordCategory.prescription]!;
+    final lab = records[RecordCategory.report]!;
+    expect(await b.attachments.read(prescription.fileName), photo);
+    expect(await b.attachments.read(lab.fileName), report);
+    expect(
+      (lab.title, lab.takenOn, lab.sizeBytes, lab.pregnancyId),
+      ('Blood report', DateTime.utc(2026, 10, 2), report.length, pregnancy.id),
+    );
     expect(b.attachKey, a.attachKey);
     // … and its book.
     final items = await b.library.watchItems().first;
@@ -334,6 +362,7 @@ void main() {
     (9, ['media_link', ...birthPrepTables]),
     (10, birthPrepTables),
     (11, birthPrepTables),
+    (12, <String>[]),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -352,10 +381,32 @@ void main() {
         }
       }
       // v12 added a blood-sugar reading's context and note.
-      for (final column in ['context', 'note']) {
-        await a.db.customStatement(
-          'ALTER TABLE vital_reading DROP COLUMN $column',
-        );
+      if (version < 12) {
+        for (final column in ['context', 'note']) {
+          await a.db.customStatement(
+            'ALTER TABLE vital_reading DROP COLUMN $column',
+          );
+        }
+      }
+      // v13 added a record's pregnancy, kind, title, date and size. Its
+      // pregnancy is a foreign key, which SQLite can't drop: rebuild.
+      const v12Attachment =
+          'CREATE TABLE attachment (id TEXT NOT NULL PRIMARY KEY, '
+          'created_at TEXT NOT NULL, updated_at TEXT NOT NULL, '
+          'deleted_at TEXT NULL, '
+          'appointment_id TEXT NULL REFERENCES appointment (id), '
+          'file_name TEXT NOT NULL, mime_type TEXT NOT NULL)';
+      const copy =
+          'CREATE TABLE attachment_v12 AS SELECT id, created_at, updated_at, '
+          'deleted_at, appointment_id, file_name, mime_type FROM attachment';
+      for (final sql in [
+        copy,
+        'DROP TABLE attachment',
+        v12Attachment,
+        'INSERT INTO attachment SELECT * FROM attachment_v12',
+        'DROP TABLE attachment_v12',
+      ]) {
+        await a.db.customStatement(sql);
       }
       await a.db.customStatement('PRAGMA user_version = $version');
       final file = File(p.join(a.root.path, 'old.navmaas'));
@@ -381,6 +432,19 @@ void main() {
       expect(
         (await b.db.select(b.db.pregnancies).getSingle()).lmp,
         DateTime.utc(2026, 4, 15),
+      );
+      // A visit photo from before v13 comes back as a prescription record,
+      // dated by its visit.
+      final photo = await (b.db.select(
+        b.db.attachments,
+      )..where((t) => t.appointmentId.isNotNull())).getSingle();
+      expect(
+        (photo.category, photo.takenOn, photo.pregnancyId),
+        (
+          RecordCategory.prescription,
+          DateTime.utc(2026, 10, 20),
+          (await b.db.select(b.db.pregnancies).getSingle()).id,
+        ),
       );
       // The tables it didn't have are there, and empty (the backup log
       // already holds this restore).

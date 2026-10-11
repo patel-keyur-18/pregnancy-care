@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | v1.16 — decided 2026-10-04, updated 2026-10-11 (official logo in §1; motion in §5; M3–M11, E1–E4 and M8 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals; M8 follow-up boards added 2026-10-10: Today at week 33 with the Hospital bag card, and with everything packed) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals; M8 follow-up boards added 2026-10-10: Today at week 33 with the Hospital bag card, and with everything packed; M9a's boards added 2026-10-11: Care with the Records tile, Records (tap a filter) and none yet, Add a record, Record details, a record as a photo and as a PDF, its ⋯ menu, Share a copy?, a doctor visit with Records from this visit, Visit summary and a page of the PDF; M9b's boards (approved, built next): Add to library with EPUB, the reader's Contents button and the Contents sheet) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -156,6 +156,9 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | App lock screen (M10) | `bg`; 88 `primary-soft` circle with the lock 36; "Navmaas is locked" 22/800 (heading); the way to unlock 15/600 `text-2`; full-width Unlock (`primary`, 56) |
 | Home-screen widget (M10) | `surface`, radius 22, 16 padding. Brand row: the 28 logo, "Navmaas" 13/800 `text-3`. Small: week 22/800, "Day N · size" 13/700 `text-2`, bell + "time · title" 13/800 `primary`. Medium: "Week N · day N" 22/800 and the size line 14/600 `text-2`, beside a 128-wide `primary-soft` box (radius 16, 12 padding): bell, "Next" 12/700, title and time 15/800. Hidden: "Next reminder" 12/700 `text-3` over the time 22/800. Stopped: the sprout in a 56 circle |
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
+| Record row (M9a) | 68+ h; 48 thumb, radius 12: "PDF" 11/800 on `primary-soft`, or the scan icon on `surface-2` (the list never decrypts a record); title 16/800 (her title, or the kind's word), "Kind · date · size" 13/600 `text-3`, chevron; grouped by month under a 15/800 `text-2` heading |
+| Record tile on a visit (M9a) | 96 × 96 thumb with its label under it; Add is a 96 × 96 tile with a 1.5 `border` outline, a plus and "Add" |
+| Visit summary PDF (M9a) | A4, always light: title 20 bold, "name · dates" and "For Dr …" in `text-2`, a 1.5 sage rule; sections headed 12 bold sage; tables with 10 px cells, headers bold `text-2`; footer "Made with Navmaas on … · values as she logged them" and "Page n of m" |
 
 ## 7. Flutter mapping
 
@@ -216,7 +219,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M8b)
+## 8. Implementation status (M9a)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -245,6 +248,12 @@ Deliberate, permanent differences:
 | Blood sugar tile (Care) | Reading and "Log blood sugar" side by side | Side by side when they fit; at large text the button moves under the reading | No overflow at 2.0× text |
 | Hospital bag reminder | "Change" and "Clear" | "Set" when no reminder is set; "Change" and "Clear" once one is; a time that has passed shows as none; with reminders off the card says "Reminders are off, so this one won't ring." and setting one offers to turn them on | A reminder must never look set when it can't ring |
 | M8a dialogs | Each box's label above it | The label floats inside the outlined box | One text-field style across the app |
+| Records, Visit summary headers | "Care" overline over a 22/800 title | The app bar's title, like every Care screen | One header style across Care |
+| Records filter, record kind and date chips | Chosen = `primary` fill | The app's choice chip (as blood sugar's "When"): chosen = the theme's selected colour, pill shape, 48 dp | One chip style across the app |
+| Add tile on a visit | Dashed 1.5 `border` | Solid 1.5 `outline` | Flutter has no dashed border without a package |
+| Record (PDF) | "Page 1 of 3" pill under a framed page | `pdfrx`'s own viewer (scroll and zoom through the pages) | The viewer already shows where she is |
+| Saving a record, deleting one | (described in the notes) | "Saving…" dialog with a progress ring while it's sealed; "Delete this record?" dialog with a red Delete | Large PDFs take a moment in pure Dart; delete asks first |
+| List icon (Contents) | Dots drawn as zero-length strokes | Small filled circles, like the ⋯ icon | Same look; Flutter can't draw a zero-length path |
 | Walk / Exercise note | Symptom list ("bleeding, dizziness…, call your doctor") with a warning triangle | One general line: "Go gently. Stop and rest if anything feels uncomfortable, and check with your doctor." (after the talk test on Walk) | No danger-sign list (Plan decision 26) |
 | Walk screen | "Evening walk" | "Gentle walk"; the Sessions tile shows "Paused · 12:30" while a walk waits to be carried on (E1); steps show "—" and an "Allow" link until Health access is given; tap Today's steps to change the daily goal | Any time of day; Health access can be refused |
 | Exercise header | "2nd trimester · step 2 of 4" | "Step 2 of 7" (the trimester is on the Sessions tile) | Shorter at large text |

@@ -14,6 +14,7 @@ import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
+import 'package:navmaas/core/utils/format_bytes.dart';
 import 'package:navmaas/core/widgets/notice_box.dart';
 import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/features/backup/data/backup_file.dart';
@@ -21,11 +22,6 @@ import 'package:navmaas/features/backup/data/backup_log.dart';
 import 'package:navmaas/features/backup/data/backup_service.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
-
-/// "2.4 MB", "820 KB".
-String formatBytes(int bytes) => bytes < 1024 * 1024
-    ? '${(bytes / 1024).ceil()} KB'
-    : '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
 
 /// "Sat 3 Oct, 9:12 pm".
 String formatMoment(DateTime t) {

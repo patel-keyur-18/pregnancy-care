@@ -1,7 +1,7 @@
 name: navmaas
 description: "Navmaas - a calm, private pregnancy companion."
 publish_to: 'none'
-version: 1.6.0+8
+version: 1.7.0+9
 
 environment:
   sdk: ^3.13.3
@@ -29,6 +29,7 @@ dependencies:
   path: ^1.9.1
   path_parsing: ^1.1.0
   path_provider: ^2.1.6
+  pdf: ^3.13.1
   pdfrx: ^2.6.5
   record: ^7.1.1
   riverpod_annotation: ^4.0.7
@@ -72,6 +73,9 @@ flutter:
     # Meditation's original bell and quiet clip (tool/bell.dart).
     - assets/audio/bell.wav
     - assets/audio/quiet.wav
+    # Static Nunito for the visit summary PDF (M9a), made from the OFL font.
+    - assets/fonts/pdf/Nunito-Regular.ttf
+    - assets/fonts/pdf/Nunito-Bold.ttf
   # Bundled (OFL, see assets/fonts/OFL-*.txt). No runtime font download (ADR-008).
   fonts:
     - family: Nunito

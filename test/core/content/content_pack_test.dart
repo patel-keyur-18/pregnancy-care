@@ -250,6 +250,8 @@ void main() {
         'reminderBag',
         'birthPlan',
         'nourishly',
+        'record',
+        'summary',
       ];
       final text =
           [
