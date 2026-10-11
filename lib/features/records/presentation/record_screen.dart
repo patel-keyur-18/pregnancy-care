@@ -52,42 +52,45 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
     final action = await showModalBottomSheet<int>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-              child: Semantics(
-                header: true,
-                child: Text(
-                  recordLabel(l10n, a),
-                  style: Theme.of(context).textTheme.titleMedium,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    recordLabel(l10n, a),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: const NmIcon(NavmaasIcon.pencil),
-              title: Text(l10n.recordEdit),
-              subtitle: Text(l10n.recordEditSub),
-              onTap: () => Navigator.pop(context, 0),
-            ),
-            ListTile(
-              leading: const NmIcon(NavmaasIcon.share),
-              title: Text(l10n.recordShare),
-              subtitle: Text(l10n.recordShareSub),
-              onTap: () => Navigator.pop(context, 1),
-            ),
-            ListTile(
-              leading: NmIcon(NavmaasIcon.close, color: scheme.error),
-              title: Text(
-                l10n.recordDelete,
-                style: TextStyle(color: scheme.error),
+              ListTile(
+                leading: const NmIcon(NavmaasIcon.pencil),
+                title: Text(l10n.recordEdit),
+                subtitle: Text(l10n.recordEditSub),
+                onTap: () => Navigator.pop(context, 0),
               ),
-              onTap: () => Navigator.pop(context, 2),
-            ),
-          ],
+              ListTile(
+                leading: const NmIcon(NavmaasIcon.share),
+                title: Text(l10n.recordShare),
+                subtitle: Text(l10n.recordShareSub),
+                onTap: () => Navigator.pop(context, 1),
+              ),
+              ListTile(
+                leading: NmIcon(NavmaasIcon.close, color: scheme.error),
+                title: Text(
+                  l10n.recordDelete,
+                  style: TextStyle(color: scheme.error),
+                ),
+                onTap: () => Navigator.pop(context, 2),
+              ),
+            ],
+          ),
         ),
       ),
     );

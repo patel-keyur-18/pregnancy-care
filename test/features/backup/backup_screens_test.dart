@@ -185,7 +185,7 @@ void main() {
     ));
     expect(find.text('Backup ready'), findsOneWidget);
     expect(find.text('navmaas-backup-2026-10-05.navmaas'), findsOneWidget);
-    expect(find.text('2.4 MB · 1,284 entries · 6 photos'), findsOneWidget);
+    expect(find.text('2.4 MB · 1,284 entries · 6 records'), findsOneWidget);
     await _tapText(tester, 'Save to Files or share…');
     expect(shared.single.path, 'navmaas-backup-2026-10-05.navmaas');
     await _tapText(tester, 'Done');
@@ -234,7 +234,7 @@ void main() {
     expect(find.text('Restored from Sat 3 Oct'), findsOneWidget);
     expect(
       find.text(
-        '1,284 entries and 6 photos are back. Reminders have been planned '
+        '1,284 entries and 6 records are back. Reminders have been planned '
         'again.',
       ),
       findsOneWidget,

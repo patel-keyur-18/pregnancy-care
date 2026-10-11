@@ -207,6 +207,8 @@ class _VisitSummaryScreenState extends ConsumerState<VisitSummaryScreen> {
                         label: Text(word),
                         selected: _choice == c,
                         showCheckmark: false,
+                        shape: const StadiumBorder(),
+                        materialTapTargetSize: MaterialTapTargetSize.padded,
                         onSelected: (_) => c == SummaryRangeChoice.custom
                             ? (pregnancy == null
                                   ? null

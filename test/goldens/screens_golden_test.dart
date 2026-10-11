@@ -8,6 +8,7 @@
 //           download it into linux/.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'package:navmaas/app/tab_bar.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
+import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -23,6 +25,7 @@ import 'package:navmaas/features/birth_prep/data/bag_repository.dart';
 import 'package:navmaas/features/birth_prep/data/birth_plan_repository.dart';
 import 'package:navmaas/features/care/data/vitals_repository.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
 import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
@@ -33,6 +36,22 @@ import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import '../helpers.dart';
 
 final Directory _library = Directory.systemTemp.createTempSync('navmaas_gold');
+
+/// A 1 × 1 PNG for the records screens.
+final Uint8List _png = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwAD'
+  'hgGAWjR9awAAAABJRU5ErkJggg==',
+);
+
+Future<void> _settleIo(WidgetTester tester) async {
+  for (var i = 0; i < 5; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
+}
 
 Future<void> _seed(AppDatabase db) async {
   await SettingsRepository(db).put(SettingKeys.firstName, 'Meera');
@@ -307,6 +326,75 @@ void main() {
             matchesGoldenFile('$_dir/${file}_$name.png'),
           );
         }
+      });
+
+      // M9a: Records, one record, and the visit summary.
+      testWidgets('records $name', skip: _dir == null, (tester) async {
+        final dir = Directory.systemTemp.createTempSync('navmaas_goldr');
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            final id = (await db.select(db.pregnancies).getSingle()).id;
+            final repo = RecordsRepository(
+              db,
+              AttachmentStore(
+                directory: dir,
+                key: () async => List.filled(32, 7),
+              ),
+            );
+            for (final (kind, title, mime, day) in [
+              (
+                RecordCategory.report,
+                'Blood report · CBC',
+                'application/pdf',
+                2,
+              ),
+              (RecordCategory.scan, 'Week 20 anomaly scan', 'image/png', 21),
+              (RecordCategory.prescription, '', 'image/png', 8),
+            ]) {
+              await repo.add(
+                pregnancyId: id,
+                bytes: _png,
+                mimeType: mime,
+                category: kind,
+                title: title,
+                takenOn: DateTime.utc(2026, day > 9 ? 9 : 10, day),
+              );
+            }
+          },
+          records: dir,
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        final router = GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+          ..go('/care/records');
+        await _settleIo(tester);
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/records_$name.png'),
+        );
+        final scan = find.text('Week 20 anomaly scan');
+        await tester.scrollUntilVisible(
+          scan,
+          200,
+          scrollable: find.byType(Scrollable).last,
+        );
+        await tester.ensureVisible(scan);
+        await tester.pumpAndSettle();
+        await tester.tap(scan);
+        await _settleIo(tester);
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/record_$name.png'),
+        );
+        router.go('/care/visit-summary');
+        await _settleIo(tester);
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/visit_summary_$name.png'),
+        );
       });
 
       // M8b: the meals she logged in Nourishly, on a day with a partial

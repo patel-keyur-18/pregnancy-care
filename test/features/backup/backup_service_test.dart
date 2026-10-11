@@ -104,6 +104,7 @@ void main() {
   late _Phone a;
   late _Phone b;
   final photo = Uint8List.fromList(List.generate(2000, (i) => i % 251));
+  final report = Uint8List.fromList([...'%PDF-1.7'.codeUnits, 1, 2, 3]);
 
   setUp(() async {
     // Phone A: a pregnancy, a visit with a photo, a book.
@@ -124,6 +125,15 @@ void main() {
       title: '',
       takenOn: DateTime.utc(2026, 10, 20),
       appointmentId: visit,
+    );
+    // … and a lab report PDF of her own (M9a records).
+    await RecordsRepository(a.db, a.attachments).add(
+      pregnancyId: id,
+      bytes: report,
+      mimeType: 'application/pdf',
+      category: RecordCategory.report,
+      title: 'Blood report',
+      takenOn: DateTime.utc(2026, 10, 2),
     );
     await a.library.import('stories.txt', Stream.value(utf8.encode('Once')));
     // … and a day of wellbeing logs (M7).
@@ -165,7 +175,7 @@ void main() {
     );
     expect(p.basename(made.file.path), startsWith('navmaas-backup-'));
     expect(made.file.path, endsWith('.navmaas'));
-    expect(made.photos, 1);
+    expect(made.photos, 2);
     // pregnancy, care items? no; appointment, attachment, library item.
     expect(made.entries, greaterThanOrEqualTo(4));
     final logged = await a.db.select(a.db.backupLog).getSingle();
@@ -186,9 +196,18 @@ void main() {
       await SettingsRepository(b.db).watch(SettingKeys.firstName).first,
       'Meera',
     );
-    // … its photo, sealed with A's key, which B now holds …
-    final attachment = await b.db.select(b.db.attachments).getSingle();
-    expect(await b.attachments.read(attachment.fileName), photo);
+    // … its records, sealed with A's key, which B now holds …
+    final records = {
+      for (final r in await b.db.select(b.db.attachments).get()) r.category: r,
+    };
+    final prescription = records[RecordCategory.prescription]!;
+    final lab = records[RecordCategory.report]!;
+    expect(await b.attachments.read(prescription.fileName), photo);
+    expect(await b.attachments.read(lab.fileName), report);
+    expect(
+      (lab.title, lab.takenOn, lab.sizeBytes, lab.pregnancyId),
+      ('Blood report', DateTime.utc(2026, 10, 2), report.length, pregnancy.id),
+    );
     expect(b.attachKey, a.attachKey);
     // … and its book.
     final items = await b.library.watchItems().first;
@@ -413,6 +432,19 @@ void main() {
       expect(
         (await b.db.select(b.db.pregnancies).getSingle()).lmp,
         DateTime.utc(2026, 4, 15),
+      );
+      // A visit photo from before v13 comes back as a prescription record,
+      // dated by its visit.
+      final photo = await (b.db.select(
+        b.db.attachments,
+      )..where((t) => t.appointmentId.isNotNull())).getSingle();
+      expect(
+        (photo.category, photo.takenOn, photo.pregnancyId),
+        (
+          RecordCategory.prescription,
+          DateTime.utc(2026, 10, 20),
+          (await b.db.select(b.db.pregnancies).getSingle()).id,
+        ),
       );
       // The tables it didn't have are there, and empty (the backup log
       // already holds this restore).

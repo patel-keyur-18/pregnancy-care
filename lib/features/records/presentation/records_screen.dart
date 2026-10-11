@@ -113,6 +113,9 @@ class _RecordsScreenState extends ConsumerState<RecordsScreen> {
                               label: Text(word),
                               selected: _filter == c,
                               showCheckmark: false,
+                              shape: const StadiumBorder(),
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.padded,
                               onSelected: (_) => setState(() => _filter = c),
                             ),
                         ],
@@ -322,42 +325,45 @@ Future<void> showAddRecord(
   final source = await showModalBottomSheet<_Source>(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
     builder: (context) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Semantics(
-              header: true,
-              child: Text(
-                l10n.recordAdd,
-                style: Theme.of(context).textTheme.titleMedium,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l10n.recordAdd,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
             ),
-          ),
-          ListTile(
-            leading: const NmIcon(NavmaasIcon.camera),
-            title: Text(l10n.recordTakePhoto),
-            onTap: () => Navigator.pop(context, _Source.camera),
-          ),
-          ListTile(
-            leading: const NmIcon(NavmaasIcon.scan),
-            title: Text(l10n.recordChoosePhoto),
-            onTap: () => Navigator.pop(context, _Source.photos),
-          ),
-          ListTile(
-            leading: const NmIcon(NavmaasIcon.notes),
-            title: Text(l10n.recordChooseFile),
-            subtitle: Text(l10n.recordChooseFileSub),
-            onTap: () => Navigator.pop(context, _Source.file),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
-            child: Text(l10n.recordKeptEncrypted),
-          ),
-        ],
+            ListTile(
+              leading: const NmIcon(NavmaasIcon.camera),
+              title: Text(l10n.recordTakePhoto),
+              onTap: () => Navigator.pop(context, _Source.camera),
+            ),
+            ListTile(
+              leading: const NmIcon(NavmaasIcon.scan),
+              title: Text(l10n.recordChoosePhoto),
+              onTap: () => Navigator.pop(context, _Source.photos),
+            ),
+            ListTile(
+              leading: const NmIcon(NavmaasIcon.notes),
+              title: Text(l10n.recordChooseFile),
+              subtitle: Text(l10n.recordChooseFileSub),
+              onTap: () => Navigator.pop(context, _Source.file),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
+              child: Text(l10n.recordKeptEncrypted),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -523,6 +529,8 @@ class _RecordDetailsDialogState extends State<RecordDetailsDialog> {
                     label: Text(recordKindWord(l10n, c)),
                     selected: _category == c,
                     showCheckmark: false,
+                    shape: const StadiumBorder(),
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
                     onSelected: (_) => setState(() => _category = c),
                   ),
               ],
