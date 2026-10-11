@@ -1,7 +1,7 @@
 name: navmaas
 description: "Navmaas - a calm, private pregnancy companion."
 publish_to: 'none'
-version: 1.6.0+8
+version: 1.7.0+9
 
 environment:
   sdk: ^3.13.3
