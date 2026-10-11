@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
@@ -22,6 +23,8 @@ import 'package:navmaas/features/care/presentation/take_button.dart';
 import 'package:navmaas/features/care/presentation/tests_screen.dart';
 import 'package:navmaas/features/nutrition/data/avoid_food_repository.dart';
 import 'package:navmaas/features/nutrition/data/nourishly_meals.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
+import 'package:navmaas/features/records/presentation/records_screen.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:navmaas/features/wellbeing/presentation/wellbeing_widgets.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -105,6 +108,8 @@ class CareScreen extends ConsumerWidget {
           const _WellbeingTile(),
           const SizedBox(height: 10),
           const _NutritionTile(),
+          const SizedBox(height: 10),
+          const _RecordsTile(),
           const SizedBox(height: 18),
           Row(
             children: [
@@ -339,6 +344,34 @@ class _NutritionTile extends ConsumerWidget {
           ? l10n.nutritionTodayMeals(meals)
           : l10n.nutritionAvoidCount(foods.length),
       onTap: () => context.go('/care/nutrition'),
+    );
+  }
+}
+
+/// Care → Records (M9a): how many she keeps and the latest one.
+class _RecordsTile extends ConsumerWidget {
+  const new();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final records = ref.watch(recordsProvider).value ?? const [];
+    final latest = records.firstOrNull;
+    return _ToolTile(
+      icon: NavmaasIcon.folder,
+      background: context.navmaas.amberSoft,
+      foreground: context.navmaas.onAmberSoft,
+      label: l10n.recordsTitle,
+      subtitle: latest == null
+          ? l10n.recordsTileNone
+          : [
+              l10n.recordsTileCount(records.length),
+              l10n.recordsTileLatest(
+                '${recordLabel(l10n, latest)}, '
+                '${DateFormat('d MMM').format(recordDay(latest))}',
+              ),
+            ].join(' · '),
+      onTap: () => context.go('/care/records'),
     );
   }
 }

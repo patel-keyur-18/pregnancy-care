@@ -17,6 +17,9 @@ import 'package:navmaas/features/care/presentation/visit_screen.dart';
 import 'package:navmaas/features/journey/journey_screen.dart';
 import 'package:navmaas/features/nutrition/presentation/nutrition_screen.dart';
 import 'package:navmaas/features/onboarding/onboarding_screen.dart';
+import 'package:navmaas/features/records/presentation/record_screen.dart';
+import 'package:navmaas/features/records/presentation/records_screen.dart';
+import 'package:navmaas/features/records/presentation/visit_summary_screen.dart';
 import 'package:navmaas/features/screen_rest/presentation/app_limits_screen.dart';
 import 'package:navmaas/features/screen_rest/presentation/screen_rest_screen.dart';
 import 'package:navmaas/features/sessions/presentation/breathing_screen.dart';
@@ -167,6 +170,22 @@ GoRouter router(Ref ref) {
                 builder: (_, _) => const NutritionScreen(),
               ),
               GoRoute(path: 'bag', builder: (_, _) => const BagScreen()),
+              GoRoute(
+                path: 'records',
+                builder: (_, _) => const RecordsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'view',
+                    builder: (_, state) =>
+                        RecordScreen(recordId: state.extra! as String),
+                  ),
+                ],
+              ),
+              GoRoute(
+                path: 'visit-summary',
+                builder: (_, state) =>
+                    VisitSummaryScreen(visitId: state.extra as String?),
+              ),
               GoRoute(
                 path: 'birth-plan',
                 builder: (_, _) => const BirthPlanScreen(),
