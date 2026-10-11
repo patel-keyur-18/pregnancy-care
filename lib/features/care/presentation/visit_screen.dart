@@ -13,6 +13,8 @@ import 'package:navmaas/core/utils/date_only.dart';
 import 'package:navmaas/core/widgets/motion.dart';
 import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
+import 'package:navmaas/features/records/data/records_repository.dart';
+import 'package:navmaas/features/records/presentation/records_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Questions shown on [visit]: the ones asked there, plus (for an upcoming
@@ -116,6 +118,8 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
       now: now,
     );
     final profile = ref.watch(profileProvider).value;
+    final records =
+        ref.watch(visitRecordsProvider(widget.visitId)).value ?? const [];
     final days = localDay(visit.at).difference(localDay(now)).inDays;
     final bring = visit.bringAlong
         .split('\n')
@@ -356,6 +360,53 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
               ),
             ),
           ],
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(l10n.visitRecords, style: text.titleMedium),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => context.go('/care/records'),
+                  child: Text(l10n.visitAllRecords),
+                ),
+              ],
+            ),
+          ),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              for (final a in records) _VisitRecordTile(record: a),
+              _AddRecordTile(
+                label: l10n.visitAddRecord,
+                onTap: () => showAddRecord(
+                  context,
+                  ref,
+                  appointmentId: visit.id,
+                  visitDay: dateOnly(visit.at),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(48),
+            ),
+            onPressed: () =>
+                context.push('/care/visit-summary', extra: visit.id),
+            icon: NmIcon(
+              NavmaasIcon.birthPlan,
+              size: 20,
+              color: scheme.onSurface,
+            ),
+            label: Text(l10n.summaryMake),
+          ),
           const SizedBox(height: 28),
           OutlinedButton(
             style: OutlinedButton.styleFrom(
@@ -470,6 +521,81 @@ class _AfterTile extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A record on the visit: a PDF glyph or picture icon, and its label.
+class _VisitRecordTile extends StatelessWidget {
+  const new({required this.record});
+
+  final Attachment record;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final label = recordLabel(l10n, record);
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      label: '$label ${formatShortDate(recordDay(record))}',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => context.push('/care/records/view', extra: record.id),
+        child: SizedBox(
+          width: 96,
+          child: Column(
+            spacing: 6,
+            children: [
+              RecordThumb(record: record, size: 96),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AddRecordTile extends StatelessWidget {
+  const new({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          width: 96,
+          height: 96,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: scheme.outline, width: 1.5),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 4,
+            children: [
+              NmIcon(NavmaasIcon.plus, size: 22, color: scheme.onSurface),
+              Text(label, style: Theme.of(context).textTheme.labelMedium),
+            ],
           ),
         ),
       ),

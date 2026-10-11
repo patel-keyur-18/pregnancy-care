@@ -10,6 +10,7 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/attachment_store.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/care/data/visit_repository.dart';
 import 'package:navmaas/features/records/data/records_repository.dart';
 
 import '../../helpers.dart';
@@ -161,5 +162,136 @@ void main() {
     await tester.tap(find.text('All'));
     await tester.pumpAndSettle();
     expect(find.text('Thyroid report'), findsOneWidget);
+  });
+
+  testWidgets(
+    'a photo record opens, shares after the warning, and leaves no copy',
+    (tester) async {
+      final dir = Directory.systemTemp.createTempSync('navmaas_rec');
+      final temp = Directory.systemTemp.createTempSync('navmaas_st');
+      final shared = <String>[];
+      await pumpApp(
+        tester,
+        seed: _seedRecords(dir),
+        records: dir,
+        recordsTemp: temp,
+        share: (f) async {
+          expect(f.readAsBytesSync(), _png);
+          shared.add(f.path);
+        },
+      );
+      await _go(tester, '/care/records');
+      await tester.tap(find.text('Thyroid report'));
+      await _settleIo(tester);
+      expect(find.byType(InteractiveViewer), findsOneWidget);
+      expect(find.text('Report · Wed, 9 Sep'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('More for this record'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Share a copy'));
+      await tester.pumpAndSettle();
+      expect(find.text('Share a copy?'), findsOneWidget);
+      await tester.tap(find.text('Share'));
+      await _settleIo(tester);
+      expect(shared.single, endsWith('Thyroid report.png'));
+      expect(temp.listSync(), isEmpty);
+    },
+  );
+
+  testWidgets('delete asks first, then removes the record and its file', (
+    tester,
+  ) async {
+    final dir = Directory.systemTemp.createTempSync('navmaas_rec');
+    await pumpApp(tester, seed: _seedRecords(dir), records: dir);
+    await _go(tester, '/care/records');
+    await tester.tap(find.text('Thyroid report'));
+    await _settleIo(tester);
+    await tester.tap(find.byTooltip('More for this record'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete record'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete this record?'), findsOneWidget);
+    await tester.tap(find.text('Delete'));
+    await _settleIo(tester);
+    expect(find.text('Thyroid report'), findsNothing);
+    expect(find.text('Week 20 anomaly scan'), findsOneWidget);
+    expect(dir.listSync(), hasLength(1));
+  });
+
+  testWidgets('edit details changes the title and kind', (tester) async {
+    final dir = Directory.systemTemp.createTempSync('navmaas_rec');
+    await pumpApp(tester, seed: _seedRecords(dir), records: dir);
+    await _go(tester, '/care/records');
+    await tester.tap(find.text('Thyroid report'));
+    await _settleIo(tester);
+    await tester.tap(find.byTooltip('More for this record'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Edit details'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Title (optional)'),
+      'TSH report',
+    );
+    await tester.tap(find.text('Save'));
+    await _settleIo(tester);
+    expect(find.text('TSH report'), findsOneWidget);
+  });
+
+  testWidgets('a visit lists its records and adds one as a prescription', (
+    tester,
+  ) async {
+    final dir = Directory.systemTemp.createTempSync('navmaas_rec');
+    late String visit;
+    final db = await pumpApp(
+      tester,
+      records: dir,
+      pickImage: ({required camera}) async => _png,
+      seed: (db) async {
+        await _seedPregnancy(db);
+        final pid = (await db.select(db.pregnancies).getSingle()).id;
+        visit = await VisitRepository(db).saveAppointment(
+          pregnancyId: pid,
+          at: DateTime(2026, 10, 2, 11),
+          doctor: 'Dr Rao',
+        );
+      },
+    );
+    GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+        .go('/care/visit', extra: visit);
+    await _settleIo(tester);
+    await tester.scrollUntilVisible(
+      find.text('Make visit summary'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text('Make visit summary'));
+    await tester.pumpAndSettle();
+    expect(find.text('Make visit summary'), findsOneWidget);
+    // Bring along has its own Add; the record tile comes after it.
+    final add = find.text('Add').last;
+    await tester.ensureVisible(add);
+    await tester.pumpAndSettle();
+    await tester.tap(add);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Choose a photo'));
+    await _settleIo(tester);
+    final chip = tester.widget<ChoiceChip>(
+      find.widgetWithText(ChoiceChip, 'Prescription'),
+    );
+    expect(chip.selected, isTrue);
+    expect(find.text('Fri, 2 Oct 2026'), findsOneWidget);
+    await tester.tap(find.text('Save'));
+    await _settleIo(tester);
+    final row = await tester.runAsync(
+      () => db.select(db.attachments).getSingle(),
+    );
+    expect(
+      (row!.appointmentId, row.category, row.takenOn),
+      (visit, RecordCategory.prescription, DateTime.utc(2026, 10, 2)),
+    );
+    expect(
+      find.bySemanticsLabel(RegExp('^Prescription Fri, 2 Oct')),
+      findsOneWidget,
+    );
   });
 }
