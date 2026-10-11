@@ -83,7 +83,7 @@
     - `int? sizeBytes`
   - `AttachmentsCompanion` gains the same fields.
 
-- [ ] **Step 1: Write the failing migration test.** Add the import `import 'generated/schema_v12.dart' as v12;` after the v11 import (it exists after Step 4). Then append:
+- [ ] **Step 1: Write the failing migration test.** Add the import `import 'generated/schema_v12.dart' as v12;` after the v11 import (v12's snapshot already exists; v13's comes in Step 4). Then append:
 
 ```dart
   test('v12 → v13 turns visit photos into prescription records', () async {
