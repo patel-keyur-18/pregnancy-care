@@ -72,7 +72,7 @@ echo -n release | gh secret set ANDROID_KEY_ALIAS
 
 Or download `navmaas-<version>.apk` from [Releases](https://github.com/patel-keyur-18/pregnancy-care/releases): each version bump merged to `main` publishes one, signed with the same key, so it installs over the previous version and keeps its data. CI prints each APK's signing-certificate digest; compare it with `keytool -list -v -keystore ~/keyur-android.jks -alias release | grep SHA256`.
 
-Build the phone APK (Arm only, about 70 MB) and install it with the phone connected over USB (USB debugging on):
+Build the phone APK (Arm only, about 74 MB) and install it with the phone connected over USB (USB debugging on):
 
 ```sh
 flutter build apk --release --target-platform android-arm,android-arm64

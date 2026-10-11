@@ -29,7 +29,7 @@ dart run tool/bell.dart               # regenerates assets/audio/bell.wav and qu
 flutter test tool/app_icon_test.dart  # makes every app icon, the notification icon and the logo images from design/logo/ (the official logo; checks Android's safe zone)
 flutter test test/goldens --update-goldens  # after an intended visual change (macOS set)
 flutter test integration_test -d <phone>     # on-device checks (allow notifications first; build_expiry_test reads the iPhone build's expiry; visit_summary_test reads a visit summary PDF's text back through pdfium; backup_test backs up, restores and deletes all data, and app_flow_test runs onboarding, Taken and a PDF read then deletes all data, so both run only on an empty install)
-flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~70 MB, Arm only; what CI builds; CI fails it over 100 MB; signed with the owner's key via android/key.properties, ADR 060, else the debug key; debug and profile builds use that key too when the file is there)
+flutter build apk --release --target-platform android-arm,android-arm64  # the phone APK (~74 MB, Arm only; what CI builds; CI fails it over 100 MB; signed with the owner's key via android/key.properties, ADR 060, else the debug key; debug and profile builds use that key too when the file is there)
 flutter build apk --release           # universal APK (~103 MB, adds x86_64; emulators only; limit 150 MB); --split-per-abi ~30 MB per phone
 flutter build ios --release --no-codesign   # compile check; installs go through Xcode (§12)
 ```
