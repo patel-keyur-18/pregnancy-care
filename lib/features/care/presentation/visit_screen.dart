@@ -362,13 +362,13 @@ class _VisitScreenState extends ConsumerState<VisitScreen> {
           ],
           Padding(
             padding: const EdgeInsets.only(top: 20, bottom: 6),
-            child: Row(
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
-                  child: Semantics(
-                    header: true,
-                    child: Text(l10n.visitRecords, style: text.titleMedium),
-                  ),
+                Semantics(
+                  header: true,
+                  child: Text(l10n.visitRecords, style: text.titleMedium),
                 ),
                 TextButton(
                   onPressed: () => context.go('/care/records'),
