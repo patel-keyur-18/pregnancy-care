@@ -165,7 +165,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 12));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 13));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
@@ -334,6 +334,7 @@ void main() {
     (9, ['media_link', ...birthPrepTables]),
     (10, birthPrepTables),
     (11, birthPrepTables),
+    (12, []),
   ]) {
     test('a schema $version backup is migrated when it opens', () async {
       for (final t in dropped) {
@@ -352,10 +353,28 @@ void main() {
         }
       }
       // v12 added a blood-sugar reading's context and note.
-      for (final column in ['context', 'note']) {
-        await a.db.customStatement(
-          'ALTER TABLE vital_reading DROP COLUMN $column',
-        );
+      if (version < 12) {
+        for (final column in ['context', 'note']) {
+          await a.db.customStatement(
+            'ALTER TABLE vital_reading DROP COLUMN $column',
+          );
+        }
+      }
+      // v13 added a record's pregnancy, kind, title, date and size. Its
+      // pregnancy is a foreign key, which SQLite can't drop: rebuild.
+      for (final sql in [
+        'CREATE TABLE attachment_v12 AS SELECT id, created_at, updated_at, '
+            'deleted_at, appointment_id, file_name, mime_type FROM attachment',
+        'DROP TABLE attachment',
+        'CREATE TABLE attachment (id TEXT NOT NULL PRIMARY KEY, '
+            'created_at TEXT NOT NULL, updated_at TEXT NOT NULL, '
+            'deleted_at TEXT NULL, '
+            'appointment_id TEXT NULL REFERENCES appointment (id), '
+            'file_name TEXT NOT NULL, mime_type TEXT NOT NULL)',
+        'INSERT INTO attachment SELECT * FROM attachment_v12',
+        'DROP TABLE attachment_v12',
+      ]) {
+        await a.db.customStatement(sql);
       }
       await a.db.customStatement('PRAGMA user_version = $version');
       final file = File(p.join(a.root.path, 'old.navmaas'));
