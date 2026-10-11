@@ -44,7 +44,7 @@ void main() {
     expect(
       find.text(
         'This deletes everything Navmaas keeps on this phone: your pregnancy, '
-        'logs, photos, books, audio and settings. Backup files you saved '
+        'logs, records, books, audio and settings. Backup files you saved '
         'elsewhere are not touched.',
       ),
       findsOneWidget,
