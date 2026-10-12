@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | v1.16 — decided 2026-10-04, updated 2026-10-11 (official logo in §1; motion in §5; M3–M11, E1–E4 and M8 components; implementation notes in §8) |
-| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals; M8 follow-up boards added 2026-10-10: Today at week 33 with the Hospital bag card, and with everything packed; M9a's boards added 2026-10-11: Care with the Records tile, Records (tap a filter) and none yet, Add a record, Record details, a record as a photo and as a PDF, its ⋯ menu, Share a copy?, a doctor visit with Records from this visit, Visit summary and a page of the PDF; M9b's boards (approved, built next): Add to library with EPUB, the reader's Contents button and the Contents sheet) |
+| **Prototype** | [Navmaas Screens](https://claude.ai/artifact/SQRrhaQU7odSc5FLNeKcJ8) — theme sheet plus 29 screens in light and dark (M7 Wellbeing, M10 widgets, lock screen and Me → Your data, and M11 app-limit boards added 2026-10-06; Walk and Exercise before Start and the library's ⋯ button updated 2026-10-08, E1; E2's Add sheet, link dialog, audio and link sheets and a link row added 2026-10-08; E3's Letters, voice note and backup switch boards added 2026-10-09; E4's mood scene boards added 2026-10-09; M8a's boards added 2026-10-10: Care with Nutrition, Blood sugar and Getting ready, Care at week 32, the blood-sugar dialog and list, Nutrition, Edit food, Hospital bag, Add your own, Birth plan and its answer dialog; M8b's boards added 2026-10-10: Nutrition with From Nourishly (tap a day), a day with no meals, sharing off, a file it can't read, and Care's Nutrition tile with today's meals; M8 follow-up boards added 2026-10-10: Today at week 33 with the Hospital bag card, and with everything packed; M9a's boards added 2026-10-11: Care with the Records tile, Records (tap a filter) and none yet, Add a record, Record details, a record as a photo and as a PDF, its ⋯ menu, Share a copy?, a doctor visit with Records from this visit, Visit summary and a page of the PDF; M9b's boards (built 2026-10-12): Add to library with EPUB, the reader's Contents button and the Contents sheet) |
 | **Web tokens** | [`design/navmaas-tokens.css`](../design/navmaas-tokens.css) (used by the prototype) |
 
 ## 1. Why this theme
@@ -158,6 +158,7 @@ Small, calm feedback when an icon is tapped (owner request, M2), plus the breath
 | Week row (Wellbeing) | Day 15/800 over date 12/700 `text-3`; mood word in an 8-radius `surface-2` chip; sleep · water and symptoms 14/600 `text-2`; "Nothing logged" in `text-3` |
 | Record row (M9a) | 68+ h; 48 thumb, radius 12: "PDF" 11/800 on `primary-soft`, or the scan icon on `surface-2` (the list never decrypts a record); title 16/800 (her title, or the kind's word), "Kind · date · size" 13/600 `text-3`, chevron; grouped by month under a 15/800 `text-2` heading |
 | Record tile on a visit (M9a) | 96 × 96 thumb with its label under it; Add is a 96 × 96 tile with a 1.5 `border` outline, a plus and "Add" |
+| Contents row (M9b) | 52+ h, 24 side padding; number 14/800 `text-3`, tabular, in a 24 column; chapter title Literata 16/22; the chapter she is in: `primary-soft` fill, title 600, "Reading" 12/800 `on-primary-soft`. The sheet: "Contents" 18/800 heading, "Book · n chapters" 13/600 `text-3`, up to 75 % of the screen |
 | Visit summary PDF (M9a) | A4, always light: title 20 bold, "name · dates" and "For Dr …" in `text-2`, a 1.5 sage rule; sections headed 12 bold sage; tables with 10 px cells, headers bold `text-2`; footer "Made with Navmaas on … · values as she logged them" and "Page n of m" |
 
 ## 7. Flutter mapping
@@ -219,7 +220,7 @@ class NavmaasColors extends ThemeExtension<NavmaasColors> {
 
 Theme mode options are **Light / Dark / System**, plus "night reading after 9 pm" for the reader (Me → Appearance, on by default). The reader opens in Night colours from 9 pm to 5 am, or whenever the app is dark; Paper / Night can be switched while reading.
 
-## 8. Implementation status (M9a)
+## 8. Implementation status (M9b)
 
 The prototype is the exact visual spec (Plan decision 15). M2 closed the M1 gaps: the prototype's own icons (drawn from its SVG paths), the pill segmented control with its soft shadow, and the one-row cycle stepper.
 
@@ -237,7 +238,7 @@ Deliberate, permanent differences:
 | Remove-time icon | (not drawn) | A × in the same line style | Needed for the supplement form; also on bring-along chips and photos |
 | Scan icon | (not drawn) | A screen with a gentle wave, same line style | Scans needed their own icon |
 | Past test windows | (not shown) | "Weeks 6–10", not "Due" | No guilt for a window that has passed |
-| Reader subtitle | "Chapter 6 · The little lamp" | PDF: "Page 42 of 120"; text: none (the library row shows "42% read") | PDFs don't reliably mark chapters |
+| Reader subtitle | "Chapter 6 · The little lamp" | EPUB: as the prototype (M9b), up to two lines; PDF: "Page 42 of 120"; text: none (the library row shows "42% read") | PDFs and text files don't reliably mark chapters |
 | Library row | "chapter 6 of 14" | "page 42 of 120" (PDF) or "42% read" (text), counting how far she has read; "Finished" once she reaches the end, even after going back (E1) | Same reason; progress never goes backwards (Plan decision 56) |
 | Letter text box | A plain box | The app's outlined text field, in the reading font | One text-field style across the app |
 | Link dialog | Each box's label above it | The label floats inside the outlined box, as in every form in the app | One text-field style across the app |

@@ -457,6 +457,22 @@ class FakeWidgetPublisher implements WidgetPublisher {
   }
 }
 
+/// Lets real I/O and isolates (`compute`, the EPUB parser) run until [done]
+/// shows, a step at a time, then settles. Gives up after [tries] steps.
+Future<void> settleUntil(
+  WidgetTester tester,
+  Finder done, {
+  int tries = 200,
+}) async {
+  for (var i = 0; i < tries && done.evaluate().isEmpty; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
+}
+
 final testToday = DateTime.utc(2026, 10, 5);
 
 /// Pumps the whole app on a fresh in-memory database, like a first install.

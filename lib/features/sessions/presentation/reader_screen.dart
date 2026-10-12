@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/app_database.dart';
@@ -15,6 +17,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/screen_rest/data/screen_use.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/domain/epub.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/features/sessions/presentation/sessions_screen.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -22,6 +25,10 @@ import 'package:pdfrx/pdfrx.dart';
 
 /// Text progress is stored as thousandths of the way through.
 const _textTotal = 1000;
+
+/// EPUB progress is finer (M9b): a novel is hundreds of thousands of
+/// pixels, and its place must land on the chapter she was in.
+const _epubTotal = 100000;
 
 /// Reading session (prototype "Reading session"): the book, a gentle 15-min
 /// timer, paper or night colours. Leaving logs the time read (from 1 min)
@@ -45,18 +52,30 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
 
   LibraryItem? _item;
   late String _path;
-  List<String>? _paragraphs;
+
+  /// A text or EPUB as paragraphs; headings are marked.
+  List<({String text, bool heading})>? _paragraphs;
+
+  /// EPUB only: each chapter's title and its heading's paragraph index.
+  List<({String title, int at})>? _chapters;
+  List<GlobalKey> _chapterKeys = const [];
+
+  /// The chapter she is in (EPUB).
+  int _chapter = 0;
   bool _failed = false;
   int? _page;
   int? _pages;
   bool? _night;
 
-  /// Thousandths of the way through a text, kept as she scrolls (the
+  /// How far through a text, in [_total]ths, kept as she scrolls (the
   /// scroll view is gone by the time dispose() runs).
   int? _textPosition;
 
   /// Seconds left of an eye rest (Screen Rest → Eye-rest nudge).
   int _eyeRestLeft = 0;
+
+  /// How finely a text's place is stored: [_epubTotal] or [_textTotal].
+  int get _total => _item?.kind == LibraryKind.epub ? _epubTotal : _textTotal;
 
   @override
   void onSecond() {
@@ -77,11 +96,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     _scroll.addListener(() {
       final max = _scroll.position.maxScrollExtent;
       if (max > 0) {
-        _textPosition = (_scroll.offset / max * _textTotal).round().clamp(
+        _textPosition = (_scroll.offset / max * _total).round().clamp(
           0,
-          _textTotal,
+          _total,
         );
       }
+      _trackChapter();
     });
     startClock(); // only time on screen counts as reading
     unawaited(_load());
@@ -93,17 +113,38 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
       if (item == null) throw StateError('missing');
       final file = await _library.file(item);
       await _library.markOpened(item.id);
-      List<String>? paragraphs;
+      List<({String text, bool heading})>? paragraphs;
+      List<({String title, int at})>? chapters;
       if (item.kind == LibraryKind.text) {
-        paragraphs = paragraphsOf(
-          utf8.decode(await file.readAsBytes(), allowMalformed: true),
-        );
+        paragraphs = [
+          for (final p in paragraphsOf(
+            utf8.decode(await file.readAsBytes(), allowMalformed: true),
+          ))
+            (
+              text: p.replaceFirst(RegExp(r'^#+\s*'), ''),
+              heading: p.startsWith('#'),
+            ),
+        ];
+      } else if (item.kind == LibraryKind.epub) {
+        // Off the UI isolate: a large book mustn't block a frame.
+        final book = await compute(parseEpub, await file.readAsBytes());
+        paragraphs = [];
+        chapters = [];
+        for (final c in book.chapters) {
+          final title = c.title.isEmpty ? item.title : c.title;
+          chapters.add((title: title, at: paragraphs.length));
+          paragraphs
+            ..add((text: title, heading: true))
+            ..addAll([for (final p in c.paragraphs) (text: p, heading: false)]);
+        }
       }
       if (!mounted) return;
       setState(() {
         _item = item;
         _path = file.path;
         _paragraphs = paragraphs;
+        _chapters = chapters;
+        _chapterKeys = [for (final _ in chapters ?? const []) GlobalKey()];
         _page = item.position + 1;
         _pages = item.total;
       });
@@ -111,13 +152,65 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!_scroll.hasClients) return;
           _scroll.jumpTo(
-            _scroll.position.maxScrollExtent * item.position / _textTotal,
+            _scroll.position.maxScrollExtent * item.position / _total,
           );
+          _trackChapter(); // a jump to 0 doesn't call the listener
         });
       }
     } on Object {
       if (mounted) setState(() => _failed = true);
     }
+  }
+
+  /// The scroll offset that puts chapter [i]'s heading at the top (past
+  /// the end for a short last chapter). Computed from the heading's render
+  /// box: the text view lays every paragraph out.
+  double? _chapterOffset(int i) {
+    final box = _chapterKeys[i].currentContext?.findRenderObject();
+    if (box == null || !_scroll.hasClients) return null;
+    return RenderAbstractViewport.of(box).getOffsetToReveal(box, 0).offset;
+  }
+
+  /// Names the chapter she is in: the last heading at or above the top, or
+  /// at the end of the book, the last heading on screen (a short last
+  /// chapter never reaches the top). A reopened place is rounded to one
+  /// [_total]th of the book, so it may sit up to half of that above its
+  /// heading.
+  void _trackChapter() {
+    if (_chapterKeys.isEmpty || !_scroll.hasClients) return;
+    final position = _scroll.position;
+    final slack = position.maxScrollExtent / (2 * _total) + 1;
+    final atEnd =
+        position.pixels > slack &&
+        position.pixels >= position.maxScrollExtent - slack;
+    final limit = atEnd
+        ? position.pixels + position.viewportDimension - 1
+        : position.pixels + slack;
+    var at = 0;
+    for (var i = 0; i < _chapterKeys.length; i++) {
+      final offset = _chapterOffset(i);
+      if (offset != null && offset <= limit) at = i;
+    }
+    if (at != _chapter) setState(() => _chapter = at);
+  }
+
+  Future<void> _contents() async {
+    final chapters = _chapters!;
+    final picked = await showModalBottomSheet<int>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheet) => _ContentsSheet(
+        bookTitle: _item!.title,
+        chapters: [for (final c in chapters) c.title],
+        current: _chapter,
+      ),
+    );
+    if (picked == null || !mounted) return;
+    if (_chapterOffset(picked) case final offset?) {
+      _scroll.jumpTo(offset.clamp(0, _scroll.position.maxScrollExtent));
+    }
+    setState(() => _chapter = picked);
   }
 
   @override
@@ -127,7 +220,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     if (item != null) {
       if (_textPosition case final position?) {
         unawaited(
-          _library.setProgress(item.id, position: position, total: _textTotal),
+          _library.setProgress(item.id, position: position, total: _total),
         );
       } else if (item.kind == LibraryKind.pdf && _page != null) {
         unawaited(
@@ -176,6 +269,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
         _page!,
         _pages!,
       ),
+      LibraryKind.epub when _chapters?.isNotEmpty ?? false =>
+        l10n.readerChapter(_chapter + 1, _chapters![_chapter].title),
       _ => null,
     };
     final small = theme.textTheme.bodySmall!.copyWith(
@@ -219,10 +314,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
                           ),
                         ),
                         if (subtitle != null)
-                          Text(subtitle, style: small.copyWith(fontSize: 12)),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: small.copyWith(fontSize: 12),
+                          ),
                       ],
                     ),
                   ),
+                  if (_chapters != null)
+                    IconButton(
+                      tooltip: l10n.readerContents,
+                      onPressed: _contents,
+                      icon: NmIcon(
+                        NavmaasIcon.list,
+                        size: 22,
+                        strokeWidth: 1.9,
+                        color: fg,
+                      ),
+                    ),
                   IconButton(
                     tooltip: night ? l10n.switchToPaper : l10n.switchToNight,
                     onPressed: () => setState(() => _night = !night),
@@ -413,22 +525,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     final item = _item;
     if (item == null) return const SizedBox.shrink();
     if (_paragraphs case final paragraphs?) {
+      final keys = {
+        for (final (i, c) in (_chapters ?? const []).indexed)
+          c.at: _chapterKeys[i],
+      };
       // ponytail: the whole text is laid out at once (exact progress, easy
-      // restore); fine for books of a few hundred KB.
+      // restore, chapter offsets); fine for books of a few hundred KB.
       return SingleChildScrollView(
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(28, 12, 28, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (final p in paragraphs)
+            for (final (i, p) in paragraphs.indexed)
               Padding(
+                key: keys[i],
                 padding: const EdgeInsets.only(bottom: 18),
-                child: p.startsWith('#')
+                child: p.heading
                     ? Semantics(
                         header: true,
                         child: Text(
-                          p.replaceFirst(RegExp(r'^#+\s*'), ''),
+                          p.text,
                           style: AppTheme.reading.copyWith(
                             fontSize: 24,
                             height: 32 / 24,
@@ -437,7 +554,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
                           ),
                         ),
                       )
-                    : Text(p, style: AppTheme.reading.copyWith(color: fg)),
+                    : Text(p.text, style: AppTheme.reading.copyWith(color: fg)),
               ),
           ],
         ),
@@ -547,6 +664,130 @@ class _EyeRest extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Contents (M9b): the book's chapters; tapping one returns its index.
+class _ContentsSheet extends StatelessWidget {
+  const new({
+    required this.bookTitle,
+    required this.chapters,
+    required this.current,
+  });
+
+  final String bookTitle;
+  final List<String> chapters;
+  final int current;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l10n.readerContents,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 2, 24, 10),
+              child: Text(
+                '$bookTitle · ${l10n.contentsChapters(chapters.length)}',
+                style: theme.textTheme.bodySmall!.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: scheme.outline,
+                ),
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                // Opens with the chapter she is in near the top.
+                controller: ScrollController(
+                  initialScrollOffset: current * 52.0,
+                ),
+                itemCount: chapters.length,
+                itemBuilder: (context, i) {
+                  final selected = i == current;
+                  return Semantics(
+                    selected: selected,
+                    button: true,
+                    child: InkWell(
+                      onTap: () => Navigator.pop(context, i),
+                      child: Ink(
+                        color: selected ? scheme.primaryContainer : null,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 52),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 6,
+                            ),
+                            child: Row(
+                              spacing: 14,
+                              children: [
+                                SizedBox(
+                                  width: 24,
+                                  child: Text(
+                                    '${i + 1}',
+                                    style: theme.textTheme.bodyMedium!.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      color: scheme.outline,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    chapters[i],
+                                    style: AppTheme.reading.copyWith(
+                                      fontSize: 16,
+                                      height: 22 / 16,
+                                      fontWeight: selected
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                                if (selected)
+                                  Text(
+                                    l10n.contentsReading,
+                                    style: theme.textTheme.labelSmall!.copyWith(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: scheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

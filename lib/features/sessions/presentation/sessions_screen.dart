@@ -378,6 +378,14 @@ class _LibraryRow extends ConsumerWidget {
           l10n.libraryPercent(read * 100 ~/ total),
       ],
       LibraryKind.text => [l10n.libraryText],
+      LibraryKind.epub when total != null => [
+        l10n.libraryEpub,
+        if (finished)
+          l10n.libraryFinished
+        else
+          l10n.libraryPercent(read * 100 ~/ total),
+      ],
+      LibraryKind.epub => [l10n.libraryEpub],
       LibraryKind.audio => [
         l10n.libraryAudio,
         if (item.durationSec case final s?) l10n.minutesShort((s / 60).ceil()),

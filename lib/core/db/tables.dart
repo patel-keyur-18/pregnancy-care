@@ -239,7 +239,7 @@ class VitalReadings extends Table with BaseColumns {
   TextColumn get note => text().nullable()();
 }
 
-enum LibraryKind { pdf, text, audio }
+enum LibraryKind { pdf, text, audio, epub }
 
 /// A book or audio file the owner imported (M4a). The file is a copy inside
 /// the private `db/library/` folder, which OS backups skip. Not tied to a

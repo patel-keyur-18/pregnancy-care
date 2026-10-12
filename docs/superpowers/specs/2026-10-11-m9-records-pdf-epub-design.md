@@ -30,7 +30,7 @@
 | # | PR | Branch | Version | Schema |
 |---|---|---|---|---|
 | 1 | M9a `feat: records vault and visit summary PDF` | `feat/m9a-records-visit-summary` | 1.7.0 | v13 |
-| 2 | M9b `feat: EPUB books` | `feat/m9b-epub` (from `main` after M9a merges) | 1.8.0 | none |
+| 2 | M9b `feat: EPUB books` | `feat/m9b-epub` (from `main` after M9a merges) | 1.8.0 | v14 (no table change) |
 
 **Packages** (owner approved 2026-10-11): `pdf` is new. `archive` and `xml` are already in the lockfile through `image` / `pdfrx` and become direct dependencies. All three are offline and pure Dart. They are recorded in ARCHITECTURE §3 and one ADR.
 
@@ -160,7 +160,7 @@
 
 ### 5.1 Import
 
-- `libraryExtensions` gains `'epub': LibraryKind.epub`. `LibraryKind` is stored as text, so there's no schema change. An older app reading a backup with an epub row is the usual "newer backup" case.
+- `libraryExtensions` gains `'epub': LibraryKind.epub`. `LibraryKind` is stored as text, so no table changes; but the schema goes to v14 so 1.7.0 refuses a 1.8.0 backup, because its restore checks only `schemaVersion` and drift can't read an unknown kind (owner approved 2026-10-12).
 - **At import**, a quick check (unzip `META-INF/container.xml` and the OPF):
   - not a valid EPUB: "Couldn't read this book";
   - `META-INF/encryption.xml` lists encrypted content (DRM): "This book is locked (DRM) and can't be opened here".
@@ -183,8 +183,8 @@
 
 - The EPUB path reuses the text reader:
   - `paragraphs` are the chapters joined, each chapter's title as a heading paragraph (Literata, larger, `Semantics(header: true)`);
-  - position in thousandths, Paper / Night, eye rest and session logging as for text.
-- **Contents** button (an icon button with a tooltip) in the top bar for EPUBs only. It opens a sheet listing the chapters; tapping one scrolls to that chapter's offset. The offset is computed, not looked up by context (CLAUDE.md: lazy lists).
+  - position in hundred-thousandths (thousandths for text; a novel needs the finer place), Paper / Night, eye rest and session logging as for text.
+- **Contents** button (an icon button with a tooltip) in the top bar for EPUBs only. It opens a sheet listing the chapters; tapping one scrolls to that chapter's offset. The offset comes from the heading's render box (`getOffsetToReveal`); the text view builds every paragraph, so the heading always exists (CLAUDE.md's lazy-list rule doesn't apply).
 - Parsing happens on open, in `compute()` so a large book doesn't block the frame.
 - A parse failure shows the existing "couldn't open" state.
 

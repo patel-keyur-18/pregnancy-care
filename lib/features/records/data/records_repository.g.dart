@@ -48,7 +48,7 @@ final class PickImageProvider
   }
 }
 
-String _$pickImageHash() => r'309d76777bc33b2ba33003642e832a90557f6c40';
+String _$pickImageHash() => r'778213cfec15ce194e443a95dcaa5d35606c6ad4';
 
 /// Where a record or the visit summary waits, plain, for the share sheet.
 
