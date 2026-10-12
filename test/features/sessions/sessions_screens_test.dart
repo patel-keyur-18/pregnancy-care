@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -567,5 +568,132 @@ void main() {
       () => SettingsRepository(db).watch(SettingKeys.nightReading).first,
     );
     expect(value, 'false');
+  });
+
+  /// Three chapters long enough to scroll; the last one short.
+  final longBook = buildEpub(
+    chapters: [
+      for (final (title, n) in [
+        ('Morning light', 40),
+        ('The river path', 40),
+        ('Home', 2),
+      ])
+        (
+          title,
+          '<h1>$title</h1>'
+              '${List.generate(n, (i) => '<p>$title, line $i.</p>').join()}',
+        ),
+    ],
+  );
+
+  Future<void> Function(AppDatabase) seedBook(Uint8List bytes) => (db) async {
+    await _pregnancy(db);
+    await LibraryRepository(
+      db,
+      directory: () async => library,
+    ).import('book.epub', Stream.value(bytes));
+  };
+
+  Future<void> openBook(WidgetTester tester) async {
+    await _tab(tester, 'Sessions');
+    await tester.tap(find.text('Evening stories').last);
+    await tester.pumpAndSettle();
+    await settleUntil(tester, find.byTooltip('Contents'));
+  }
+
+  testWidgets('EPUB: chapters, Contents jumps, and the place is kept', (
+    tester,
+  ) async {
+    final db = await pumpApp(
+      tester,
+      library: library,
+      seed: seedBook(longBook),
+    );
+    await openBook(tester);
+    expect(find.text('Chapter 1 · Morning light'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Morning light'),
+      findsWidgets,
+      reason: 'chapter titles are headings',
+    );
+
+    await tester.tap(find.byTooltip('Contents'));
+    await tester.pumpAndSettle();
+    final sheet = find.byType(BottomSheet);
+    expect(
+      find.descendant(of: sheet, matching: find.text('Contents')),
+      findsOneWidget,
+    );
+    expect(find.text('Evening stories · 3 chapters'), findsOneWidget);
+    expect(find.text('Reading'), findsOneWidget);
+    await tester.tap(
+      find.descendant(of: sheet, matching: find.text('The river path')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chapter 2 · The river path'), findsOneWidget);
+    // The text view builds every paragraph, so check the heading is on screen.
+    final heading = find.text('The river path').first;
+    expect(
+      tester.getTopLeft(heading).dy,
+      lessThan(tester.getSize(find.byType(Scaffold).last).height / 2),
+    );
+
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
+    final item = (await tester.runAsync(
+      () => db.select(db.libraryItems).getSingle(),
+    ))!;
+    expect((item.kind, item.total), (LibraryKind.epub, 1000));
+    expect(find.textContaining('% read'), findsOneWidget);
+
+    await openBook(tester);
+    expect(find.text('Chapter 2 · The river path'), findsOneWidget);
+  });
+
+  testWidgets('EPUB: Contents jumps to a short last chapter', (tester) async {
+    await pumpApp(tester, library: library, seed: seedBook(longBook));
+    await openBook(tester);
+    await tester.tap(find.byTooltip('Contents'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text('Home'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chapter 3 · Home'), findsOneWidget);
+    await tester.tap(find.byTooltip('Contents'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSemantics(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('Home'),
+        ),
+      ),
+      isSemantics(isSelected: true),
+    );
+  });
+
+  testWidgets('EPUB: a book that cannot be read says so', (tester) async {
+    await pumpApp(
+      tester,
+      library: library,
+      seed: (db) async {
+        await seedBook(longBook)(db);
+        // The library file goes bad after import.
+        for (final f in library.listSync().whereType<File>()) {
+          f.writeAsStringSync('not a book');
+        }
+      },
+    );
+    await _tab(tester, 'Sessions');
+    await tester.tap(find.text('Evening stories').last);
+    await tester.pumpAndSettle();
+    await settleUntil(tester, find.text("This file couldn't be opened."));
+    expect(find.text("This file couldn't be opened."), findsOneWidget);
+    expect(find.byTooltip('Contents'), findsNothing);
   });
 }
