@@ -190,4 +190,30 @@ void main() {
       _problem(EpubProblem.unreadable),
     );
   });
+
+  test('text in divs, pre and lists of terms is kept', () {
+    final book = parseEpub(
+      buildEpub(
+        chapters: [
+          (
+            'One',
+            '<p>Prose.</p><div class="stanza">Line one<br/>line two</div>',
+          ),
+          ('Two', '<h2>Two</h2><div>Long text.</div><div>More.</div>'),
+          (
+            'Three',
+            '<pre>Kept as is</pre><dl><dt>Term</dt><dd>Means</dd></dl>',
+          ),
+        ],
+      ),
+    );
+    expect(
+      [for (final c in book.chapters) (c.title, c.paragraphs.join(' | '))],
+      [
+        ('One', 'Prose. | Line one\nline two'),
+        ('Two', 'Long text. | More.'),
+        ('Three', 'Kept as is | Term | Means'),
+      ],
+    );
+  });
 }

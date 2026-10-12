@@ -86,6 +86,13 @@ void main() {
     expect(find.text('Add a book'), findsOneWidget);
     expect(find.text('Add audio'), findsOneWidget);
     expect(find.text("Write today's letter"), findsOneWidget);
+    expect(
+      find.text(
+        'Add books (PDF, EPUB or text) and audio from your phone. '
+        'They stay on this phone.',
+      ),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
@@ -359,7 +366,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Audio (MP3, M4A, AAC or WAV)'), findsOneWidget);
     expect(find.text('A link'), findsOneWidget);
-    expect(find.text('A book (PDF or text)'), findsNothing);
+    expect(find.text('A book (PDF, EPUB or text)'), findsNothing);
   });
 
   testWidgets('audio: Replace file keeps the title, swaps the file', (
@@ -644,7 +651,7 @@ void main() {
     final item = (await tester.runAsync(
       () => db.select(db.libraryItems).getSingle(),
     ))!;
-    expect((item.kind, item.total), (LibraryKind.epub, 1000));
+    expect((item.kind, item.total), (LibraryKind.epub, 100000));
     expect(find.textContaining('% read'), findsOneWidget);
 
     await openBook(tester);
@@ -682,6 +689,48 @@ void main() {
   ) async {
     await pumpApp(tester, library: library, seed: seedBook(buildEpub()));
     await openBook(tester);
+    expect(find.text('Chapter 1 · Morning light'), findsOneWidget);
+  });
+
+  testWidgets('EPUB: a heading below the top is not yet its chapter', (
+    tester,
+  ) async {
+    // Long enough that a thousandth of the book is many pixels.
+    String line(String title, int i) => '<p>$title, line $i.</p>';
+    final novel = buildEpub(
+      chapters: [
+        for (final title in ['Morning light', 'The river path', 'Home'])
+          (
+            title,
+            '<h1>$title</h1>${[for (var i = 0; i < 400; i++) line(title, i)].join()}',
+          ),
+      ],
+    );
+    await pumpApp(tester, library: library, seed: seedBook(novel));
+    await openBook(tester);
+    await tester.tap(find.byTooltip('Contents'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.text('The river path'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Chapter 2 · The river path'), findsOneWidget);
+    final position = tester
+        .state<ScrollableState>(
+          find
+              .descendant(
+                of: find.byType(SingleChildScrollView).last,
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position;
+    expect(position.maxScrollExtent, greaterThan(60000));
+    position.jumpTo(position.pixels - 60); // still in chapter 1
+    await tester.pump();
     expect(find.text('Chapter 1 · Morning light'), findsOneWidget);
   });
 

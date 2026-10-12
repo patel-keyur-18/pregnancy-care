@@ -26,6 +26,10 @@ import 'package:pdfrx/pdfrx.dart';
 /// Text progress is stored as thousandths of the way through.
 const _textTotal = 1000;
 
+/// EPUB progress is finer (M9b): a novel is hundreds of thousands of
+/// pixels, and its place must land on the chapter she was in.
+const _epubTotal = 100000;
+
 /// Reading session (prototype "Reading session"): the book, a gentle 15-min
 /// timer, paper or night colours. Leaving logs the time read (from 1 min)
 /// and remembers the place.
@@ -63,12 +67,15 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
   int? _pages;
   bool? _night;
 
-  /// Thousandths of the way through a text, kept as she scrolls (the
+  /// How far through a text, in [_total]ths, kept as she scrolls (the
   /// scroll view is gone by the time dispose() runs).
   int? _textPosition;
 
   /// Seconds left of an eye rest (Screen Rest → Eye-rest nudge).
   int _eyeRestLeft = 0;
+
+  /// How finely a text's place is stored: [_epubTotal] or [_textTotal].
+  int get _total => _item?.kind == LibraryKind.epub ? _epubTotal : _textTotal;
 
   @override
   void onSecond() {
@@ -89,9 +96,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     _scroll.addListener(() {
       final max = _scroll.position.maxScrollExtent;
       if (max > 0) {
-        _textPosition = (_scroll.offset / max * _textTotal).round().clamp(
+        _textPosition = (_scroll.offset / max * _total).round().clamp(
           0,
-          _textTotal,
+          _total,
         );
       }
       _trackChapter();
@@ -145,7 +152,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!_scroll.hasClients) return;
           _scroll.jumpTo(
-            _scroll.position.maxScrollExtent * item.position / _textTotal,
+            _scroll.position.maxScrollExtent * item.position / _total,
           );
           _trackChapter(); // a jump to 0 doesn't call the listener
         });
@@ -166,12 +173,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
 
   /// Names the chapter she is in: the last heading at or above the top, or
   /// at the end of the book, the last heading on screen (a short last
-  /// chapter never reaches the top). Places are kept in thousandths, so a
-  /// reopened place may sit up to one thousandth above its heading.
+  /// chapter never reaches the top). A reopened place is rounded to one
+  /// [_total]th of the book, so it may sit up to half of that above its
+  /// heading.
   void _trackChapter() {
     if (_chapterKeys.isEmpty || !_scroll.hasClients) return;
     final position = _scroll.position;
-    final slack = position.maxScrollExtent / _textTotal + 1;
+    final slack = position.maxScrollExtent / (2 * _total) + 1;
     final atEnd =
         position.pixels > slack &&
         position.pixels >= position.maxScrollExtent - slack;
@@ -212,7 +220,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     if (item != null) {
       if (_textPosition case final position?) {
         unawaited(
-          _library.setProgress(item.id, position: position, total: _textTotal),
+          _library.setProgress(item.id, position: position, total: _total),
         );
       } else if (item.kind == LibraryKind.pdf && _page != null) {
         unawaited(

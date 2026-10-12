@@ -402,7 +402,7 @@
   "addAudio": "Add audio",
   "yourLibrary": "Your library",
   "addToLibrary": "Add to your library",
-  "libraryEmpty": "Add books (PDF or text) and audio from your phone. They stay on this phone.",
+  "libraryEmpty": "Add books (PDF, EPUB or text) and audio from your phone. They stay on this phone.",
   "libraryPdf": "PDF you added",
   "libraryText": "Text you added",
   "libraryEpub": "EPUB you added",

@@ -183,8 +183,8 @@
 
 - The EPUB path reuses the text reader:
   - `paragraphs` are the chapters joined, each chapter's title as a heading paragraph (Literata, larger, `Semantics(header: true)`);
-  - position in thousandths, Paper / Night, eye rest and session logging as for text.
-- **Contents** button (an icon button with a tooltip) in the top bar for EPUBs only. It opens a sheet listing the chapters; tapping one scrolls to that chapter's offset. The offset is computed, not looked up by context (CLAUDE.md: lazy lists).
+  - position in hundred-thousandths (thousandths for text; a novel needs the finer place), Paper / Night, eye rest and session logging as for text.
+- **Contents** button (an icon button with a tooltip) in the top bar for EPUBs only. It opens a sheet listing the chapters; tapping one scrolls to that chapter's offset. The offset comes from the heading's render box (`getOffsetToReveal`); the text view builds every paragraph, so the heading always exists (CLAUDE.md's lazy-list rule doesn't apply).
 - Parsing happens on open, in `compute()` so a large book doesn't block the frame.
 - A parse failure shows the existing "couldn't open" state.
 

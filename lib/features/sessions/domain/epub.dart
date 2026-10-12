@@ -36,7 +36,14 @@ const _skipped = {
   'head', 'img', 'svg', 'table', 'script', 'style', 'math', 'audio', //
   'video', 'object', 'iframe',
 };
-const _blocks = {'p', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'};
+
+/// Elements whose text is a paragraph when no block sits inside them;
+/// otherwise they're walked. Containers (`div`, `section`…) are here so
+/// text written straight into them isn't lost.
+const _blocks = {
+  'p', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', //
+  'dt', 'dd', 'figcaption', 'div', 'section', 'article', 'aside',
+};
 const _headings = {'h1', 'h2', 'h3'};
 const _html = XmlDefaultEntityMapping.html5();
 
