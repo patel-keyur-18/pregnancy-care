@@ -677,6 +677,14 @@ void main() {
     );
   });
 
+  testWidgets('EPUB: a book shorter than the screen opens on chapter 1', (
+    tester,
+  ) async {
+    await pumpApp(tester, library: library, seed: seedBook(buildEpub()));
+    await openBook(tester);
+    expect(find.text('Chapter 1 · Morning light'), findsOneWidget);
+  });
+
   testWidgets('EPUB: a book that cannot be read says so', (tester) async {
     await pumpApp(
       tester,

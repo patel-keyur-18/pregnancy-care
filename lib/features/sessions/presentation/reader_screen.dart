@@ -155,29 +155,33 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
     }
   }
 
-  /// The scroll offset that puts chapter [i]'s heading at the top, capped at
-  /// the end (a short last chapter can't reach the top). Computed from the
-  /// heading's render box: the text view lays every paragraph out.
+  /// The scroll offset that puts chapter [i]'s heading at the top (past
+  /// the end for a short last chapter). Computed from the heading's render
+  /// box: the text view lays every paragraph out.
   double? _chapterOffset(int i) {
     final box = _chapterKeys[i].currentContext?.findRenderObject();
     if (box == null || !_scroll.hasClients) return null;
-    final offset = RenderAbstractViewport.of(box)
-        .getOffsetToReveal(box, 0)
-        .offset;
-    return offset.clamp(0, _scroll.position.maxScrollExtent);
+    return RenderAbstractViewport.of(box).getOffsetToReveal(box, 0).offset;
   }
 
-  /// Names the chapter she is in: the last heading at or above the top.
-  /// Places are kept in thousandths, so a reopened place may sit up to one
-  /// thousandth above the heading it was on.
+  /// Names the chapter she is in: the last heading at or above the top, or
+  /// at the end of the book, the last heading on screen (a short last
+  /// chapter never reaches the top). Places are kept in thousandths, so a
+  /// reopened place may sit up to one thousandth above its heading.
   void _trackChapter() {
     if (_chapterKeys.isEmpty || !_scroll.hasClients) return;
-    final top =
-        _scroll.offset + _scroll.position.maxScrollExtent / _textTotal + 1;
+    final position = _scroll.position;
+    final slack = position.maxScrollExtent / _textTotal + 1;
+    final atEnd =
+        position.pixels > slack &&
+        position.pixels >= position.maxScrollExtent - slack;
+    final limit = atEnd
+        ? position.pixels + position.viewportDimension - 1
+        : position.pixels + slack;
     var at = 0;
     for (var i = 0; i < _chapterKeys.length; i++) {
       final offset = _chapterOffset(i);
-      if (offset != null && offset <= top) at = i;
+      if (offset != null && offset <= limit) at = i;
     }
     if (at != _chapter) setState(() => _chapter = at);
   }
@@ -195,7 +199,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> with SessionClock {
       ),
     );
     if (picked == null || !mounted) return;
-    if (_chapterOffset(picked) case final offset?) _scroll.jumpTo(offset);
+    if (_chapterOffset(picked) case final offset?) {
+      _scroll.jumpTo(offset.clamp(0, _scroll.position.maxScrollExtent));
+    }
     setState(() => _chapter = picked);
   }
 
