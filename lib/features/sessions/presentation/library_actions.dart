@@ -11,6 +11,7 @@ import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
+import 'package:navmaas/features/sessions/domain/epub.dart';
 import 'package:navmaas/features/sessions/domain/media_link.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -69,9 +70,24 @@ Future<void> addToLibrary(
       if ((kind == LibraryKind.audio) == audio) ext,
   ]);
   if (picked == null) return;
-  final item = await ref
-      .read(libraryRepositoryProvider)
-      .import(picked.name, picked.bytes);
+  final LibraryItem? item;
+  try {
+    item = await ref
+        .read(libraryRepositoryProvider)
+        .import(picked.name, picked.bytes);
+  } on EpubException catch (e) {
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(switch (e.problem) {
+          EpubProblem.unreadable => l10n.epubUnreadable,
+          EpubProblem.locked => l10n.epubLocked,
+        }),
+      ),
+    );
+    return;
+  }
   if (item == null && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context).importUnsupported)),

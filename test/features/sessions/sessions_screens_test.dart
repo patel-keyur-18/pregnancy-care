@@ -11,6 +11,7 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 
 import '../../helpers.dart';
+import 'epub_fixture.dart';
 
 const _story = '''
 # The little lamp
@@ -87,13 +88,58 @@ void main() {
 
     await tester.tap(find.text('Add'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('A book (PDF or text)'));
+    await tester.tap(find.text('A book (PDF, EPUB or text)'));
     await tester.pumpAndSettle();
     await _settleIo(tester);
-    expect(asked.single, ['pdf', 'txt', 'md']);
+    expect(asked.single, ['pdf', 'epub', 'txt', 'md']);
     expect(find.text('evening stories'), findsOneWidget);
     expect(find.text('Text you added'), findsOneWidget);
     expect(find.text('15 min · evening stories'), findsOneWidget);
+  });
+
+  testWidgets('Add: an EPUB comes in with its title; a locked one does not', (
+    tester,
+  ) async {
+    var file = (name: 'pg1342.epub', bytes: Stream.value(buildEpub()));
+    await pumpApp(
+      tester,
+      library: library,
+      seed: _seed(library),
+      pickFile: (_) async => file,
+    );
+    await _tab(tester, 'Sessions');
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('A book (PDF, EPUB or text)'));
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
+    expect(find.text('Evening stories'), findsWidgets);
+    expect(find.text('EPUB you added'), findsOneWidget);
+
+    file = (
+      name: 'locked.epub',
+      bytes: Stream.value(
+        buildEpub(
+          title: 'Locked book',
+          files: {
+            'META-INF/encryption.xml':
+                '<encryption><EncryptedData><EncryptionMethod '
+                'Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/> '
+                '</EncryptedData></encryption>',
+          },
+        ),
+      ),
+    );
+    await tester.tap(find.text('Add'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('A book (PDF, EPUB or text)'));
+    await tester.pumpAndSettle();
+    await _settleIo(tester);
+    expect(
+      find.text("This book is locked (DRM) and can't be opened here."),
+      findsOneWidget,
+    );
+    expect(find.text('Locked book'), findsNothing);
   });
 
   testWidgets('a 15-minute reading session is logged end to end', (

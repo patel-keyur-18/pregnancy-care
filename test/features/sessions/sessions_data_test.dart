@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' hide isNotNull, isNull;
@@ -9,7 +10,10 @@ import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
+import 'package:navmaas/features/sessions/domain/epub.dart';
 import 'package:path/path.dart' as p;
+
+import 'epub_fixture.dart';
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -41,7 +45,7 @@ void main() {
     expect(copy.readAsStringSync(), '%PDF-1.4');
     expect(p.isWithin(library.path, copy.path), isTrue);
 
-    expect(await repo.import('x.epub', const Stream.empty()), isNull);
+    expect(await repo.import('x.docx', const Stream.empty()), isNull);
 
     await repo.setProgress(item.id, position: 41, total: 120);
     // Going back keeps how far she has read.
@@ -106,5 +110,44 @@ void main() {
     expect(letters.single.body, 'Dear little one, hello.');
     await repo.remove(letters.single.id);
     expect(await repo.watch(pregnancyId).first, isEmpty);
+  });
+
+  test('an EPUB imports with its own title', () async {
+    final library = Directory(p.join(tmp.path, 'library'));
+    final repo = LibraryRepository(db, directory: () async => library);
+    final item = await repo.import(
+      'pg1342-images-3.epub',
+      Stream.value(buildEpub()),
+    );
+    expect((item!.kind, item.title), (LibraryKind.epub, 'Evening stories'));
+    expect((await repo.file(item)).readAsBytesSync(), buildEpub());
+  });
+
+  test('a locked or broken EPUB copies nothing', () async {
+    final library = Directory(p.join(tmp.path, 'library'));
+    final repo = LibraryRepository(db, directory: () async => library);
+    final locked = buildEpub(
+      files: {
+        'META-INF/encryption.xml':
+            '<encryption><EncryptedData><EncryptionMethod '
+            'Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"/> '
+            '</EncryptedData></encryption>',
+      },
+    );
+    await expectLater(
+      repo.import('locked.epub', Stream.value(locked)),
+      throwsA(
+        isA<EpubException>().having((e) => e.problem, 'p', EpubProblem.locked),
+      ),
+    );
+    await expectLater(
+      repo.import('broken.epub', Stream.value(utf8.encode('nope'))),
+      throwsA(isA<EpubException>()),
+    );
+    expect(await db.select(db.libraryItems).get(), isEmpty);
+    expect(
+      library.existsSync() ? library.listSync() : const <FileSystemEntity>[],
+      isEmpty,
+    );
   });
 }

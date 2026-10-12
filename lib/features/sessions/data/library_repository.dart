@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/tables.dart';
 import 'package:navmaas/core/utils/clock.dart';
+import 'package:navmaas/features/sessions/domain/epub.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,6 +16,7 @@ part 'library_repository.g.dart';
 /// File types the library accepts, by extension (ARCHITECTURE §9).
 const Map<String, LibraryKind> libraryExtensions = {
   'pdf': LibraryKind.pdf,
+  'epub': LibraryKind.epub,
   'txt': LibraryKind.text,
   'md': LibraryKind.text,
   'mp3': LibraryKind.audio,
@@ -64,13 +67,26 @@ class LibraryRepository {
     _db.libraryItems,
   )..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  /// Copies the file called [name] into the library, streaming [bytes] (the
+  /// Copies the file called [name] into the library, streaming [source] (the
   /// picker may hand over a content URI, not a path). Returns null for a
-  /// file type the library doesn't read.
-  Future<LibraryItem?> import(String name, Stream<List<int>> bytes) async {
+  /// file type the library doesn't read. An EPUB is checked first (M9b):
+  /// [EpubException] when it isn't readable or is locked, and nothing is
+  /// copied; it takes the book's own title.
+  Future<LibraryItem?> import(String name, Stream<List<int>> source) async {
     final ext = p.extension(name).replaceFirst('.', '').toLowerCase();
     final kind = libraryExtensions[ext];
     if (kind == null) return null;
+    var bytes = source;
+    String? bookTitle;
+    if (kind == LibraryKind.epub) {
+      // ponytail: the whole book in memory for the check; EPUBs are a few MB.
+      final all = (await bytes.fold(
+        BytesBuilder(copy: false),
+        (b, chunk) => b..add(chunk),
+      )).takeBytes();
+      bookTitle = inspectEpub(all);
+      bytes = Stream.value(all);
+    }
     final dir = await directory();
     await dir.create(recursive: true);
     final id = newId();
@@ -87,7 +103,7 @@ class LibraryRepository {
           LibraryItemsCompanion.insert(
             id: Value(id),
             kind: kind,
-            title: titleFromFileName(name),
+            title: bookTitle ?? titleFromFileName(name),
             fileName: fileName,
           ),
         );

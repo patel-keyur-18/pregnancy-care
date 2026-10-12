@@ -81,5 +81,6 @@ Uint8List buildEpub({
   for (final MapEntry(key: path, value: text) in all.entries) {
     archive.addFile(ArchiveFile.bytes(path, utf8.encode(text)));
   }
-  return ZipEncoder().encodeBytes(archive);
+  // A fixed time, so the same book is the same bytes.
+  return ZipEncoder().encodeBytes(archive, modified: DateTime.utc(2026));
 }
