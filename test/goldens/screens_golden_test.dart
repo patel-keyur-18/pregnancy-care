@@ -6,6 +6,7 @@
 //   macOS:  flutter test test/goldens --update-goldens
 //   Linux:  push to the PR; the failing CI run uploads `linux-goldens`,
 //           download it into linux/.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -33,6 +34,7 @@ import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/today/mood_scene_card.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
+import '../features/sessions/epub_fixture.dart';
 import '../helpers.dart';
 
 final Directory _library = Directory.systemTemp.createTempSync('navmaas_gold');
@@ -326,6 +328,39 @@ void main() {
             matchesGoldenFile('$_dir/${file}_$name.png'),
           );
         }
+      });
+
+      // M9b: an EPUB in the reader, then its Contents sheet.
+      testWidgets('reader epub $name', skip: _dir == null, (tester) async {
+        late String id;
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            id = (await LibraryRepository(
+              db,
+              directory: () async => _library,
+            ).import('book.epub', Stream.value(buildEpub())))!.id;
+          },
+          library: _library,
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        unawaited(
+          GoRouter.of(tester.element(find.byType(NavmaasTabBar)))
+              .push('/read', extra: id),
+        );
+        await settleUntil(tester, find.byTooltip('Contents'));
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/reader_epub_$name.png'),
+        );
+        await tester.tap(find.byTooltip('Contents'));
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/reader_contents_$name.png'),
+        );
       });
 
       // M9a: Records, one record, and the visit summary.

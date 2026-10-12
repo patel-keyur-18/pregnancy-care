@@ -27,6 +27,7 @@ import 'package:navmaas/features/sessions/data/media_link_repository.dart';
 import 'package:navmaas/features/third_trimester/data/third_trimester_repository.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
+import 'features/sessions/epub_fixture.dart';
 import 'helpers.dart';
 
 /// Small phone, so 2.0× text has the least room.
@@ -54,6 +55,11 @@ Future<void> _seed(AppDatabase db) async {
   await PregnancyRepository(db)
       .saveDating(method: .lmp, date: DateTime.utc(2026, 4, 15));
   final library = LibraryRepository(db, directory: () async => _library);
+  // An EPUB (M9b), its own title so it doesn't clash with the text book.
+  await library.import(
+    'moonlit.epub',
+    Stream.value(buildEpub(title: 'Moonlit tales')),
+  );
   await library.import(
     'evening_stories.txt',
     Stream.value(utf8.encode('# The little lamp\n\nIn a quiet village.')),
@@ -435,6 +441,24 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'evening stories');
       await _settleIo(t);
       await t.pump(const Duration(minutes: 20));
+    },
+  ),
+  'reader (EPUB)': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Moonlit tales');
+      await settleUntil(t, find.byTooltip('Contents'));
+    },
+  ),
+  'contents': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Moonlit tales');
+      await settleUntil(t, find.byTooltip('Contents'));
+      await t.tap(find.byTooltip('Contents'));
+      await t.pumpAndSettle();
     },
   ),
   'delete all data': (
