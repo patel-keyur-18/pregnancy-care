@@ -67,7 +67,7 @@ class AppDatabase extends _$AppDatabase {
   );
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -152,6 +152,9 @@ class AppDatabase extends _$AppDatabase {
           WHERE appointment_id IS NOT NULL
         ''');
       },
+      // v14 (M9b): no table change. `library_item.kind` may now be `epub`,
+      // which 1.7.0 can't read, so its restore refuses a 1.8.0 backup.
+      from13To14: (m, schema) async {},
     ),
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

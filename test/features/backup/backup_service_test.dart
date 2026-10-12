@@ -184,7 +184,7 @@ void main() {
       (BackupKind.backup, made.sizeBytes, true),
     );
     final header = await b.service.inspect(made.file);
-    expect((header.appVersion, header.schemaVersion), (appVersion, 13));
+    expect((header.appVersion, header.schemaVersion), (appVersion, 14));
 
     final restored = await b.service.restore(made.file, 'correct horse');
     expect((restored.entries, restored.photos), (made.entries, made.photos));
