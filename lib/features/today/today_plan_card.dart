@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
+import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/theme/navmaas_icons.dart';
 import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/core/utils/date_only.dart';
@@ -22,7 +24,8 @@ import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// "Today's gentle plan" (prototype Today): today's supplement doses, a
 /// reading session (ticked by a session in the reader, or by hand for a
-/// printed book) and a gentle walk.
+/// printed book) and a gentle walk (ticked by a timed walk, by hand, or by
+/// today's steps reaching the step goal; E5).
 class TodayPlanCard extends ConsumerWidget {
   const new({super.key});
 
@@ -52,7 +55,18 @@ class TodayPlanCard extends ConsumerWidget {
         .where((s) => s.type == SessionType.reading && s.libraryItemId == null)
         .toList();
     final pregnancyId = ref.watch(activePregnancyProvider).value?.id;
-    final walkedToday = todaySessions.any((s) => s.type == SessionType.walk);
+    // Walk ticked by hand (E5): a walk tagged [walkByHandKey]. Steps at the
+    // goal tick it too, logging nothing.
+    final walkByHand = todaySessions
+        .where(
+          (s) => s.type == SessionType.walk && s.routineKey == walkByHandKey,
+        )
+        .toList();
+    final steps = ref.watch(todayStepsProvider).value;
+    final stepGoal = ref.watch(stepGoalProvider).value ?? defaultStepGoal;
+    final walkedToday =
+        todaySessions.any((s) => s.type == SessionType.walk) ||
+        (steps != null && steps >= stepGoal);
 
     final rows = <Widget>[
       for (final slot in slots)
@@ -122,6 +136,27 @@ class TodayPlanCard extends ConsumerWidget {
         subtitle: l10n.walkEasy(walkGoalMinutes),
         done: walkedToday,
         onOpen: () => context.push('/walk'),
+        // Timed or by steps, it stays ticked; by hand, it can be unticked.
+        onToggle: pregnancyId == null || (walkedToday && walkByHand.isEmpty)
+            ? null
+            : () {
+                final sessions = ref.read(sessionRepositoryProvider);
+                if (walkByHand.isEmpty) {
+                  unawaited(
+                    sessions.log(
+                      pregnancyId: pregnancyId,
+                      type: SessionType.walk,
+                      startedAt: clockNow(),
+                      durationSec: walkGoalMinutes * 60,
+                      routineKey: walkByHandKey,
+                    ),
+                  );
+                } else {
+                  for (final s in walkByHand) {
+                    unawaited(sessions.remove(s.id));
+                  }
+                }
+              },
       ),
     ];
     final done = [
@@ -168,9 +203,9 @@ class TodayPlanCard extends ConsumerWidget {
   }
 }
 
-/// One plan item. [onToggle] ticks it by hand (supplements, reading); without
-/// it the circle only shows whether it's done (the walk, or reading done in
-/// the reader).
+/// One plan item. [onToggle] ticks it by hand (supplements, reading, the
+/// walk); without it the circle only shows whether it's done (reading done in
+/// the reader, a timed walk or steps at the goal).
 class _PlanRow extends StatelessWidget {
   const new({
     required this.tile,

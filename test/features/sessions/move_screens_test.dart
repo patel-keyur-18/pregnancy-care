@@ -5,6 +5,7 @@ import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
 import 'package:navmaas/core/db/tables.dart';
+import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/domain/walk_draft.dart';
 
 import '../../helpers.dart';
@@ -279,5 +280,101 @@ void main() {
       () => SettingsRepository(db).watch(SettingKeys.stepGoal).first,
     );
     expect(goal, isNull);
+  });
+
+  group("Today's walk, by hand or by steps (E5)", () {
+    Future<void> walkOf(AppDatabase db, {String? routineKey}) async {
+      final pregnancy = await db.select(db.pregnancies).getSingle();
+      await SessionRepository(db).log(
+        pregnancyId: pregnancy.id,
+        type: SessionType.walk,
+        startedAt: DateTime(2026, 10, 5, 8),
+        durationSec: 20 * 60,
+        routineKey: routineKey,
+      );
+    }
+
+    testWidgets('ticked by hand, and unticked', (tester) async {
+      final db = await pumpApp(tester, seed: _seed);
+      await _show(tester, 'Gentle walk');
+      expect(find.text('0 of 2 done'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Mark done: Gentle walk'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 2 done'), findsOneWidget);
+      var walk = (await _sessions(tester, db)).single;
+      expect(
+        (walk.type, walk.durationSec, walk.routineKey, walk.steps),
+        (SessionType.walk, 20 * 60, walkByHandKey, null),
+      );
+
+      await tester.tap(find.bySemanticsLabel('Done: Gentle walk'));
+      await tester.pumpAndSettle();
+      expect(find.text('0 of 2 done'), findsOneWidget);
+      walk = (await _sessions(tester, db)).single;
+      expect(walk.deletedAt, isNotNull);
+    });
+
+    testWidgets('a timed walk keeps it ticked', (tester) async {
+      final db = await pumpApp(
+        tester,
+        seed: (db) async {
+          await _seed(db);
+          await walkOf(db);
+        },
+      );
+      await _show(tester, 'Gentle walk');
+      expect(find.text('1 of 2 done'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Done: Gentle walk'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 2 done'), findsOneWidget);
+      expect((await _sessions(tester, db)).single.deletedAt, isNull);
+    });
+
+    testWidgets('steps at the goal tick it, logging nothing', (tester) async {
+      final db = await pumpApp(
+        tester,
+        seed: _seed,
+        steps: FakeSteps()..today = 6000,
+      );
+      await _show(tester, 'Gentle walk');
+      expect(find.text('1 of 2 done'), findsOneWidget);
+      expect(await _sessions(tester, db), isEmpty);
+    });
+
+    testWidgets('ticked by hand, then the goal: untick keeps it done', (
+      tester,
+    ) async {
+      final db = await pumpApp(
+        tester,
+        seed: (db) async {
+          await _seed(db);
+          await walkOf(db, routineKey: walkByHandKey);
+        },
+        steps: FakeSteps()..today = 6000,
+      );
+      await _show(tester, 'Gentle walk');
+      await tester.tap(find.bySemanticsLabel('Done: Gentle walk'));
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 2 done'), findsOneWidget);
+      expect((await _sessions(tester, db)).single.deletedAt, isNotNull);
+    });
+
+    testWidgets('steps are read again when she comes back', (tester) async {
+      final steps = FakeSteps();
+      await pumpApp(tester, seed: _seed, steps: steps);
+      await _show(tester, 'Gentle walk');
+      expect(find.text('0 of 2 done'), findsOneWidget);
+      steps.today = 6200;
+      [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ].forEach(tester.binding.handleAppLifecycleStateChanged);
+      await tester.pumpAndSettle();
+      expect(find.text('1 of 2 done'), findsOneWidget);
+    });
   });
 }

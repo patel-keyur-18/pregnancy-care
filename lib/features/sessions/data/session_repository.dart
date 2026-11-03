@@ -9,6 +9,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'session_repository.g.dart';
 
+/// The `routineKey` of a walk ticked by hand on Today (E5, Plan decision
+/// 81): walks have no routine, so the key marks the ones she may untick.
+const walkByHandKey = 'by-hand';
+
 /// Reading, listening, walk, exercise and breathing sessions.
 class SessionRepository {
   const new(this._db);
