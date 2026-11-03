@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:navmaas/core/reminders/planner.dart';
 import 'package:navmaas/core/reminders/reminder_settings.dart';
+import 'package:navmaas/core/reminders/scheduler.dart';
+import 'package:navmaas/features/sessions/domain/move_reminders.dart';
 import 'package:navmaas/features/wellbeing/domain/water_reminders.dart';
 import 'package:navmaas/l10n/gen/app_localizations_en.dart';
 
@@ -311,6 +313,122 @@ void main() {
       expect(p.where((c) => c.at.day == 5), isEmpty);
       expect(p.where((c) => c.at.day == 6), isNotEmpty);
       expect(p.first.title, 'Water');
+    });
+  });
+
+  group('move breaks (E6, Plan decision 82)', () {
+    const move = ReminderSettings(on: true, moveOn: true);
+    List<ReminderCandidate> breaks({
+      ReminderSettings settings = move,
+      int days = 7,
+    }) => moveCandidates(
+      now: now,
+      settings: settings,
+      l10n: AppLocalizationsEn(),
+      days: days,
+    );
+    List<DateTime> times(Iterable<(DateTime, String, bool)> p) => [
+      for (final (at, _, _) in p) at,
+    ];
+
+    test('off by default: none', () {
+      expect(breaks(settings: on), isEmpty);
+    });
+
+    test('every hour after 10:00, up to 5:00 pm; lunch drops 1:00 pm', () {
+      final today = plan(breaks()).where((p) => p.$1.day == 5);
+      expect(times(today), [
+        t(5, 11),
+        t(5, 12),
+        t(5, 14),
+        t(5, 15),
+        t(5, 16),
+        t(5, 17),
+      ]);
+      expect(breaks().first.title, 'Move');
+      expect(
+        breaks().first.body,
+        "Stand up and walk gently for 5 minutes, whenever you're ready.",
+      );
+    });
+
+    test('weekdays by default: none on Saturday 10 and Sunday 11', () {
+      final days = {for (final c in breaks()) c.at.day};
+      expect(days, {5, 6, 7, 8, 9});
+    });
+
+    test('her own days and every 2 hours', () {
+      final p = breaks(
+        settings: const ReminderSettings(
+          on: true,
+          moveOn: true,
+          moveEvery: 2,
+          moveDays: '67',
+          moveFrom: 9 * 60,
+          moveUntil: 15 * 60,
+        ),
+      );
+      expect({for (final c in p) c.at.day}, {10, 11});
+      expect(
+        [for (final c in p.where((c) => c.at.day == 10)) c.at],
+        [t(10, 11), t(10, 13), t(10, 15)],
+      );
+    });
+
+    test('From not before Until: none', () {
+      expect(
+        breaks(
+          settings: const ReminderSettings(
+            on: true,
+            moveOn: true,
+            moveFrom: 17 * 60,
+          ),
+        ),
+        isEmpty,
+      );
+    });
+
+    test('outside the daily limit; with a supplement they count once', () {
+      final p = plan([
+        c('s1', t(6, 8)),
+        c('s2', t(6, 9)),
+        c('s3', t(6, 10)),
+        c('s4', t(6, 11, 15)),
+        ...breaks(),
+      ], settings: const ReminderSettings(on: true, moveOn: true));
+      final day = p.where((p) => p.$1.day == 6).toList();
+      expect(day.where((p) => p.$3), isEmpty, reason: 'four fit the limit');
+      // 11:00 bundles with s4 at 11:15; the other five stand on their own.
+      expect(
+        day.where((p) => p.$2.contains('s4')).single.$2,
+        contains('move@'),
+      );
+      expect(
+        day.where((p) => p.$2.split(',').every((k) => k.startsWith('move@'))),
+        hasLength(5),
+      );
+    });
+
+    test("the cap keeps every reminder that isn't a nudge first", () {
+      final visit = c('visit', t(11, 18), kind: ReminderKind.appointment);
+      final p = plan([...breaks(), visit], maxPending: 10);
+      expect(p, hasLength(10));
+      expect(p.last.$2, 'visit');
+      expect(p.first.$1, t(5, 11), reason: 'the nearest breaks fill the rest');
+    });
+
+    test('a tap on a move break opens Walk; bundled, it opens nothing', () {
+      final planned = planReminders(
+        now: now,
+        candidates: [...breaks(days: 1), c('s', t(5, 11, 10))],
+        settings: move,
+      );
+      final l10n = AppLocalizationsEn();
+      final alone = planned.firstWhere((p) => p.at == t(5, 12));
+      expect(reminderPayloadFor(alone, l10n).open, ReminderOpen.walk);
+      expect(reminderPayloadFor(alone, l10n).title, 'Move');
+      final bundled = planned.firstWhere((p) => p.at == t(5, 11));
+      expect(reminderPayloadFor(bundled, l10n).open, isNull);
     });
   });
 }

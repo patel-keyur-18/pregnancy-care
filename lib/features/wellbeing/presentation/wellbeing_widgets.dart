@@ -56,6 +56,7 @@ class WordChip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.large = false,
+    this.exclusive = true,
     super.key,
   });
 
@@ -66,13 +67,17 @@ class WordChip extends StatelessWidget {
   /// Mood and rested words are 16 px; symptom chips 14 px.
   final bool large;
 
+  /// One of a group where only one is chosen (moods); false for chips she
+  /// may pick several of (move-break days).
+  final bool exclusive;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final fg = selected ? scheme.onPrimary : scheme.onSurface;
     return Semantics(
-      inMutuallyExclusiveGroup: true,
+      inMutuallyExclusiveGroup: exclusive,
       checked: selected,
       button: true,
       child: Material(

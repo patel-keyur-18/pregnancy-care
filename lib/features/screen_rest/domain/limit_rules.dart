@@ -69,12 +69,14 @@ Map<String, Object> _day(
       start = null;
     }
   }
+  // Move breaks on their own don't count toward the daily limit (ADR 068).
   final count = planned
       .where(
         (p) =>
             p.at.year == day.year &&
             p.at.month == day.month &&
-            p.at.day == day.day,
+            p.at.day == day.day &&
+            !isMoveOnly(p.items),
       )
       .length;
   return {

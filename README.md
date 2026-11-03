@@ -19,6 +19,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.10.0** (E6) adds **move breaks** on the Walk screen: a gentle nudge to stand up and walk for 5 minutes, every hour or two in your working hours, on the days you choose (off until you switch it on; never in bedtime rest or meal times).
+>
 > **Release 1.9.0** (E5) lets you tick Today's walk yourself, and ticks it for you once your steps reach your step goal (6,000 by default).
 >
 > **Release 1.8.0** (M9b) opens DRM-free **EPUB** books in the reader: chapters as headings, the chapter you're in under the title, and a Contents sheet to jump between them, with Paper / Night and your place kept. Images and tables are left out; a locked (DRM) book says so and isn't copied.

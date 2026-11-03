@@ -69,6 +69,16 @@ abstract final class SettingKeys {
   static const waterEvery = 'water_every';
   static const wellbeingCardHidden = 'wellbeing_card_hidden';
 
+  /// Walk → Move breaks (E6, Plan decision 82): on or off (default off),
+  /// every `move_every` hours (1 or 2, default 1) after `move_from` up to
+  /// `move_until` (minutes after midnight, default 600 / 1020), on the
+  /// weekdays in `move_days` (digits 1–7, Monday = 1; default `12345`).
+  static const moveRemind = 'move_remind';
+  static const moveEvery = 'move_every';
+  static const moveFrom = 'move_from';
+  static const moveUntil = 'move_until';
+  static const moveDays = 'move_days';
+
   /// Home-screen widget (M10): "Hide details on widget" in Me (Plan
   /// decision 47; off unless set).
   static const widgetHide = 'widget_hide';

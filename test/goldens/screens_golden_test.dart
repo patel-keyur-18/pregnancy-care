@@ -501,6 +501,32 @@ void main() {
         );
       });
 
+      testWidgets('walk move breaks $name', skip: _dir == null, (tester) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            await SettingsRepository(db).put(SettingKeys.moveRemind, 'true');
+          },
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        final walk = find.text('Gentle walk');
+        await tester.scrollUntilVisible(walk, 200);
+        await tester.ensureVisible(walk);
+        await tester.pumpAndSettle();
+        await tester.tap(walk);
+        await tester.pumpAndSettle();
+        final note = find.textContaining('for long days at a desk');
+        await tester.scrollUntilVisible(note, 200);
+        await tester.ensureVisible(note);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/walk_move_breaks_$name.png'),
+        );
+      });
+
       testWidgets('app limits $name', skip: _dir == null, (tester) async {
         final usage = FakeAppUsage(access: true)
           ..minutes.addAll({

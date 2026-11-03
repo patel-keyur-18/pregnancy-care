@@ -22,6 +22,11 @@ class ReminderSettings {
     this.windDownAt = 21 * 60,
     this.waterOn = false,
     this.waterEvery = 2,
+    this.moveOn = false,
+    this.moveEvery = 1,
+    this.moveFrom = 10 * 60,
+    this.moveUntil = 17 * 60,
+    this.moveDays = '12345',
     this.bagAt,
   });
 
@@ -41,6 +46,11 @@ class ReminderSettings {
       windDownAt: minutes(SettingKeys.windDownAt, 21 * 60),
       waterOn: s[SettingKeys.waterRemind] == 'true',
       waterEvery: s[SettingKeys.waterEvery] == '3' ? 3 : 2,
+      moveOn: s[SettingKeys.moveRemind] == 'true',
+      moveEvery: s[SettingKeys.moveEvery] == '2' ? 2 : 1,
+      moveFrom: minutes(SettingKeys.moveFrom, 10 * 60),
+      moveUntil: minutes(SettingKeys.moveUntil, 17 * 60),
+      moveDays: moveDaysOf(s[SettingKeys.moveDays] ?? '12345'),
       bagAt: DateTime.tryParse(s[SettingKeys.bagRemindAt] ?? ''),
     );
   }
@@ -72,6 +82,15 @@ class ReminderSettings {
   /// hours (2 or 3) in the day (Plan decision 41).
   final bool waterOn;
   final int waterEvery;
+
+  /// Walk → Move breaks (E6, default off): a nudge every [moveEvery] hours
+  /// (1 or 2) after [moveFrom], up to and including [moveUntil], on the
+  /// weekdays in [moveDays] (digits, Monday = 1). Outside the daily limit.
+  final bool moveOn;
+  final int moveEvery;
+  final int moveFrom;
+  final int moveUntil;
+  final String moveDays;
 
   /// Hospital bag → "Remind me to pack" (M8a): one reminder, or null.
   final DateTime? bagAt;
@@ -114,6 +133,11 @@ class ReminderSettings {
     windDownAt,
     waterOn,
     waterEvery,
+    moveOn,
+    moveEvery,
+    moveFrom,
+    moveUntil,
+    moveDays,
     bagAt,
   );
 
@@ -125,6 +149,13 @@ class ReminderSettings {
   @override
   int get hashCode => _fields.hashCode;
 }
+
+/// [raw]'s weekdays 1–7, once each and in order ('' for none), so equal
+/// choices compare equal.
+String moveDaysOf(String raw) => [
+  for (var d = 1; d <= 7; d++)
+    if (raw.contains('$d')) d,
+].join();
 
 @Riverpod(keepAlive: true)
 Stream<ReminderSettings> reminderSettings(Ref ref) => ref

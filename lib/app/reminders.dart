@@ -22,6 +22,7 @@ import 'package:navmaas/features/care/domain/care_reminders.dart';
 import 'package:navmaas/features/care/domain/supplement_reminders.dart';
 import 'package:navmaas/features/screen_rest/domain/rest_reminders.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
+import 'package:navmaas/features/sessions/domain/move_reminders.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 import 'package:navmaas/features/wellbeing/domain/water_reminders.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
@@ -75,7 +76,7 @@ Future<void> reminderActionInBackground(NotificationResponse response) async {
 
 /// A tap on a reminder (not on one of its actions) opens the screen it
 /// names: the digest opens Today; wind-down opens her last audio with the
-/// screen off, or Sessions when she has none.
+/// screen off, or Sessions when she has none; a move break opens Walk.
 Future<void> openReminder(
   ProviderContainer container,
   NotificationResponse response,
@@ -93,6 +94,8 @@ Future<void> openReminder(
       } else {
         unawaited(router.push('/listen?screen=off', extra: audio.id));
       }
+    case ReminderOpen.walk:
+      unawaited(router.push('/walk'));
   }
 }
 
@@ -199,6 +202,8 @@ class ReminderSync extends _$ReminderSync {
             goalReached: ref.read(waterGoalReachedProvider),
             l10n: _l10n,
           ),
+        if (pregnancy != null)
+          ...moveCandidates(now: now, settings: settings, l10n: _l10n),
         if (pregnancy != null)
           ...bagCandidates(now: now, at: settings.bagAt, l10n: _l10n),
         ...buildExpiryCandidates(expiry: expiry, l10n: _l10n),
