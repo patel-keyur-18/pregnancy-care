@@ -16,11 +16,13 @@ import 'package:navmaas/core/widgets/pill_segmented.dart';
 import 'package:navmaas/features/care/data/supplement_repository.dart';
 import 'package:navmaas/features/care/domain/dose_slots.dart';
 import 'package:navmaas/features/journey/data/checklist_repository.dart';
+import 'package:navmaas/features/journey/your_week_card.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
 /// Journey (prototype "Journey"): trimester tabs, week picker, the week's
-/// notes and checklist, and how this trimester is going.
+/// notes and checklist, what she logged that week (E7) and how this
+/// trimester is going.
 class JourneyScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -118,6 +120,16 @@ class _JourneyScreenState extends ConsumerState<JourneyScreen> {
                 .read(checklistRepositoryProvider)
                 .setTicked(pregnancy.id, key, ticked: ticked),
           ),
+          // E7: this week so far and every week before it.
+          if (week <= snapshot.weeks) ...[
+            const SizedBox(height: 16),
+            YourWeekCard(
+              key: ValueKey(week),
+              week: week,
+              isCurrent: week == snapshot.weeks,
+              firstDay: addDays(pregnancy.startDate, week * 7),
+            ),
+          ],
           const SizedBox(height: 16),
           _TrimesterProgress(
             trimester: snapshot.trimester,

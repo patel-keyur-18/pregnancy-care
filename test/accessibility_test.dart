@@ -352,6 +352,26 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
   ),
   'today': (true, (_) async {}),
   'journey': (true, (t) => _tab(t, 'Journey')),
+  // E7: this week's card, opened with Show more when there is more.
+  'journey, your week': (
+    true,
+    (t) async {
+      await _tab(t, 'Journey');
+      // The first Scrollable is the page (the week chips scroll too).
+      await t.scrollUntilVisible(
+        find.text('Your week so far'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final more = find.textContaining('Show more');
+      if (more.evaluate().isNotEmpty) {
+        await t.ensureVisible(more);
+        await t.pumpAndSettle();
+        await t.tap(more);
+        await t.pumpAndSettle();
+      }
+    },
+  ),
   'sessions': (true, (t) => _tab(t, 'Sessions')),
   'care': (true, (t) => _tab(t, 'Care')),
   'me': (true, (t) => _tab(t, 'Me')),

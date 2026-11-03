@@ -246,6 +246,7 @@ Deliberate, permanent differences:
 | Path tiles | Fixed text | "Add a book" / "Add audio" when the library is empty; Talk to baby shows "Today's letter is written" | Gentle prompts instead of empty tiles |
 | Me → Appearance | "Larger text" switch | Not built; the app follows the phone's text size (tested to 2.0×) | The phone's own setting already does this everywhere |
 | Journey tiles | Reading sessions · walks logged · supplements taken | Same (M4b); the M2 "checklist done" stand-in is gone | — |
+| Journey · Your week (E7) | Board "Journey · Your week" | As drawn: Supplements ("6 of 7 taken"), Walks and Exercise, then "Show more (N)" / "Show less" with a chevron; the supplements value drops the word "doses" | The content test keeps dose words out of `yourWeek*` strings |
 | Blood sugar tile (Care) | Reading and "Log blood sugar" side by side | Side by side when they fit; at large text the button moves under the reading | No overflow at 2.0× text |
 | Hospital bag reminder | "Change" and "Clear" | "Set" when no reminder is set; "Change" and "Clear" once one is; a time that has passed shows as none; with reminders off the card says "Reminders are off, so this one won't ring." and setting one offers to turn them on | A reminder must never look set when it can't ring |
 | M8a dialogs | Each box's label above it | The label floats inside the outlined box | One text-field style across the app |

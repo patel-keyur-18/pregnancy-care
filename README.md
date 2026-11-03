@@ -19,6 +19,8 @@ It combines:
 >
 > **Phase 2:** M7a (2026-10-06) adds Wellbeing in Care: a daily mood check-in in five calm words, a symptom log of common discomforts (a log, never advice), sleep with a weekly average, water toward a goal she sets with optional gentle reminders, and a "How are you today?" card on Today. M7b adds Meditation in Sessions: 5 to 20 minutes between two soft, original bells (they ring even with the phone locked), or your own audio. M10a adds home-screen widgets on iPhone and Android: your week and the next reminder, with "Hide details on widget" in Me. M10b adds an optional app lock (Face ID or fingerprint, falling back to your passcode). M11a adds gentle limits for other apps on Android: one calm notice when an app passes the minutes you set, never in your rest windows, nothing blocked.
 >
+> **Release 1.11.0** (E7) adds **Your week** in Journey: for this week and every week before it, what you logged (supplements, walks and exercise first; Show more for reading, listening, meditation, breathing, water, sleep and mood). Values only, never a score.
+>
 > **Release 1.10.0** (E6) adds **move breaks** on the Walk screen: a gentle nudge to stand up and walk for 5 minutes, every hour or two in your working hours, on the days you choose (off until you switch it on; never in bedtime rest or meal times).
 >
 > **Release 1.9.0** (E5) lets you tick Today's walk yourself, and ticks it for you once your steps reach your step goal (6,000 by default).
@@ -40,6 +42,8 @@ It combines:
 > **Release 1.2.0** has the owner's enhancements E1–E4 on top of 1.1.0.
 >
 > **Release 1.1.0** (Phase 2) has M7, M10 and M11. All of its on-phone flows (onboarding, Taken from a notification, reading a PDF) are checked by `integration_test/app_flow_test.dart`.
+>
+> **Enhancements (E5–E7, 2026-11-03):** E5–E7 are built: the walk ticked by hand or by steps (1.9.0), move breaks (1.10.0) and Your week in Journey (1.11.0).
 >
 > **Enhancements (E1–E4, 2026-10-08):** E1–E4 are built. E1: a finished book stays finished when you go back a page, a ⋯ button on each library row to rename or remove, walks and exercise routines that start when you tap Start (a paused walk can be carried on later, even after closing the app), and Today's reading can be ticked by hand for a printed book. E2 adds links: save a YouTube, YouTube Music or Spotify link in your library and it opens in that app (or your browser), and an audio file can be replaced with a new one. E3 adds voice letters: tap Speak in Talk to baby to record a voice note for your baby (up to 10 minutes, encrypted on the phone, in backups only when you choose). E4 adds a gentle scene on Today for the mood you picked: each mood has its own, and Tired and Low get a baby scene ("You and baby, together today"). To reword the scene lines, edit the `moodSceneLine*` entries in `lib/l10n/app_en.arb`.
 >

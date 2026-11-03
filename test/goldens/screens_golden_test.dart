@@ -31,6 +31,7 @@ import 'package:navmaas/features/screen_rest/data/app_limits.dart';
 import 'package:navmaas/features/sessions/data/letter_repository.dart';
 import 'package:navmaas/features/sessions/data/library_repository.dart';
 import 'package:navmaas/features/sessions/data/media_link_repository.dart';
+import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/today/mood_scene_card.dart';
 import 'package:navmaas/features/wellbeing/data/wellbeing_repository.dart';
 
@@ -498,6 +499,50 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesGoldenFile('$_dir/letter_voice_$name.png'),
+        );
+      });
+
+      testWidgets('journey your week $name', skip: _dir == null, (
+        tester,
+      ) async {
+        await pumpApp(
+          tester,
+          seed: (db) async {
+            await _seed(db);
+            await _seedWellbeing(db);
+            final id = (await db.select(db.pregnancies).getSingle()).id;
+            for (final (type, day, minutes) in [
+              (SessionType.walk, 1, 20),
+              (SessionType.walk, 3, 25),
+              (SessionType.exercise, 2, 15),
+              (SessionType.reading, 4, 15),
+            ]) {
+              await SessionRepository(db).log(
+                pregnancyId: id,
+                type: type,
+                startedAt: DateTime(2026, 10, day, 8),
+                durationSec: minutes * 60,
+              );
+            }
+          },
+          platformBrightness: brightness,
+          textScale: scale,
+        );
+        await _tab(tester, 'Journey');
+        final page = find.byType(Scrollable).first;
+        final more = find.textContaining('Show more');
+        await tester.scrollUntilVisible(more, 200, scrollable: page);
+        await tester.ensureVisible(more);
+        await tester.pumpAndSettle();
+        await tester.tap(more);
+        await tester.pumpAndSettle();
+        final less = find.text('Show less');
+        await tester.scrollUntilVisible(less, 200, scrollable: page);
+        await tester.ensureVisible(less);
+        await tester.pumpAndSettle();
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesGoldenFile('$_dir/journey_your_week_$name.png'),
         );
       });
 
