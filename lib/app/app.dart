@@ -11,6 +11,7 @@ import 'package:navmaas/core/content/content_pack.dart';
 import 'package:navmaas/core/db/app_database.dart';
 import 'package:navmaas/core/db/pregnancy_repository.dart';
 import 'package:navmaas/core/db/settings_repository.dart';
+import 'package:navmaas/core/platform/health.dart';
 import 'package:navmaas/core/reminders/scheduler.dart';
 import 'package:navmaas/core/theme/app_theme.dart';
 import 'package:navmaas/core/utils/clock.dart';
@@ -72,9 +73,11 @@ class _NavmaasAppState extends ConsumerState<NavmaasApp> {
   Future<void> _onResume() async {
     // A new day may have started, the time zone may have changed, and a
     // reminder's "Taken" may have written to the DB from another isolate.
-    // Nourishly may have written new meals while she was away.
+    // Nourishly may have written new meals while she was away, and she may
+    // have walked (Today's walk is done at the step goal).
     ref
       ..invalidate(todayProvider)
+      ..invalidate(todayStepsProvider)
       ..invalidate(nowProvider)
       ..invalidate(nourishlyShareProvider);
     final db = ref.read(appDatabaseProvider);
