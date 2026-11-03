@@ -69,6 +69,7 @@ Plan decisions 81–83 and ADRs 067–069, one each.
   - Sleep — average hours.
   - Mood — the words logged, with counts ("Calm 3 · Tired 2"), no colours.
   - With nothing at all: one calm line ("Nothing logged this week.").
+- **Less at first** (owner, on the boards, 2026-11-03): the card shows Supplements, Walks and Exercise; "Show more (N)" opens the rest and "Show less" folds them. With none of those three logged, the rest show straight away.
 - **Code:** a pure `weekReport()` in `features/journey/domain/` from sessions, doses, wellbeing logs and per-day steps; unit-tested. Range-based reads (sessions and doses already have them; wellbeing gains range variants of its week providers). Steps per day come from `StepSource.steps(day, day+1)`, null without access.
 - **Not in it:** kicks, contractions, blood sugar and visits (Care has them), a PDF or export, earlier pregnancies.
 
