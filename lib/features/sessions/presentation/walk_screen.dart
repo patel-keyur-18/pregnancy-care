@@ -14,6 +14,7 @@ import 'package:navmaas/core/utils/clock.dart';
 import 'package:navmaas/features/care/presentation/care_widgets.dart';
 import 'package:navmaas/features/sessions/data/session_repository.dart';
 import 'package:navmaas/features/sessions/domain/walk_draft.dart';
+import 'package:navmaas/features/sessions/presentation/move_breaks_card.dart';
 import 'package:navmaas/features/sessions/presentation/session_clock.dart';
 import 'package:navmaas/l10n/gen/app_localizations.dart';
 
@@ -29,7 +30,7 @@ String formatSteps(int steps) =>
 /// pauses it) and coming back carries on where she was; with the screen off
 /// it keeps counting. Steps come from Apple Health / Health Connect, counted
 /// only while she walks. Always open (Plan decision 27). Finish logs the
-/// walk from one minute.
+/// walk from one minute. Move breaks (E6) are set at the bottom.
 class WalkScreen extends ConsumerStatefulWidget {
   const new({super.key});
 
@@ -419,6 +420,8 @@ class _WalkScreenState extends ConsumerState<WalkScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  const MoveBreaksCard(),
                 ],
               ),
             ),

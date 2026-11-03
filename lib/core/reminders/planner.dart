@@ -61,14 +61,24 @@ const mealKeyPrefix = 'meal@';
 /// Key prefix of the wind-down nudge; tapping it opens her audio.
 const windDownKeyPrefix = 'wind-down@';
 
+/// Key prefix of a move break (E6); tapping it opens Walk. A notification of
+/// move breaks only doesn't count toward the daily limit (ADR 068).
+const moveKeyPrefix = 'move@';
+
+/// Whether [g] holds move breaks and nothing else.
+bool isMoveOnly(Iterable<ReminderCandidate> g) =>
+    g.isNotEmpty && g.every((c) => c.key.startsWith(moveKeyPrefix));
+
 /// Plans the next [days] days from [now]:
 /// 1. reminders inside a meal window or quiet hours move to their end;
 ///    nudges there are dropped;
 /// 2. reminders within 30 minutes are bundled at the first time;
 /// 3. each day keeps at most `dailyLimit` by priority; the rest fold into
 ///    one digest at the end of quiet hours (skipped if that has passed).
-///    Nudges never wait for the digest: over the limit they are dropped;
-/// 4. at most [maxPending] are kept (iOS allows 64 pending).
+///    Nudges never wait for the digest: over the limit they are dropped.
+///    Move breaks on their own are kept outside the limit;
+/// 4. at most [maxPending] are kept (iOS allows 64 pending): every reminder
+///    that isn't a nudge first, then nudges, nearest first.
 List<PlannedReminder> planReminders({
   required DateTime now,
   required List<ReminderCandidate> candidates,
@@ -132,8 +142,12 @@ List<PlannedReminder> planReminders({
         .add(g);
   }
   final out = <PlannedReminder>[];
-  for (final MapEntry(key: day, value: dayGroups) in byDay.entries) {
+  for (final MapEntry(key: day, value: all) in byDay.entries) {
     final limit = settings.dailyLimit;
+    for (final g in all.where(isMoveOnly)) {
+      out.add(_planned(g, g.first.at, digest: false));
+    }
+    final dayGroups = all.where((g) => !isMoveOnly(g));
     final ranked = [...dayGroups]
       ..sort((a, b) {
         final p = _kind(a).index.compareTo(_kind(b).index);
@@ -164,9 +178,13 @@ List<PlannedReminder> planReminders({
     }
   }
 
-  // 4. Cap.
+  // 4. Cap: nudges can't push out a visit days away.
   out.sort((a, b) => a.at.compareTo(b.at));
-  return out.take(maxPending).toList();
+  final kept = [
+    ...out.where((p) => p.kind != ReminderKind.nudge),
+    ...out.where((p) => p.kind == ReminderKind.nudge),
+  ].take(maxPending).toList();
+  return kept..sort((a, b) => a.at.compareTo(b.at));
 }
 
 ReminderKind _kind(List<ReminderCandidate> g) =>

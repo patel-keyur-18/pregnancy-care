@@ -28,6 +28,9 @@ abstract final class ReminderOpen {
 
   /// Wind-down: her last audio, screen off (Sessions if she has none).
   static const windDown = 'wind-down';
+
+  /// A move break (E6): Walk.
+  static const walk = 'walk';
 }
 
 /// What a scheduled reminder carries, so an action can act on it later.
@@ -327,6 +330,8 @@ ReminderPayload reminderPayloadFor(PlannedReminder p, AppLocalizations l10n) {
         ? ReminderOpen.today
         : items.length == 1 && items.single.key.startsWith(windDownKeyPrefix)
         ? ReminderOpen.windDown
+        : isMoveOnly(items)
+        ? ReminderOpen.walk
         : null,
   );
 }

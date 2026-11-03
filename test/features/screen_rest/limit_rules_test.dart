@@ -95,6 +95,33 @@ void main() {
     expect(days.take(4).map((d) => d['room']), [2, 3, 0, 4]);
   });
 
+  test("move breaks on their own leave the day's room alone (E6)", () {
+    PlannedReminder move(int id, int hour) => PlannedReminder(
+      id: id,
+      at: DateTime(2026, 10, 5, hour),
+      kind: ReminderKind.nudge,
+      items: [
+        ReminderCandidate(
+          key: '${moveKeyPrefix}x$hour',
+          at: DateTime(2026, 10, 5, hour),
+          kind: ReminderKind.nudge,
+          title: 'Move',
+          body: '',
+        ),
+      ],
+    );
+    final days =
+        rules(
+              planned: [
+                move(1, 11),
+                move(2, 12),
+                at(3, DateTime(2026, 10, 5, 15)),
+              ],
+            )['days']
+            as List;
+    expect((days.first as Map)['room'], 3);
+  });
+
   test('reminders off or tracking stopped: no notice at all', () {
     expect(rules(settings: const ReminderSettings())['days'], isEmpty);
     expect(rules(active: false)['days'], isEmpty);

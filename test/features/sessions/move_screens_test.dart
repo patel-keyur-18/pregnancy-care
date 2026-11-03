@@ -377,4 +377,58 @@ void main() {
       expect(find.text('1 of 2 done'), findsOneWidget);
     });
   });
+
+  testWidgets('move breaks: off by default, then hourly on weekdays (E6)', (
+    tester,
+  ) async {
+    final scheduler = FakeScheduler();
+    final db = await pumpApp(
+      tester,
+      scheduler: scheduler,
+      seed: (db) async {
+        await _seed(db);
+        await SettingsRepository(db).put(SettingKeys.remindersOn, 'true');
+      },
+    );
+    List<DateTime> breaks(int day) => [
+      for (final p in scheduler.scheduled)
+        if (p.at.day == day && p.keys.every((k) => k.startsWith('move@'))) p.at,
+    ];
+    await _show(tester, 'Gentle walk');
+    await tester.tap(find.text('Gentle walk'));
+    await tester.pumpAndSettle();
+    await _show(tester, 'Move breaks');
+    expect(find.text('Off'), findsOneWidget);
+    expect(breaks(5), isEmpty);
+
+    await tester.tap(find.bySemanticsLabel('Move breaks').last);
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Every hour, 10:00 am – 5:00 pm · Mon–Fri'),
+      findsOneWidget,
+    );
+    // From 9:00 today: 11, 12, (1 pm lunch drops it) 2, 3, 4 and 5 pm,
+    // outside the daily limit; none on the weekend.
+    expect(breaks(5), [
+      for (final h in [11, 12, 14, 15, 16, 17]) DateTime(2026, 10, 5, h),
+    ]);
+    expect(breaks(10), isEmpty);
+
+    await tester.ensureVisible(find.text('Every 2 hours'));
+    await tester.tap(find.text('Every 2 hours'));
+    await tester.pumpAndSettle();
+    expect(breaks(5), [
+      for (final h in [12, 14, 16]) DateTime(2026, 10, 5, h),
+    ]);
+
+    await tester.ensureVisible(find.bySemanticsLabel('Saturday'));
+    await tester.tap(find.bySemanticsLabel('Saturday'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Mon, Tue, Wed, Thu, Fri, Sat'), findsOneWidget);
+    expect(breaks(10), isNotEmpty);
+    final days = await tester.runAsync(
+      () => SettingsRepository(db).watch(SettingKeys.moveDays).first,
+    );
+    expect(days, '123456');
+  });
 }

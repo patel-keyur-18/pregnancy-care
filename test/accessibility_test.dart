@@ -517,6 +517,17 @@ final _screens = <String, (bool, Future<void> Function(WidgetTester))>{
       await _tapText(t, 'Walk');
     },
   ),
+  // E6: the Move breaks card, switched on (every hour, days, times).
+  'walk, move breaks': (
+    true,
+    (t) async {
+      await _tab(t, 'Sessions');
+      await _tapText(t, 'Walk');
+      await _tapText(t, 'Move breaks');
+      await t.tap(find.byType(Switch).last);
+      await t.pumpAndSettle();
+    },
+  ),
   'exercise': (
     true,
     (t) async {

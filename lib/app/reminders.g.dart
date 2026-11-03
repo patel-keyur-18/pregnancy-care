@@ -50,7 +50,7 @@ final class ReminderSyncProvider
   }
 }
 
-String _$reminderSyncHash() => r'ef9a98228fcabaf1731d57970cea4c6381cfd80e';
+String _$reminderSyncHash() => r'bdde6fb3c6a2c452b52d7f5c280ec7e0d04a17aa';
 
 /// Keeps the OS schedule in step with supplements, taken doses and the
 /// calm-notification settings. Re-plans on any change and on resume. Its
